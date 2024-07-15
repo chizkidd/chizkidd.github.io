@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "My implementation of Karpathy neural networks zero to hero lecture series"
+title: "My Implementation of Karpathy's Neural Networks: Zero to Hero Lecture Series"
 date: 2024-07-15
 ---
 
