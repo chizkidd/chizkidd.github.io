@@ -3,17 +3,18 @@ description: Bookmark this to keep an eye on my articles & project updates!
 github_username: chizkidd
 url: "https://chizkidd.github.io/"
 
-theme: jekyll-theme-minimal
+theme: minimal
+# theme: jekyll-theme-minimal
 
 author:
   name: Chizoba Obasi
 
-# Minima theme options
-jekyll-theme-minimal:
-  # accent_color: "#ff6600"  # Customize the accent color
-  social_links:
-    rss: true
-    github: chizkidd
+# # Minima theme options
+# jekyll-theme-minimal:
+#   # accent_color: "#ff6600"  # Customize the accent color
+#   social_links:
+#     rss: true
+#     github: chizkidd
 
 # Navigation links
 header_pages:
