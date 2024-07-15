@@ -16,11 +16,11 @@ author:
 #     rss: true
 #     github: chizkidd
 
-# Navigation links
-header_pages:
-  - about.md
+# # Navigation links
+# header_pages:
+#   - about.md
   
-# Plugins
-plugins:
-  - jekyll-feed
-  - jekyll-seo-tag
+# # Plugins
+# plugins:
+#   - jekyll-feed
+#   - jekyll-seo-tag
