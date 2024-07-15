@@ -15,7 +15,7 @@ Two engines are built and leveraged in this lecture series: `micrograd` and `mak
 
 ---
 The implementation of each lecture can be found below:
-> Lecture 1: micrograd [article](https://nbviewer.org/github.com/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/001_micrograd/micrograd.ipynb)<br>
+> Lecture 1: micrograd [article](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/001_micrograd/micrograd.ipynb)<br>
 > Lecture 2: makemore 1 bigrams [article](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/002_makemore_Bigrams/makemore_Bigrams.ipynb)<br>
 > Lecture 3: makemore 2 multi-layer perceptron [article](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/003_makemore_MLP/makemore_MLP.ipynb)<br>
 > Lecture 4: makemore 3 batch normalization [article](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/004_makemore_BatchNorm/makemore_BatchNorm.ipynb)<br>
