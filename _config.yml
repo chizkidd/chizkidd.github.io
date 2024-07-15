@@ -10,7 +10,7 @@ author:
 
 # Minima theme options
 jekyll-theme-minimal:
-  accent_color: "#ff6600"  # Customize the accent color
+  # accent_color: "#ff6600"  # Customize the accent color
   social_links:
     rss: true
     github: chizkidd
