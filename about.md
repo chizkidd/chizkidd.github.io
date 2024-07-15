@@ -4,13 +4,6 @@ title: About
 permalink: /about/
 ---
 
-# About
+I am a deep learning enthusiast that is actively building in public on github and kaggle.
 
-This is the About page for the Chizoba Obasi blog.
-
-## Author
-
-**Chizoba Obasi**
-
-[GitHub](https://github.com/chizkidd)
-[Kaggle](https://www.kaggle.com/chizkidd)
+Links: [GitHub](https://github.com/chizkidd) | [Kaggle](https://www.kaggle.com/chizkidd)
