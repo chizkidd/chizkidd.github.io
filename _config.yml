@@ -7,8 +7,24 @@ url: "https://chizkidd.github.io/"
 theme: minima
 # theme: jekyll-theme-minimal
 
+# RSS feed settings
+feed:
+  path: feed.xml
+
+# Minima theme specific settings
+minima:
+  social_links:
+    - platform: rss
+      user_url: /feed.xml
+    - platform: github
+      user_url: https://github.com/chizkidd
+    - platform: kaggle
+      user_url: https://www.kaggle.com/chizkidd
+    - platform: twitter
+      user_url: https://twitter.com/chizkidd
+
 social-network-links:
-  rss: true  # remove this line if you don't want to show an RSS link at the bottom
+  rss: true
   kaggle: chizkidd
   github: chizkidd
   twitter: chizkidd
