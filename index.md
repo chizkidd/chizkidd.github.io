@@ -2,13 +2,13 @@
 layout: default
 ---
 
-# Welcome to my blog
+
 
 {% for post in site.posts %}
-{{ post.date | date: "%b %-d, %Y" }}
-## [{{ post.title }}]({{ post.url | relative_url }})
-
-{{ post.excerpt | truncatewords: 50 }}
-
+<article class="post-preview">
+  <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+  <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p>
+  <p class="post-excerpt">{{ post.excerpt | truncatewords: 50 }}</p>
+</article>
 {% endfor %}
 
