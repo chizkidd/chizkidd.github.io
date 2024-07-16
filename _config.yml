@@ -22,6 +22,8 @@ kramdown:
   auto_ids: true
   syntax_highlighter: rouge
 
+# Excerpt settings
+excerpt_length: 50
 
 # # Plugins
 # plugins:
@@ -59,5 +61,4 @@ kramdown:
 #       layout: "post"
 #       author: "Chizoba Obasi"
 
-# # Excerpt settings
-# excerpt_length: 50
+
