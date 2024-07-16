@@ -1,33 +1,33 @@
 title: Chizoba Obasi blog
 description: Musings of a deep learning enthusiast. Bookmark this website to keep an eye on my articles & project updates!
 github_username: chizkidd
-# kaggle_username: chizkidd
+kaggle_username: chizkidd
 url: "https://chizkidd.github.io/"
 
 theme: minima
 # theme: jekyll-theme-minimal
 
-# RSS feed settings
-feed:
-  path: feed.xml
+# # RSS feed settings
+# feed:
+#   path: feed.xml
 
-# Minima theme specific settings
-minima:
-  social_links:
-    - platform: rss
-      user_url: /feed.xml
-    - platform: github
-      user_url: https://github.com/chizkidd
-    - platform: kaggle
-      user_url: https://www.kaggle.com/chizkidd
-    - platform: twitter
-      user_url: https://twitter.com/chizkidd
+# # Minima theme specific settings
+# minima:
+#   social_links:
+#     - platform: rss
+#       user_url: /feed.xml
+#     - platform: github
+#       user_url: https://github.com/chizkidd
+#     - platform: kaggle
+#       user_url: https://www.kaggle.com/chizkidd
+#     - platform: twitter
+#       user_url: https://twitter.com/chizkidd
 
-social-network-links:
-  rss: true
-  kaggle: chizkidd
-  github: chizkidd
-  twitter: chizkidd
+# social-network-links:
+#   rss: true
+#   kaggle: chizkidd
+#   github: chizkidd
+#   twitter: chizkidd
   
 # author:
 #   name: Chizoba Obasi
