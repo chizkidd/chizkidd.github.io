@@ -1,17 +1,16 @@
 title: Chizoba Obasi blog
 email:
 description: "Musings of a deep learning enthusiast." # Bookmark this website to keep an eye on my articles & project updates!
-github_username: chizkidd
-# twitter_username: chizkidd
-# kaggle_username: chizkidd
+baseurl: ""
 url: "https://chizkidd.github.io/"
 
-theme: minima
-# theme: jekyll-theme-minimal
+
 
 # Build settings
 markdown: kramdown
 permalink: pretty
+theme: minima
+# theme: jekyll-theme-minimal
 
 highlighter: rouge
 kramdown:
@@ -20,63 +19,44 @@ kramdown:
   syntax_highlighter: rouge
 
 
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
 
+# RSS Feed settings
+feed:
+  path: feed.xml
 
-# # RSS feed settings
-# feed:
-#   path: feed.xml
+# Social links
+twitter_username: chizkidd
+github_username: chizkidd
+kaggle_username: chizkidd
 
-# # Minima theme specific settings
-# minima:
-#   social_links:
-#     - platform: rss
-#       user_url: /feed.xml
-#     - platform: github
-#       user_url: https://github.com/chizkidd
-#     - platform: kaggle
-#       user_url: https://www.kaggle.com/chizkidd
-#     - platform: twitter
-#       user_url: https://twitter.com/chizkidd
+# Minima theme specific settings
+minima:
+  social_links:
+    - platform: rss
+      user_url: /feed.xml
+    - platform: github
+      user_url: https://github.com/chizkidd
+    - platform: kaggle
+      user_url: https://www.kaggle.com/chizkidd
+    - platform: twitter
+      user_url: https://twitter.com/chizkidd
 
-# social-network-links:
-#   rss: true
-#   kaggle: chizkidd
-#   github: chizkidd
-#   twitter: chizkidd
-  
-# author:
-#   name: Chizoba Obasi
+# Navigation
+header_pages:
+  - about.md
 
-# # Minima theme options
-# jekyll-theme-minimal:
-#   # accent_color: "#ff6600"  # Customize the accent color
-#   social_links:
-#     rss: true
-#     github: chizkidd
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Chizoba Obasi"
 
-# # Navigation links
-# header_pages:
-#   - about.md
-  
-# # Plugins
-# plugins:
-#   - jekyll-feed
-#   - jekyll-seo-tag
-
-# # Markdown settings
-# markdown: kramdown
-# kramdown:
-#   input: GFM
-#   syntax_highlighter: rouge
-
-# # Permalinks structure
-# permalink: /:categories/:year/:month/:day/:title/
-
-# # Defaults
-# defaults:
-#   - scope:
-#       path: ""
-#       type: "posts"
-#     values:
-#       layout: "post"
-#       author: "Chizoba Obasi"
+# Excerpt settings
+excerpt_length: 50
