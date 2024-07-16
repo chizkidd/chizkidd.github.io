@@ -1,10 +1,10 @@
 <header class="site-header">
   <div class="wrapper">
+    <a href="{{ "/feed.xml" | relative_url }}" class="rss-link">
+      <img src="{{ "/assets/images/rss-icon.png" | relative_url }}" alt="RSS feed" width="24" height="24">
+    </a>
     <a class="site-title" href="{{ "/" | relative_url }}">{{ site.title | escape }}</a>
     <nav class="site-nav">
-      <a href="{{ "/feed.xml" | relative_url }}" class="rss-link">
-        <img src="{{ "/assets/images/rss-icon.png" | relative_url }}" alt="RSS feed" width="24" height="24">
-      </a>
       {%- for path in site.header_pages -%}
         {%- assign my_page = site.pages | where: "path", path | first -%}
         {%- if my_page.title -%}
