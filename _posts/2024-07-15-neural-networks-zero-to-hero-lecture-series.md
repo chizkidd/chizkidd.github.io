@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: post
 title: "Implementation of Karpathy's Neural Networks: Zero to Hero Lecture Series"
 date: 2024-07-15
 ---
