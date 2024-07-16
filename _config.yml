@@ -9,7 +9,7 @@ url: "https://chizkidd.github.io/"
 # Build settings
 markdown: kramdown
 permalink: pretty
-theme: minima
+# theme: minima
 # theme: jekyll-theme-minimal
 
 highlighter: rouge
@@ -33,30 +33,30 @@ twitter_username: chizkidd
 github_username: chizkidd
 kaggle_username: chizkidd
 
-# Minima theme specific settings
-minima:
-  social_links:
-    - platform: rss
-      user_url: /feed.xml
-    - platform: github
-      user_url: https://github.com/chizkidd
-    - platform: kaggle
-      user_url: https://www.kaggle.com/chizkidd
-    - platform: twitter
-      user_url: https://twitter.com/chizkidd
+# # Minima theme specific settings
+# minima:
+#   social_links:
+#     - platform: rss
+#       user_url: /feed.xml
+#     - platform: github
+#       user_url: https://github.com/chizkidd
+#     - platform: kaggle
+#       user_url: https://www.kaggle.com/chizkidd
+#     - platform: twitter
+#       user_url: https://twitter.com/chizkidd
 
 # Navigation
 header_pages:
   - about.md
 
-# Defaults
-defaults:
-  - scope:
-      path: ""
-      type: "posts"
-    values:
-      layout: "post"
-      author: "Chizoba Obasi"
+# # Defaults
+# defaults:
+#   - scope:
+#       path: ""
+#       type: "posts"
+#     values:
+#       layout: "post"
+#       author: "Chizoba Obasi"
 
 # Excerpt settings
 excerpt_length: 50
