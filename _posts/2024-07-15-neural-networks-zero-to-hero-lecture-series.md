@@ -4,6 +4,7 @@ comments: true
 title: "Implementation of Karpathy's Neural Networks: Zero to Hero Lecture Series"
 excerpt: 
 date: 2024-07-15
+mathjax: true
 ---
 This blog post contains my detailed implementation of Andrej Karpathy's [Neural Networks: Zero to Hero youtube](https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ) lecture series & exercises in Jupyter Notebook. The articles go into extreme details to ensure a proper, robust fundamental understanding of neural networks. This lecture series covers neural networks (NNs) and how to build them from scratch in code. The course starts with the basics of backpropagation, then proceeds to multi-layer perceptrons (MLPs), convolutional neural networks (CNNs), and finally builds up to modern deep neural networks like transformers (GPTs). The course also introduces and covers diagnostic tools for understanding neural networks dynamics and performance. The field of focus in this course is language modeling (LM) because not only are language models a superb place to learn deep learning but also most of the skills learned here are immediately transferable to other fields of deep learning such as computer vision (CV). The full project can be found on [github](https://github.com/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero).
 
