@@ -32,9 +32,9 @@ feed_show_tags: true
 # Add a search button to the navbar
 post_search: true
 
-# # RSS feed settings
-# feed:
-#   path: feed.xml
+# RSS feed settings
+feed:
+  path: feed.xml
 
 # # Minima theme specific settings
 # minima:
