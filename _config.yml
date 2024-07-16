@@ -22,9 +22,9 @@ kramdown:
 
 
 
-# RSS feed settings
-feed:
-  path: feed.xml
+# # RSS feed settings
+# feed:
+#   path: feed.xml
 
 # # Minima theme specific settings
 # minima:
