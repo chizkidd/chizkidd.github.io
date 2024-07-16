@@ -6,9 +6,9 @@ baseurl: ""
 url: "https://chizkidd.github.io/"
 
 # Social links
-twitter_username: chizkidd
 github_username: chizkidd
-kaggle_username: chizkidd
+# twitter_username: chizkidd
+# kaggle_username: chizkidd
 
 # Build settings
 markdown: kramdown
