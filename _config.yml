@@ -1,12 +1,23 @@
 title: Chizoba Obasi blog
-description: Musings of a deep learning enthusiast. Bookmark this website to keep an eye on my articles & project updates!
+email:
+description: "Musings of a deep learning enthusiast." # Bookmark this website to keep an eye on my articles & project updates!
 github_username: chizkidd
+twitter_username: chizkidd
 kaggle_username: chizkidd
 url: "https://chizkidd.github.io/"
 
 theme: minima
 # theme: jekyll-theme-minimal
 
+# Build settings
+markdown: kramdown
+permalink: pretty
+
+highlighter: rouge
+kramdown:
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
 # # RSS feed settings
 # feed:
 #   path: feed.xml
@@ -39,29 +50,29 @@ theme: minima
 #     rss: true
 #     github: chizkidd
 
-# Navigation links
-header_pages:
-  - about.md
+# # Navigation links
+# header_pages:
+#   - about.md
   
-# Plugins
-plugins:
-  - jekyll-feed
-  - jekyll-seo-tag
+# # Plugins
+# plugins:
+#   - jekyll-feed
+#   - jekyll-seo-tag
 
-# Markdown settings
-markdown: kramdown
-kramdown:
-  input: GFM
-  syntax_highlighter: rouge
+# # Markdown settings
+# markdown: kramdown
+# kramdown:
+#   input: GFM
+#   syntax_highlighter: rouge
 
-# Permalinks structure
-permalink: /:categories/:year/:month/:day/:title/
+# # Permalinks structure
+# permalink: /:categories/:year/:month/:day/:title/
 
-# Defaults
-defaults:
-  - scope:
-      path: ""
-      type: "posts"
-    values:
-      layout: "post"
-      author: "Chizoba Obasi"
+# # Defaults
+# defaults:
+#   - scope:
+#       path: ""
+#       type: "posts"
+#     values:
+#       layout: "post"
+#       author: "Chizoba Obasi"
