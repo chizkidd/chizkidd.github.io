@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Implementation of Karpathy's "Neural Networks: Zero to Hero" Lecture Series"
+title: "Implementation of Karpathy's Neural Networks: Zero to Hero Lecture Series"
 excerpt: 
 date: 2024-07-15
 mathjax: true
