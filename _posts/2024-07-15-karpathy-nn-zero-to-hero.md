@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Implementation of Karpathy's Neural Networks: Zero to Hero Lecture Series"
+title: "Implementation of Karpathy's "Neural Networks: Zero to Hero" Lecture Series"
 excerpt: 
 date: 2024-07-15
 mathjax: true
@@ -10,11 +10,13 @@ This blog post contains my detailed implementation of Andrej Karpathy's [Neural 
 
 Three engines are built and leveraged in this lecture series: `micrograd`, `makemore` and `gpt`. The 1st two engines are not meant to be too heavyweight of libraries with a billion switches and knobs. They should exist as a single hackable file, and are mostly intended for educational purposes. Python and [PyTorch](https://pytorch.org) are the only requirements.
 * `micrograd`: A tiny **autograd** (automatic gradient) engine that implements **backpropagation** (reverse-mode autodiff) over a dynamically built **DAG** (Directed Acyclic Graph) and a **small NNs library** on  top of it with a **PyTorch-like API**. It's a minimalistic, scalar-valued, auto-differentiation (**autodiff**) engine in python.
+  
 * `makemore`: *makemore* takes one text file as input, where each line is assumed to be one training thing, and generates more things like it. Under the hood, it is an **autoregressive character-level language model**, with a <u>wide choice of models from bigrams all the way to a Transformer (exactly as seen in GPT)</u>. For example, we can feed it a database of names, and makemore will generate cool baby name ideas that all sound name-like, but are not already existing names. Or if we feed it a database of company names then we can generate new ideas for a name of a company. Or we can just feed it valid scrabble words and generate english-like babble.
   ```
   "As the name suggests, makemore makes more."
   ```
-* `gpt`: Generative Pre-trained Transformer, otherwise known as **GPT**, is a large language model (LLM) that is trained on a significant large size of text data to understand and generate human-like text sequentially. The "transformer" part refers to the model's architecture, which was introduced and inspired by the 2017 "Attention Is All You Need" paper. GPTs are based on the _**transformer**_ architecture, _**pre-trained**_ on large data sets of unlabelled text, and able to _**generate**_ novel human-like content.
+
+* `gpt`: <u>Generative Pre-trained Transformer,</u> otherwise known as **GPT**, is a large language model (LLM) that is trained on a significant large size of text data to understand and generate human-like text sequentially. The "transformer" part refers to the model's architecture, which was introduced and inspired by the 2017 "Attention Is All You Need" paper. GPTs are based on the _**transformer**_ architecture, _**pre-trained**_ on large data sets of unlabelled text, and able to _**generate**_ novel human-like content.
 
 ---
 The implementation of each lecture can be found below:
