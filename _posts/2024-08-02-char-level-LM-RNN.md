@@ -120,9 +120,9 @@ This method implements the following steps for each time step in the input seque
 
 The equations governing this process are:
 
-- Hidden state: h[t] = tanh(U * x[t] + W * h[t-1] + b)
-- Output: o[t] = V * h[t] + c
-- Predictions: y[t] = softmax(o[t])
+- Hidden state: `h[t] = tanh(U * x[t] + W * h[t-1] + b)`
+- Output: `o[t] = V * h[t] + c`
+- Predictions: `y[t] = softmax(o[t])`
 
 ## Backward Pass and Training
 
