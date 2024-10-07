@@ -49,6 +49,12 @@ class DataReader:
         if self.pointer + self.seq_length + 1 >= self.data_size:
             self.pointer = 0
         return inputs, targets
+
+    def just_started(self):
+        return self.pointer == 0
+
+    def close(self):
+        self.fp.close()
 ```
 
 This class handles reading the input text file and preparing the data for our model. Here's what it does:
@@ -57,8 +63,11 @@ This class handles reading the input text file and preparing the data for our mo
 2. Creates a vocabulary of unique characters in the text.
 3. Maps each character to a unique integer index and vice versa.
 4. Implements a `next_batch()` method to provide sequences of characters for training.
+5. Provides a `just_started()` method to check if we're at the beginning of the data.
 
 The `seq_length` parameter determines how many characters the model will see at once during training. This is important because it affects the model's ability to capture long-range dependencies in the text.
+
+The `just_started()` method is used to check if we've reset our pointer to the beginning of the data. This is useful for initializing the hidden state when we start a new epoch of training.
 
 ## RNN Model Architecture
 
@@ -82,6 +91,7 @@ class RNN:
         # Memory variables for Adagrad optimization
         self.mU, self.mW, self.mV = np.zeros_like(self.U), np.zeros_like(self.W), np.zeros_like(self.V)
         self.mb, self.mc = np.zeros_like(self.b), np.zeros_like(self.c)
+
 ```
 
 In the constructor, we initialize the model parameters:
@@ -93,6 +103,18 @@ In the constructor, we initialize the model parameters:
 - `c`: Output layer bias
 
 We also initialize memory variables for the Adagrad optimization algorithm, which we'll use to update our parameters during training.
+
+```python
+def update_model(self, dU, dW, dV, db, dc):
+    # parameter update with adagrad
+    for param, dparam, mem in zip([self.U, self.W, self.V, self.b, self.c],
+                                  [dU, dW, dV, db, dc],
+                                  [self.mU, self.mW, self.mV, self.mb, self.mc]):
+        mem += dparam * dparam
+        param += -self.learning_rate * dparam / np.sqrt(mem + 1e-8)  # adagrad update
+```
+
+This `update_model` method implements the Adagrad optimization algorithm to update the model parameters. Adagrad adapts the learning rate for each parameter based on the historical gradients, which can help with convergence, especially when dealing with sparse data. The `update_model` method is called after each backward pass to adjust the model parameters based on the computed gradients. This is a crucial step in the training process, as it's how the model learns and improves its performance over time.
 
 ## Forward Pass
 
