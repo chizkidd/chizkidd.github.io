@@ -89,8 +89,24 @@ class RNN:
         self.c = np.zeros((vocab_size, 1))
         
         # Memory variables for Adagrad optimization
-        self.mU, self.mW, self.mV = np.zeros_like(self.U), np.zeros_like(self.W), np.zeros_like(self.V)
-        self.mb, self.mc = np.zeros_like(self.b), np.zeros_like(self.c)
+        self.mU = np.zeros_like(self.U)
+        self.mW = np.zeros_like(self.W)
+        self.mV = np.zeros_like(self.V)
+        self.mb = np.zeros_like(self.b)
+        self.mc = np.zeros_like(self.c)
+
+    def loss(self, ps, targets):
+        """
+        Cross-entropy loss function.
+        """
+        loss = 0
+        for t in range(len(targets)):
+            loss += -np.log(ps[t][targets[t], 0])
+        return loss / len(targets)
+
+    def softmax(self, x):
+        e_x = np.exp(x - np.max(x))
+        return e_x / e_x.sum(axis=0)
 
 ```
 
@@ -102,16 +118,16 @@ In the constructor, we initialize the model parameters:
 - `b`: Hidden layer bias
 - `c`: Output layer bias
 
-We also initialize memory variables for the Adagrad optimization algorithm, which we'll use to update our parameters during training.
+We also initialize memory variables for the Adagrad optimization algorithm, which we'll use to update our parameters during training. The loss and softmax functions are also defined in the above.
 
 ```python
 def update_model(self, dU, dW, dV, db, dc):
     # parameter update with adagrad
-    for param, dparam, mem in zip([self.U, self.W, self.V, self.b, self.c],
+    for param, dparam, mom in zip([self.U, self.W, self.V, self.b, self.c],
                                   [dU, dW, dV, db, dc],
                                   [self.mU, self.mW, self.mV, self.mb, self.mc]):
-        mem += dparam * dparam
-        param += -self.learning_rate * dparam / np.sqrt(mem + 1e-8)  # adagrad update
+        mom += dparam * dparam
+        param += -self.learning_rate * dparam / np.sqrt(mom + 1e-8)  # adagrad update
 ```
 
 This `update_model` method implements the Adagrad optimization algorithm to update the model parameters. Adagrad adapts the learning rate for each parameter based on the historical gradients, which can help with convergence, especially when dealing with sparse data. The `update_model` method is called after each backward pass to adjust the model parameters based on the computed gradients. This is a crucial step in the training process, as it's how the model learns and improves its performance over time.
@@ -152,8 +168,11 @@ The backward pass is where we compute the gradients of our loss function with re
 
 ```python
 def backward(self, xs, hs, ps, targets):
-    dU, dW, dV = np.zeros_like(self.U), np.zeros_like(self.W), np.zeros_like(self.V)
-    db, dc = np.zeros_like(self.b), np.zeros_like(self.c)
+    dU = np.zeros_like(self.U)
+    dW = np.zeros_like(self.W)
+    dV = np.zeros_like(self.V)
+    db = np.zeros_like(self.b)
+    dc = np.zeros_like(self.c)
     dhnext = np.zeros_like(hs[0])
     for t in reversed(range(self.seq_length)):
         dy = np.copy(ps[t])
@@ -167,7 +186,7 @@ def backward(self, xs, hs, ps, targets):
         dW += np.dot(dhrec, hs[t-1].T)
         dhnext = np.dot(self.W.T, dhrec)
     for dparam in [dU, dW, dV, db, dc]:
-        np.clip(dparam, -5, 5, out=dparam)
+        np.clip(dparam, -5, 5, out=dparam) # handle exploding gradients
     return dU, dW, dV, db, dc
 ```
 
@@ -196,7 +215,7 @@ def train(self, data_reader):
         smooth_loss = smooth_loss*0.999 + loss*0.001
         hprev = hs[self.seq_length-1]
         if not iter_num%500:
-            sample_ix = self.sample(hprev, inputs[0], 200)
+            sample_ix = self.sample(hprev, inputs[0], 200) # self.sample(_, _, seq_length)
             print( ''.join(data_reader.ix_to_char[ix] for ix in sample_ix))
             print( "\n\niter :%d, loss:%f"%(iter_num, smooth_loss))
         iter_num += 1
@@ -252,8 +271,8 @@ rnn = RNN(hidden_size=100, vocab_size=data_reader.vocab_size, seq_length=seq_len
 rnn.train(data_reader)
 
 # Generate some text
-generated_text = rnn.predict(data_reader, 'speak', 50)
-print(generated_text)
+generated_text = rnn.sample(np.zeros((rnn.hidden_size, 1)), data_reader.char_to_ix['s'], 50)
+print(''.join(data_reader.ix_to_char[ix] for ix in generated_text))
 ```
 
 This code:
