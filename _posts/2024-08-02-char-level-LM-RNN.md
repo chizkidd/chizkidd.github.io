@@ -75,16 +75,23 @@ Now, let's look at the core of our implementation: the `RNN` class. We'll break 
 
 ```python
 class RNN:
-    def __init__(self, hidden_size, vocab_size, seq_length, learning_rate):
+    def __init__(self, hidden_size, vocab_size, seq_length, learning_rate, kaiming_init=True):
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
         self.seq_length = seq_length
         self.learning_rate = learning_rate
+        self.kaiming_init = kaiming_init
         
         # Initialize weights and biases
-        self.U = np.random.randn(hidden_size, vocab_size)*0.01
-        self.W = np.random.randn(hidden_size, hidden_size)*0.01
-        self.V = np.random.randn(vocab_size, hidden_size)*0.01
+        if kaiming_init == True:
+            # Initialize weights and biases using uniform distribution (Kaiming-He, Glorot, LeCun, Xavier, etc.)
+            self.U = np.random.uniform(-np.sqrt(1.0/vocab_size), np.sqrt(1.0/vocab_size), (hidden_size, vocab_size))
+            self.W = np.random.uniform(-np.sqrt(1.0/hidden_size), np.sqrt(1.0/hidden_size), (hidden_size, hidden_size))
+            self.V = np.random.uniform(-np.sqrt(1.0/hidden_size), np.sqrt(1.0/hidden_size), (vocab_size, hidden_size))
+        else:
+            self.U = np.random.randn(hidden_size, vocab_size)*0.01
+            self.W = np.random.randn(hidden_size, hidden_size)*0.01
+            self.V = np.random.randn(vocab_size, hidden_size)*0.01
         self.b = np.zeros((hidden_size, 1))
         self.c = np.zeros((vocab_size, 1))
         
