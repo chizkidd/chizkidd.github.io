@@ -10,6 +10,9 @@ github_username: chizkidd
 # twitter_username: chizkidd
 # kaggle_username: chizkidd
 
+# Analytics
+google_analytics: G-WFFQCFF6S8
+
 # Build settings
 markdown: kramdown
 permalink: pretty
