@@ -13,6 +13,12 @@ github_username: chizkidd
 # Analytics
 google_analytics: G-WFFQCFF6S8
 
+#  Resources:
+#    - Beautiful Jekyll: "http://deanattali.com/beautiful-jekyll/"
+#    - Learn markdown: "http://www.markdowntutorial.com/"
+#    - GitHub Pages: "https://pages.github.com/"
+#  Author's home: "http://deanattali.com"
+
 # Build settings
 markdown: kramdown
 permalink: pretty
@@ -36,8 +42,6 @@ excerpt_length: 50
 # # RSS Feed settings
 # feed:
 #   path: feed.xml
-
-
 
 # # Minima theme specific settings
 # minima:
