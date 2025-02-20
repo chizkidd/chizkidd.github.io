@@ -7,7 +7,7 @@ date: 2025-02-20
 mathjax: true
 ---
 
-A critical review of Robert Bryce's **"Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future."**
+A critical review of Robert Bryce's "<u>Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future.</u>"
 
 ## INTRODUCTION
 
