@@ -7,13 +7,13 @@ date: 2025-02-20
 mathjax: true
 ---
 
-*A critical analysis of Robert Bryce's "Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future"*
+A critical review of Robert Bryce's **"Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future."**
 
 ## INTRODUCTION
 
 Robert Bryce, in his book "Power Hungry," argues that natural gas and nuclear energy are the next consecutive logical energy transitions from coal and oil for the U.S. to not only make strides towards national energy autonomy, and satisfy the demands of the "Four Imperatives¹ – energy density, power density, cost, and scale – ," but also to achieve megatrends such as decarbonization, increasing use and availability of gaseous fuels, concerns about peak oil and peak coal, increasing urbanization of global population, and reducing carbon dioxide (CO₂) emissions¹. His energy solution, referred to as N2N (natural gas to nuclear), is definitely supported by meeting his "Four Imperatives" criteria for a sustainable, economic, environmental-friendly, and viable long-term option. However, to adopt a national or global long-term energy solution, the criteria not only has to be fully objective but also has to take into account the pros and cons of each proposed option in relation to geography, politics, resources and needs.
 
-Bryce presents his solution as a panacea for the energy problem in the U.S. and that is deeply flawed because fundamentally, even the US states are vastly different from one another. Therefore, the energy solution to one state is not a guaranteed solution for another state. Even within states, different geographical and resource outlays can still dictate different energy source needs. Bryce's use of data and facts is commendable because on a basic level the numerical results have no biases or emotions, however the manner in which he juxtaposes varying data for different energy sources seems biased as most of the graphs support his opinions with little or no disagreements to his opinions. A good mathematical/data model is one that tells the whole story both positive and negative.
+Bryce presents his solution as a panacea for the energy problem in the U.S. and that is deeply flawed because fundamentally, even the US states are vastly different from one another. Therefore, the energy solution for one state is not a guaranteed solution for another state. Even within states, different geographical and resource outlays can still dictate different energy source needs. Bryce's use of data and facts is commendable because on a basic level the numerical results have no biases or emotions, however the manner in which he juxtaposes varying data for different energy sources seems biased as most of the graphs support his opinions with little or no disagreements to his opinions. A good mathematical/data model is one that tells the whole story both positive and negative.
 
 ## THOUGHTS ON SOME SOLID POINTS
 
