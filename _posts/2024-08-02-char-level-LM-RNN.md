@@ -9,7 +9,7 @@ mathjax: true
 
 In this blog post, we'll dive deep into the implementation of a character-level language model using a vanilla Recurrent Neural Network (RNN). This type of model can learn to generate text one character at a time, capturing the patterns and structure of the language it's trained on. We'll walk through the code, explain the key concepts, and provide insights into how this model works.
 
-## Table of Contents
+### Table of Contents
 1. [Introduction](#introduction)
 2. [Data Preparation](#data-preparation)
 3. [RNN Model Architecture](#rnn-model-architecture)
@@ -19,11 +19,11 @@ In this blog post, we'll dive deep into the implementation of a character-level 
 7. [Putting It All Together](#putting-it-all-together)
 8. [Conclusion](#conclusion)
 
-## Introduction
+### Introduction
 
 Recurrent Neural Networks are a class of neural networks designed to work with sequential data. They're particularly well-suited for tasks like language modeling, where the order and context of the input matter. In this implementation, we'll create a character-level language model, which means our model will learn to predict the next character in a sequence given the previous characters.
 
-## Data Preparation
+### Data Preparation
 
 Before we can train our model, we need to prepare our data. Let's look at the `DataReader` class:
 
@@ -69,7 +69,7 @@ The `seq_length` parameter determines how many characters the model will see at 
 
 The `just_started()` method is used to check if we've reset our pointer to the beginning of the data. This is useful for initializing the hidden state when we start a new epoch of training.
 
-## RNN Model Architecture
+### RNN Model Architecture
 
 Now, let's look at the core of our implementation: the `RNN` class. We'll break it down into several parts.
 
@@ -139,7 +139,7 @@ def update_model(self, dU, dW, dV, db, dc):
 
 This `update_model` method implements the Adagrad optimization algorithm to update the model parameters. Adagrad adapts the learning rate for each parameter based on the historical gradients, which can help with convergence, especially when dealing with sparse data. The `update_model` method is called after each backward pass to adjust the model parameters based on the computed gradients. This is a crucial step in the training process, as it's how the model learns and improves its performance over time.
 
-## Forward Pass
+### Forward Pass
 
 The forward pass is where we compute the model's predictions given an input sequence. Let's look at the `forward` method:
 
@@ -169,7 +169,7 @@ The equations governing this process are:
 - Output: `o[t] = V * h[t] + c`
 - Predictions: `y[t] = softmax(o[t])`
 
-## Backward Pass and Training
+### Backward Pass and Training
 
 The backward pass is where we compute the gradients of our loss function with respect to the model parameters. This is done using backpropagation through time (BPTT). Let's look at the `backward` method:
 
@@ -237,7 +237,7 @@ This method repeatedly:
 5. Updates the model parameters
 6. Occasionally samples from the model to check its progress
 
-## Sampling from the Model
+### Sampling from the Model
 
 Once we've trained our model, we can use it to generate new text. The `sample` method does this:
 
@@ -267,7 +267,7 @@ This method:
    - Uses this character as the input for the next step
 
 
-## Putting It All Together
+### Putting It All Together
 
 Here's how we can use our implementation:
 
@@ -293,7 +293,7 @@ It's important to note that in this implementation, we're using the "Tiny Shakes
 
 Using a smaller dataset like Tiny Shakespeare allows for faster training and experimentation, making it ideal for learning purposes. However, it's worth mentioning that the quality and diversity of the generated text will be limited compared to models trained on larger, more diverse datasets.
 
-## Conclusion
+### Conclusion
 
 In this blog post, we've explored the implementation of a character-level language model using a vanilla RNN, trained on the Tiny Shakespeare dataset. We've seen how to prepare the data, implement the forward and backward passes, train the model, and generate text from the trained model.
 
@@ -306,7 +306,7 @@ Understanding this implementation provides a solid foundation for exploring more
 Happy coding, and may your RNNs speak with the eloquence of the Bard himself!
 
 
-## References
+### References
 1. [The Unreasonable Effectiveness of Recurrent Neural Networks](https://karpathy.github.io/2015/05/21/rnn-effectiveness/), Andrej Karpathy, May 2015.
 2. [Recurrent Neural Networks (RNNs): Implementing an RNN from Scratch in Python](https://towardsdatascience.com/recurrent-neural-networks-rnns-3f06d7653a85), Javaid Nabi, Jul 2019.
 2. [Recurrent Neural Networks Tutorial, Pt 1: Introduction to RNNs](https://dennybritz.com/posts/wildml/recurrent-neural-networks-tutorial-part-1/), Denny Britz, Sept 2015.
