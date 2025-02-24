@@ -1,13 +1,13 @@
 ---
 layout: post
 comments: true
-title: "The Energy Dilemma: Why N2N Isn't the Magic Bullet for America's Energy Future"
+title: "The Energy Dilemma I (Pre-COVID-19): Why N2N Isn't the Magic Bullet for America's Energy Future"
 excerpt: 
 date: 2025-02-20
 mathjax: true
 ---
 
-A critical review of Robert Bryce's "<u>Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future.</u>"
+A pre-COVID-19 critical review of Robert Bryce's "<u>Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future.</u>"
 
 ## INTRODUCTION
 
