@@ -7,7 +7,7 @@ date: 2025-05-30
 mathjax: true
 ---
 
-"A comprehensive guide to the most critical machine learning mathematical equations, from probability theory to advanced concepts like diffusion models and attention mechanisms. It includes theoretical explanations and practical Python implementations."
+A comprehensive guide to the most critical machine learning mathematical equations, from probability theory to advanced concepts like diffusion models and attention mechanisms. It includes theoretical explanations and practical Python implementations.
 
 ## Motivation
 
