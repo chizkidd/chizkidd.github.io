@@ -17,11 +17,11 @@ Backpropagation is a gradient-based optimization algorithm used to train artific
 
 - **Forward Pass**: Input data propagates through the network, undergoing transformations via weights, biases, and activation functions to produce a prediction.
 - **Loss Function**: Measures the error, such as mean squared error (MSE) for regression or cross-entropy for classification.
-- **Backward Pass**: Computes gradients of the loss with respect to each parameter, propagating errors backward from the output to the input layer.
+- **Backward Pass**: Computes gradients of the loss with respect to each parameter, propagating errors backward from the output to the input layer. 
 - **Gradient Descent**: Updates parameters in the direction that reduces the loss, using a learning rate to control step size.
 
 ## Historical Context
-Backpropagation’s roots trace back to Seppo Linnainmaa’s 1970 work on reverse-mode automatic differentiation, with significant contributions by Paul Werbos (1982) and the formalization by David E. Rumelhart, Geoffrey Hinton, and Ronald J. Williams in their 1986 paper, [“Learning representations by back-propagating errors.”](https://www.cs.utoronto.ca/~hinton/absps/naturebp.pdf) Its adoption in the 1980s, coupled with GPU advancements in the 2010s, revolutionized deep learning, enabling applications in computer vision, natural language processing, and more.
+Backpropagation’s roots trace back to [Seppo Linnainmaa’s 1970 work](https://papers.baulab.info/papers/also/Linnainmaa-1976.pdf) on reverse-mode automatic differentiation, with significant contributions by [Paul Werbos (1982)](https://werbos.com/Neural/SensitivityIFIPSeptember1981.pdf) and the formalization by David E. Rumelhart, Geoffrey Hinton, and Ronald J. Williams in their 1986 paper, [“Learning representations by back-propagating errors.”](https://www.cs.utoronto.ca/~hinton/absps/naturebp.pdf) Its adoption in the 1980s, coupled with GPU advancements in the 2010s, revolutionized deep learning, enabling applications in computer vision, natural language processing, and more.
 
 ## How Backpropagation Works
 Backpropagation operates in a series of well-defined steps:
