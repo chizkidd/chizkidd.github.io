@@ -7,8 +7,6 @@ date: 2025-05-30
 mathjax: true
 ---
 
-
-
 ## Introduction
 Backpropagation, often referred to as "backward propagation of errors," is the cornerstone of training deep neural networks. It is a supervised learning algorithm that optimizes the weights and biases of a neural network to minimize the error between predicted and actual outputs. This blog post provides a highly technical yet understandable exploration of backpropagation, detailing its mechanics, mathematical foundations, and practical applications, making it accessible to those with a basic understanding of calculus and machine learning.
 

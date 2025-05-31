@@ -2,15 +2,12 @@
 layout: post
 comments: true
 title: "The Most Important Machine Learning Equations: A Comprehensive Guide"
-excerpt: 
+excerpt: A comprehensive guide to the most critical machine learning mathematical equations, from probability theory to advanced concepts like diffusion models and attention mechanisms. It includes theoretical explanations and practical Python implementations.  
 date: 2025-05-30
 mathjax: true
 ---
 
-A comprehensive guide to the most critical machine learning mathematical equations, from probability theory to advanced concepts like diffusion models and attention mechanisms. It includes theoretical explanations and practical Python implementations.
-
 ## Motivation
-
 Machine learning (ML) is a powerful field driven by mathematics. Whether you're building models, optimizing algorithms, or simply trying to understand how ML works under the hood, mastering the core equations is essential. This blog post is designed to be your go-to resource, covering the most critical and "mind-breaking" ML equations—enough to grasp most of the core math behind ML. Each section includes theoretical insights, the equations themselves, and practical implementations in Python, so you can see the math in action.
 
 This guide is for anyone with a basic background in math and programming who wants to deepen their understanding of ML and is inspired by this [tweet from @goyal__pramod](https://x.com/goyal__pramod/status/1923064911501914216). Let's dive into the equations that power this fascinating field!
@@ -52,13 +49,11 @@ This guide is for anyone with a basic background in math and programming who wan
 ---
 
 ## Introduction
-
 Mathematics is the language of machine learning. From probability to linear algebra, optimization to advanced generative models, equations define how ML algorithms learn from data and make predictions. This blog post compiles the most essential equations, explains their significance, and provides practical examples using Python libraries like NumPy, scikit-learn, TensorFlow, and PyTorch. Whether you're a beginner or an experienced practitioner, this guide will equip you with the tools to understand and apply ML math effectively.
 
 ---
 
 ## Probability and Information Theory
-
 Probability and information theory provide the foundation for reasoning about uncertainty and measuring differences between distributions.
 
 ### Bayes' Theorem
@@ -198,7 +193,6 @@ print(f"Cross-Entropy: {cross_entropy}")  # Output: 0.164252033486018
 ---
 
 ## Linear Algebra
-
 Linear algebra powers the transformations and structures in ML models.
 
 ### Linear Transformation
@@ -264,7 +258,6 @@ print(f"U:\n{U}\nS: {S}\nVt:\n{Vt}")
 ---
 
 ## Optimization
-
 Optimization is how ML models learn from data.
 
 ### Gradient Descent
@@ -328,7 +321,6 @@ print(f"Loss: {loss.item()}")
 ---
 
 ## Loss Functions
-
 Loss functions measure model performance and guide optimization.
 
 ### Mean Squared Error (MSE)
@@ -358,7 +350,6 @@ print(f"MSE: {mse}")  # Output: 0.01
 ---
 
 ## Advanced ML Concepts
-
 These equations power cutting-edge ML techniques.
 
 ### Diffusion Process
@@ -437,7 +428,7 @@ print(f"Softmax: {softmax}")  # Output: [0.09003057 0.24472847 0.66524096]
 
 ---
 
-## Attention Mechanism
+### Attention Mechanism
 
 **Equation:**
 
@@ -476,7 +467,6 @@ This blog post has explored the most critical equations in machine learning, fro
 ---
 
 ## Further Reading
-
 * *Pattern Recognition and Machine Learning* by Christopher Bishop
 * *Deep Learning* by Ian Goodfellow, Yoshua Bengio, and Aaron Courville
 * [Stanford CS229: Machine Learning](https://cs229.stanford.edu/)
