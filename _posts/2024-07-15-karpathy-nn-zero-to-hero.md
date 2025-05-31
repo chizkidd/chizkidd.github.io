@@ -2,7 +2,8 @@
 layout: post
 comments: true
 title: "Implementation of Karpathy's Neural Networks: Zero to Hero Lecture Series"
-excerpt: 
+excerpt:  |
+    This blog post presents my detailed implementation of Andrej Karpathy's Neural Networks: Zero to Hero YouTube lecture series and exercises in Jupyter Notebook. The articles go deeply from NNs to MLPs to CNNs to LLMs to ensure a thorough and robust understanding of neural networks.
 date: 2024-07-15
 mathjax: true
 ---
