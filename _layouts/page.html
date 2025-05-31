@@ -24,7 +24,7 @@ layout: default
   };
   (function() { // DON'T EDIT BELOW THIS LINE
   var d = document, s = d.createElement('script');
-  s.src = 'https://karpathyblog.disqus.com/embed.js';
+  s.src = 'https://chizoba-blog.disqus.com/embed.js';
   s.setAttribute('data-timestamp', +new Date());
   (d.head || d.body).appendChild(s);
   })();
@@ -35,6 +35,21 @@ layout: default
 </div>
 
 <!-- mathjax -->
-{% if page.mathjax %}
+<!-- {% if page.mathjax %}
 <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+{% endif %} -->
+{% if page.mathjax %}
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 {% endif %}
