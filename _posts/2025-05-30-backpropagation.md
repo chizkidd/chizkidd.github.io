@@ -34,7 +34,15 @@ Backpropagation operates in a series of well-defined steps:
 
 2. **Compute the Loss**
 
-    - The loss function ( $C$ ) quantifies the error. For regression, MSE is common:$$C = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$$For classification, cross-entropy is often used:$$C = -\sum_i y_i \log(\hat{y}_i)$$where ( $y_i$ ) is the true label and ( $\hat{y}_i$ ) is the predicted output.
+    - The loss function ( $C$ ) quantifies the error. For regression, MSE is common:
+        $$
+        C = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
+        $$
+    For classification, cross-entropy is often used:
+        $$
+        C = -\sum_i y_i \log(\hat{y}_i)
+        $$
+    where ( $y_i$ ) is the true label and ( $\hat{y}_i$ ) is the predicted output.
 
 3. **Backward Pass (Gradient Computation)**
 
@@ -51,18 +59,40 @@ Backpropagation operates in a series of well-defined steps:
 
 4. **Update Parameters**
 
-    - Parameters are updated using gradient descent:$$W^l := W^l - \eta \frac{\partial C}{\partial W^l}, \quad b^l := b^l - \eta \frac{\partial C}{\partial b^l}$$where ( $\eta$ ) is the learning rate.
+    - Parameters are updated using gradient descent:
+        $$
+        W^l := W^l - \eta \frac{\partial C}{\partial W^l}, \quad b^l := b^l - \eta \frac{\partial C}{\partial b^l}
+        $$
+        where ( $\eta$ ) is the learning rate.
 
 5. **Iterate**
 
     - The process repeats for multiple epochs until the loss converges or a stopping criterion is met.
 
 ## Mathematical Formulation
-Consider a neural network with ( $L$ ) layers, where layer ( $l$ ) has ( $n_l$ ) neurons. The activation ( $a^l$ ) and weighted input ( $z^l$ ) are defined as:$$z^l = W^l a^{l-1} + b^l, \quad a^l = f^l(z^l)$$ The loss function ( $C$ ) depends on the output ( $a^L$ ) and true labels ( $y$ ). The goal is to compute ( $\frac{\partial C}{\partial W^l}$ ) and ( $\frac{\partial C}{\partial b^l}$ ).
+Consider a neural network with ( $L$ ) layers, where layer ( $l$ ) has ( $n_l$ ) neurons. The activation ( $a^l$ ) and weighted input ( $z^l$ ) are defined as:
+$$
+z^l = W^l a^{l-1} + b^l, \quad a^l = f^l(z^l)
+$$
+The loss function ( $C$ ) depends on the output ( $a^L$ ) and true labels ( $y$ ). The goal is to compute ( $\frac{\partial C}{\partial W^l}$ ) and ( $\frac{\partial C}{\partial b^l}$ ).
 
-* **Output Layer**: The error term is:$$\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)$$Gradients are:$$    \frac{\partial C}{\partial W^L} = \delta^L (a^{L-1})^T, \quad \frac{\partial C}{\partial b^L} = \delta^L$$
+* **Output Layer**: The error term is:
+$$
+\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)
+$$
+Gradients are:
+$$
+\frac{\partial C}{\partial W^L} = \delta^L (a^{L-1})^T, \quad \frac{\partial C}{\partial b^L} = \delta^L
+$$
 
-* **Hidden Layers**: The error term is:$$\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)$$Gradients are:$$\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l$$
+* **Hidden Layers**: The error term is:
+$$
+\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)
+$$
+Gradients are:
+$$
+\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l
+$$
 
 
 This recursive computation leverages dynamic programming to avoid redundant calculations, making backpropagation computationally efficient.
@@ -71,10 +101,10 @@ This recursive computation leverages dynamic programming to avoid redundant calc
 
 ### Network Configuration
 
-* **Input:** x = [0.05, 0.10]
+* **Input:** $x = [0.05, 0.10]$
 * **Hidden Layer:** 2 neurons with sigmoid activation
 * **Output Layer:** 1 neuron with sigmoid activation
-* **True Output:** y = 0.01
+* **True Output:** $y = 0.01$
 
 ### Initial Parameters
 

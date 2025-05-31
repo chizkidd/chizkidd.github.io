@@ -58,7 +58,11 @@ Probability and information theory provide the foundation for reasoning about un
 
 ### Bayes' Theorem
 
-**Equation:** $$ P(A|B) = \frac{P(B|A) P(A)}{P(B)} $$
+**Equation:** 
+
+$$
+P(A|B) = \frac{P(B|A) P(A)}{P(B)}
+$$
 
 **Explanation:** Bayes' Theorem describes how to update the probability of a hypothesis ($A$) given new evidence ($B$). It’s a cornerstone of probabilistic reasoning and is widely used in machine learning for tasks like classification and inference. 
 
@@ -94,7 +98,11 @@ print(f"P(D|T+) = {result:.4f}")  # Output: P(D|T+) = 0.3333
 
 ### Entropy
 
-**Equation:** $$H(X) = -\sum_{x \in X} P(x) \log P(x)$$
+**Equation:** 
+
+$$
+H(X) = -\sum_{x \in X} P(x) \log P(x)
+$$
 
 **Explanation:** Entropy measures the uncertainty or randomness in a probability distribution. It quantifies the amount of information required to describe the distribution and is fundamental in understanding concepts like information gain and decision trees. 
 
@@ -130,9 +138,15 @@ print(f"Entropy of biased coin: {entropy(biased_coin)}")  # Output: 0.4698716731
 **Equations:**
 
 * Joint Probability:
-  $$P(A, B) = P(A|B) P(B) = P(B|A) P(A)$$
+  
+  $$
+  P(A, B) = P(A|B) P(B) = P(B|A) P(A)
+  $$
 * Conditional Probability:
-  $$P(A|B) = \frac{P(A, B)}{P(B)}$$
+  
+  $$
+  P(A|B) = \frac{P(A, B)}{P(B)}
+  $$
 
 **Explanation:** Joint probability describes the likelihood of two events occurring together, while conditional probability measures the probability of one event given another. These are the building blocks of Bayesian methods and probabilistic models.
 
@@ -153,7 +167,10 @@ print(model.predict([[2.5, 3.5]]))  # Output: [1]
 ### Kullback-Leibler Divergence (KLD)
 
 **Equation:**
-$$D_{KL}(P \| Q) = \sum_{x \in \mathcal{X}} P(x) \log \left( \frac{P(x)}{Q(x)} \right)$$
+
+$$
+D_{KL}(P \| Q) = \sum_{x \in \mathcal{X}} P(x) \log \left( \frac{P(x)}{Q(x)} \right)
+$$
 
 **Explanation:** KLD measures how much one probability distribution $P$ diverges from another $Q$. It’s asymmetric and foundational in information theory and generative models.
 
@@ -173,7 +190,10 @@ print(f"KL Divergence: {kl_div}")  # Output: 0.08228287850505156
 ### Cross-Entropy
 
 **Equation:**
-$$H(P, Q) = -\sum_{x \in \mathcal{X}} P(x) \log Q(x)$$
+
+$$
+H(P, Q) = -\sum_{x \in \mathcal{X}} P(x) \log Q(x)
+$$
 
 **Explanation:** Cross-entropy quantifies the difference between the true distribution $P$ and the predicted distribution $Q$. It’s a widely used loss function in classification.
 
@@ -198,7 +218,10 @@ Linear algebra powers the transformations and structures in ML models.
 ### Linear Transformation
 
 **Equation:**
-$$y = Ax + b \quad \text{where } A \in \mathbb{R}^{m \times n}, x \in \mathbb{R}^n, y \in \mathbb{R}^m, b \in \mathbb{R}^m$$
+
+$$
+y = Ax + b \quad \text{where } A \in \mathbb{R}^{m \times n}, x \in \mathbb{R}^n, y \in \mathbb{R}^m, b \in \mathbb{R}^m
+$$
 
 **Explanation:** This equation represents a linear mapping of input $x$ to output $y$ via matrix $A$ and bias $b$. It’s the core operation in neural network layers.
 
@@ -219,7 +242,10 @@ print(y)  # Output: [4 7]
 ### Eigenvalues and Eigenvectors
 
 **Equation:**
-$$Av = \lambda v \quad \text{where } \lambda \in \mathbb{R}, v \in \mathbb{R}^n, v \neq 0$$
+
+$$
+Av = \lambda v \quad \text{where } \lambda \in \mathbb{R}, v \in \mathbb{R}^n, v \neq 0
+$$
 
 **Explanation:** Eigenvalues $\lambda$ and eigenvectors $v$ describe how a matrix $A$ scales and rotates space, crucial for understanding data variance.
 
@@ -239,7 +265,10 @@ print(f"Eigenvectors:\n{eigenvectors}")
 ### Singular Value Decomposition (SVD)
 
 **Equation:**
-$$A = U \Sigma V^T$$
+
+$$
+A = U \Sigma V^T
+$$
 
 **Explanation:** SVD breaks down a matrix $A$ into orthogonal matrices $U$ and $V$ and a diagonal matrix $\Sigma$ of singular values. It reveals the intrinsic structure of data.
 
@@ -263,7 +292,10 @@ Optimization is how ML models learn from data.
 ### Gradient Descent
 
 **Equation:**
-$$\theta_{t+1} = \theta_t - \eta \nabla_{\theta} L(\theta)$$
+
+$$
+\theta_{t+1} = \theta_t - \eta \nabla_{\theta} L(\theta)
+$$
 
 **Explanation:** Gradient descent updates parameters $\theta$ by moving opposite to the gradient of the loss function $L$, scaled by learning rate $\eta$.
 
@@ -291,7 +323,10 @@ print(theta)  # Output: ~[0., 1.]
 ### Backpropagation
 
 **Equation:**
-$$\frac{\partial L}{\partial w_{ij}} = \frac{\partial L}{\partial a_j} \cdot \frac{\partial a_j}{\partial z_j} \cdot \frac{\partial z_j}{\partial w_{ij}}$$
+
+$$
+\frac{\partial L}{\partial w_{ij}} = \frac{\partial L}{\partial a_j} \cdot \frac{\partial a_j}{\partial z_j} \cdot \frac{\partial z_j}{\partial w_{ij}}
+$$
 
 **Explanation:** Backpropagation applies the chain rule to compute gradients of the loss $L$ with respect to weights $w_{ij}$ in neural networks.
 
@@ -326,7 +361,10 @@ Loss functions measure model performance and guide optimization.
 ### Mean Squared Error (MSE)
 
 **Equation:**
-$$\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$$
+
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
+$$
 
 **Explanation:** MSE calculates the average squared difference between true $y_i$ and predicted $\hat{y}_i$ values, penalizing larger errors more heavily.
 
