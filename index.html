@@ -5,14 +5,14 @@ layout: default
 <div class="home">
   <ul class="posts">
     {% for post in site.posts %}
-      {% if post.title and post.excerpt and post.content != "" %}
-        <li>
-          <span class="post-date">{{ post.date | date: "%b %-d, %Y" }}</span><br>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-          <br>
-          {{ post.excerpt | truncatewords: 50 | markdownify }}
-        </li>
-      {% endif %}
+      <!-- {% if post.title and post.content != "" %} -->
+      <li>
+        <span class="post-date">{{ post.date | date: "%b %-d, %Y" }}</span>
+        <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+        <br>
+        {{ post.excerpt | truncatewords: 50 | markdownify }}
+      </li>
+      <!-- {% endif %} -->
     {% endfor %}
   </ul>
 </div>
