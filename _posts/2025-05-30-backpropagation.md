@@ -2,12 +2,12 @@
 layout: post
 comments: true
 title: "Understanding Backpropagation in Deep Learning"
-excerpt: 
+excerpt: A highly technical yet understandable exploration of backpropagation, detailing its mechanics, mathematical foundations, and practical applications, making it accessible to those with a basic understanding of calculus and machine learning.
 date: 2025-05-30
 mathjax: true
 ---
 
-A highly technical yet understandable exploration of backpropagation, detailing its mechanics, mathematical foundations, and practical applications, making it accessible to those with a basic understanding of calculus and machine learning.
+
 
 ## Introduction
 Backpropagation, often referred to as "backward propagation of errors," is the cornerstone of training deep neural networks. It is a supervised learning algorithm that optimizes the weights and biases of a neural network to minimize the error between predicted and actual outputs. This blog post provides a highly technical yet understandable exploration of backpropagation, detailing its mechanics, mathematical foundations, and practical applications, making it accessible to those with a basic understanding of calculus and machine learning.
@@ -29,41 +29,42 @@ Backpropagation’s roots trace back to Seppo Linnainmaa’s 1970 work on revers
 Backpropagation operates in a series of well-defined steps:
 1. **Forward Pass**
 
-- Input data ( $x$ ) is fed into the network.
-- For each layer ( $l$ ), the weighted input ( $z^l = W^l a^{l-1} + b^l$ ) is computed, where ( $W^l$ ) is the weight matrix, ( $b^l$ ) is the bias vector, and ( $a^{l-1}$ ) is the activation from the previous layer.
-- An activation function ( $f^l$ ) (e.g., sigmoid, ReLU) is applied: ( $a^l = f^l(z^l)$ ).
-- This continues until the output layer produces a prediction ( $a^L$ ).
+    - Input data ( $x$ ) is fed into the network.
+    - For each layer ( $l$ ), the weighted input ( $z^l = W^l a^{l-1} + b^l$ ) is computed, where ( $W^l$ ) is the weight matrix, ( $b^l$ ) is the bias vector, and ( $a^{l-1}$ ) is the activation from the previous layer.
+    - An activation function ( $f^l$ ) (e.g., sigmoid, ReLU) is applied: ( $a^l = f^l(z^l)$ ).
+    - This continues until the output layer produces a prediction ( $a^L$ ).
 
 2. **Compute the Loss**
 
-- The loss function ( $C$ ) quantifies the error. For regression, MSE is common:$$C = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$$For classification, cross-entropy is often used:$$C = -\sum_i y_i \log(\hat{y}_i)$$where ( $y_i$ ) is the true label and ( $\hat{y}_i$ ) is the predicted output.
+    - The loss function ( $C$ ) quantifies the error. For regression, MSE is common:$$C = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$$For classification, cross-entropy is often used:$$C = -\sum_i y_i \log(\hat{y}_i)$$where ( $y_i$ ) is the true label and ( $\hat{y}_i$ ) is the predicted output.
 
 3. **Backward Pass (Gradient Computation)**
 
-- Chain Rule: Gradients are computed using the chain rule. For a weight ($w_{ij}^l$), the gradient is:
-$$
-\frac{\partial C}{\partial w_{ij}^l} = \frac{\partial C}{\partial a^l} \cdot \frac{\partial a^l}{\partial z^l} \cdot \frac{\partial z^l}{\partial w_{ij}^l}
-$$
-- Error Term: The error term ($\delta^l = \frac{\partial C}{\partial z^l}$) is computed recursively:
-   - For the output layer: $\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)$.
-   - For hidden layers: $\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)$.
+    - <u>Chain Rule</u>: Gradients are computed using the chain rule. For a weight ($w_{ij}^l$), the gradient is:
+        $$
+        \frac{\partial C}{\partial w_{ij}^l} = \frac{\partial C}{\partial a^l} \cdot \frac{\partial a^l}{\partial z^l} \cdot \frac{\partial z^l}{\partial w_{ij}^l}
+        $$
 
-- Gradients: Gradients are then $\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T$ and $\frac{\partial C}{\partial b^l} = \delta^l$.
+    - <u>Error Term</u>: The error term ($\delta^l = \frac{\partial C}{\partial z^l}$) is computed recursively:
+        - For the output layer: $\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)$.
+        - For hidden layers: $\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)$.
+
+    - <u>Gradients</u>: Gradients are then $\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T$ and $\frac{\partial C}{\partial b^l} = \delta^l$.
 
 4. **Update Parameters**
 
-- Parameters are updated using gradient descent:$$W^l := W^l - \eta \frac{\partial C}{\partial W^l}, \quad b^l := b^l - \eta \frac{\partial C}{\partial b^l}$$where ( $\eta$ ) is the learning rate.
+    - Parameters are updated using gradient descent:$$W^l := W^l - \eta \frac{\partial C}{\partial W^l}, \quad b^l := b^l - \eta \frac{\partial C}{\partial b^l}$$where ( $\eta$ ) is the learning rate.
 
 5. **Iterate**
 
-- The process repeats for multiple epochs until the loss converges or a stopping criterion is met.
+    - The process repeats for multiple epochs until the loss converges or a stopping criterion is met.
 
 ## Mathematical Formulation
 Consider a neural network with ( $L$ ) layers, where layer ( $l$ ) has ( $n_l$ ) neurons. The activation ( $a^l$ ) and weighted input ( $z^l$ ) are defined as:$$z^l = W^l a^{l-1} + b^l, \quad a^l = f^l(z^l)$$ The loss function ( $C$ ) depends on the output ( $a^L$ ) and true labels ( $y$ ). The goal is to compute ( $\frac{\partial C}{\partial W^l}$ ) and ( $\frac{\partial C}{\partial b^l}$ ).
 
-- **Output Layer**: The error term is:$$\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)$$Gradients are:$$    \frac{\partial C}{\partial W^L} = \delta^L (a^{L-1})^T, \quad \frac{\partial C}{\partial b^L} = \delta^L$$
+* **Output Layer**: The error term is:$$\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)$$Gradients are:$$    \frac{\partial C}{\partial W^L} = \delta^L (a^{L-1})^T, \quad \frac{\partial C}{\partial b^L} = \delta^L$$
 
-- **Hidden Layers**: The error term is:$$\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)$$Gradients are:$$\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l$$
+* **Hidden Layers**: The error term is:$$\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)$$Gradients are:$$\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l$$
 
 
 This recursive computation leverages dynamic programming to avoid redundant calculations, making backpropagation computationally efficient.
@@ -72,10 +73,10 @@ This recursive computation leverages dynamic programming to avoid redundant calc
 
 ### Network Configuration
 
-* **Input:** $x = [0.05, 0.10]$
+* **Input:** x = [0.05, 0.10]
 * **Hidden Layer:** 2 neurons with sigmoid activation
 * **Output Layer:** 1 neuron with sigmoid activation
-* **True Output:** $y = 0.01$
+* **True Output:** y = 0.01
 
 ### Initial Parameters
 
