@@ -6,6 +6,8 @@ excerpt:
 date: 2024-07-15
 mathjax: true
 ---
+
+## 📘 Introduction
 This blog post presents my detailed implementation of Andrej Karpathy's [Neural Networks: Zero to Hero YouTube](https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ) lecture series and exercises in Jupyter Notebook. The articles delve deeply into each topic to ensure a thorough and robust understanding of neural networks. The lecture series covers neural networks (NNs) and demonstrates how to build them from scratch in code. It begins with the basics of backpropagation, then moves on to multi-layer perceptrons (MLPs), convolutional neural networks (CNNs), and ultimately builds up to modern deep neural networks, such as Large Language Models (LLMs) like generative pre-trained transformers (GPTs), and LLM tokenization via Byte Pair Encoding (BPE). The course also introduces and explains diagnostic tools for understanding neural network dynamics and performance. The primary focus is on language modeling (LM), as language models provide an excellent foundation for learning deep learning concepts, and most of the skills acquired here are immediately transferable to other areas of deep learning, such as computer vision (CV). The full project can be found on [GitHub](https://github.com/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero).
 
 Four engines are built and leveraged in this lecture series: `micrograd`, `makemore`, `gpt` and `minBPE`. The 1st two engines are not meant to be too heavyweight of libraries with a billion switches and knobs. They should exist as a single hackable file, and are mostly intended for educational purposes. Python and [PyTorch](https://pytorch.org) are the only requirements.
@@ -22,7 +24,36 @@ Four engines are built and leveraged in this lecture series: `micrograd`, `makem
 * `minBPE`: A minimal, clean implementation of the Byte Pair Encoding (BPE) algorithm commonly used in **LLM tokenization**. The algorithm is based on the following paper: [Neural Machine Translation of Rare Words with Subword Units](https://arxiv.org/abs/1508.07909). This tokenizer engine handles the crucial preprocessing step that converts raw text into tokens that language models can understand. BPE works at the **byte level**, processing **UTF-8-encoded strings** to efficiently handle a wide array of human languages and symbols. The `minBPE` tokenizer can train vocabulary and merges on text data, encode text to tokens, and decode tokens back to text - making it an essential component of the modern LLM pipeline used by models like `GPT`, `Llama`, and `Mistral`.
 
 ---
+## 📘 Lecture Notebooks
 The implementation of each lecture can be found below:
+- **Lecture 1**: micrograd  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/001_micrograd/micrograd.ipynb)
+
+- **Lecture 2**: makemore 1 (Bigram model)  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/002_makemore_Bigrams/makemore_Bigrams.ipynb)
+
+- **Lecture 3**: makemore 2 (Multi-Layer Perceptron)  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/003_makemore_MLP/makemore_MLP.ipynb)
+
+- **Lecture 4**: makemore 3 (Batch Normalization)  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/004_makemore_BatchNorm/makemore_BatchNorm.ipynb)
+
+- **Lecture 5**: makemore 4 (Backprop Ninja)  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/005_makemore_BackpropNinja/makemore_Backprop.ipynb)
+
+- **Lecture 6**: makemore 5 (WaveNet)  
+  [View Notebook →](https://github.com/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/006_makemore_WaveNet/makemore_WaveNet.ipynb)
+
+- **Lecture 7**: GPT (Transformer from scratch)  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/007_GPT/gpt.ipynb)
+
+- **Lecture 8**: minBPE (GPT Tokenizer with Byte Pair Encoding [BPE])  
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)
+
+---
+
+
+<!-- The implementation of each lecture can be found below:
 > Lecture 1: micrograd [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/001_micrograd/micrograd.ipynb)<br>
 > Lecture 2: makemore 1 bigrams [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/002_makemore_Bigrams/makemore_Bigrams.ipynb)<br>
 > Lecture 3: makemore 2 multi-layer perceptron [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/003_makemore_MLP/makemore_MLP.ipynb)<br>
@@ -30,4 +61,4 @@ The implementation of each lecture can be found below:
 > Lecture 5: makemore 4 backpropagation on steroids [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/005_makemore_BackpropNinja/makemore_Backprop.ipynb)<br>
 > Lecture 6: makemore 5 wavenet [notebook](https://github.com/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/006_makemore_WaveNet/makemore_WaveNet.ipynb)<br>
 > Lecture 7: Generative Pretrained Transformers (GPT) [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/007_GPT/gpt.ipynb)<br>
-> Lecture 8: Byte Pair Encoding (BPE) [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)<br>
+> Lecture 8: Byte Pair Encoding (BPE) [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)<br> -->
