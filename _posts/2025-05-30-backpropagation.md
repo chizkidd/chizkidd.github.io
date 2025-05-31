@@ -21,7 +21,7 @@ Backpropagation is a gradient-based optimization algorithm used to train artific
 - **Gradient Descent**: Updates parameters in the direction that reduces the loss, using a learning rate to control step size.
 
 ## Historical Context
-Backpropagation’s roots trace back to Seppo Linnainmaa’s 1970 work on reverse-mode automatic differentiation, with significant contributions by Paul Werbos (1982) and the formalization by David E. Rumelhart, Geoffrey Hinton, and Ronald J. Williams in their 1986 paper, “Learning representations by back-propagating errors.” Its adoption in the 1980s, coupled with GPU advancements in the 2010s, revolutionized deep learning, enabling applications in computer vision, natural language processing, and more.
+Backpropagation’s roots trace back to Seppo Linnainmaa’s 1970 work on reverse-mode automatic differentiation, with significant contributions by Paul Werbos (1982) and the formalization by David E. Rumelhart, Geoffrey Hinton, and Ronald J. Williams in their 1986 paper, [“Learning representations by back-propagating errors.”](https://www.cs.utoronto.ca/~hinton/absps/naturebp.pdf) Its adoption in the 1980s, coupled with GPU advancements in the 2010s, revolutionized deep learning, enabling applications in computer vision, natural language processing, and more.
 
 ## How Backpropagation Works
 Backpropagation operates in a series of well-defined steps:
@@ -34,35 +34,56 @@ Backpropagation operates in a series of well-defined steps:
 
 2. **Compute the Loss**
 
-    - The loss function ( $C$ ) quantifies the error. For regression, MSE is common:
+    - The loss function ( $C$ ) quantifies the error. 
+    - For regression, MSE is common:
+
         $$
         C = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
         $$
-    For classification, cross-entropy is often used:
+
+    - For classification, cross-entropy is often used:
+
         $$
         C = -\sum_i y_i \log(\hat{y}_i)
         $$
+
     where ( $y_i$ ) is the true label and ( $\hat{y}_i$ ) is the predicted output.
 
 3. **Backward Pass (Gradient Computation)**
 
     - <u>Chain Rule</u>: Gradients are computed using the chain rule. For a weight ($w_{ij}^l$), the gradient is:
+
         $$
         \frac{\partial C}{\partial w_{ij}^l} = \frac{\partial C}{\partial a^l} \cdot \frac{\partial a^l}{\partial z^l} \cdot \frac{\partial z^l}{\partial w_{ij}^l}
         $$
 
     - <u>Error Term</u>: The error term ($\delta^l = \frac{\partial C}{\partial z^l}$) is computed recursively:
-        - For the output layer: $\delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)$.
-        - For hidden layers: $\delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)$.
+        - For the output layer: 
 
-    - <u>Gradients</u>: Gradients are then $\frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T$ and $\frac{\partial C}{\partial b^l} = \delta^l$.
+        $$
+        \delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)
+        $$
+
+        - For hidden layers: 
+        
+        $$
+        \delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)
+        $$
+
+    - <u>Gradients</u>: Gradients are then computed as:
+
+        $$
+        \frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l
+        $$
 
 4. **Update Parameters**
 
     - Parameters are updated using gradient descent:
+
         $$
         W^l := W^l - \eta \frac{\partial C}{\partial W^l}, \quad b^l := b^l - \eta \frac{\partial C}{\partial b^l}
         $$
+
         where ( $\eta$ ) is the learning rate.
 
 5. **Iterate**
@@ -71,25 +92,33 @@ Backpropagation operates in a series of well-defined steps:
 
 ## Mathematical Formulation
 Consider a neural network with ( $L$ ) layers, where layer ( $l$ ) has ( $n_l$ ) neurons. The activation ( $a^l$ ) and weighted input ( $z^l$ ) are defined as:
+
 $$
 z^l = W^l a^{l-1} + b^l, \quad a^l = f^l(z^l)
 $$
+
 The loss function ( $C$ ) depends on the output ( $a^L$ ) and true labels ( $y$ ). The goal is to compute ( $\frac{\partial C}{\partial W^l}$ ) and ( $\frac{\partial C}{\partial b^l}$ ).
 
 * **Output Layer**: The error term is:
+
 $$
 \delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)
 $$
+
 Gradients are:
+
 $$
 \frac{\partial C}{\partial W^L} = \delta^L (a^{L-1})^T, \quad \frac{\partial C}{\partial b^L} = \delta^L
 $$
 
 * **Hidden Layers**: The error term is:
+
 $$
 \delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)
 $$
+
 Gradients are:
+
 $$
 \frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l
 $$
