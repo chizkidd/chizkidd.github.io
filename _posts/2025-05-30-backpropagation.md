@@ -408,6 +408,6 @@ The next time you train a neural network, remember that behind those improving l
 ## Further Reading
 - [Deep Learning Book](https://www.deeplearningbook.org/) by Ian Goodfellow, Yoshua Bengio, and Aaron Courville
 - [Coursera’s Deep Learning Specialization](https://www.coursera.org/specializations/deep-learning)
-- Experiment with [TensorFlow](https://www.tensorflow.org/tutorials/quickstart/beginner) or [PyTorch](https://pytorch.org/tutorials/beginner/deep_learning_101.html)
-- Watch [3Blue1Brown’s neural network series](https://www.youtube.com/watch?v=airc96oN5iY)
+- Experiment with [TensorFlow](https://www.tensorflow.org/tutorials/quickstart/beginner) or [PyTorch](https://docs.pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html)
+- Watch [3Blue1Brown’s neural network series](https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&feature=shared)
 
