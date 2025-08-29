@@ -52,7 +52,7 @@ The implementation of each lecture can be found below:
   [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)
 
 - **Lecture 9**: GPT2 from scratch <br>
-  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/009_GPT2/gpt2-from-scratch.ipynb)
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/009_GPT2/gpt-2-from-scratch.ipynb)
 
 ---
 
