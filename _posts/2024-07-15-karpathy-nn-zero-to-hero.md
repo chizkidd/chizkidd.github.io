@@ -51,6 +51,9 @@ The implementation of each lecture can be found below:
 - **Lecture 8**: minBPE (GPT Tokenizer with Byte Pair Encoding [BPE])  
   [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)
 
+- **Lecture 9**: GPT2 from scratch <br>
+  [View Notebook →](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/009_GPT2/gpt2-from-scratch.ipynb)
+
 ---
 
 
@@ -62,4 +65,5 @@ The implementation of each lecture can be found below:
 > Lecture 5: makemore 4 backpropagation on steroids [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/005_makemore_BackpropNinja/makemore_Backprop.ipynb)<br>
 > Lecture 6: makemore 5 wavenet [notebook](https://github.com/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/006_makemore_WaveNet/makemore_WaveNet.ipynb)<br>
 > Lecture 7: Generative Pretrained Transformers (GPT) [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/007_GPT/gpt.ipynb)<br>
-> Lecture 8: Byte Pair Encoding (BPE) [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)<br> -->
+> Lecture 8: Byte Pair Encoding (BPE) [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/008_minBPE/minbpe.ipynb)<br>
+> Lecture 9: GPT2 from scratch [notebook](https://nbviewer.org/github/chizkidd/Karpathy-Neural-Networks-Zero-to-Hero/blob/main/009_GPT2/gpt2-from-scratch.ipynb)<br> -->
