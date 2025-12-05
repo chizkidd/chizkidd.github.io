@@ -60,6 +60,10 @@ future: true
 # # Navigation
 # header_pages:
 #   - about.md
+# in _config.yml under "header_pages" or "main_links"
+main_links:
+  - title: "Games"
+    url: /flappybird-game/
 
 # # Defaults
 # defaults:
@@ -69,5 +73,6 @@ future: true
 #     values:
 #       layout: "post"
 #       author: "Chizoba Obasi"
+
 
 
