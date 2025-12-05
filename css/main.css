@@ -10,9 +10,9 @@
 
 body {
   /* STICKY FOOTER FIX */
-  display: flex;
-  min-height: 200vh;
-  flex-direction: column;
+  /* display: flex; */
+  /* min-height: 200vh; */
+  /* flex-direction: column; */
   
   font-family: Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -81,6 +81,14 @@ a:visited { color: #205caa; }
 /* Site footer */
 
 .site-footer {
+  /* CRITICAL FIX: Locks the footer to the bottom of the viewport */
+  position: fixed;
+  bottom: 0; /* Pins it to the bottom edge */
+  left: 0;   /* Pins it to the left edge */
+  width: 100%; /* Ensures it spans the full width of the screen */
+  z-index: 100; /* Ensures it appears above other content */
+  background-color: #fdfdfd; /* Use the body background color for a seamless look */
+  
   border-top: 1px solid #e8e8e8;
   padding: 30px 0;
 }
@@ -141,9 +149,10 @@ a:visited { color: #205caa; }
 /* ----------------------------------------------------------*/
 
 .page-content {
-  flex-grow: 1; /* STICKY FOOTER FIX: tells content to expand and push the footer down */
+  /* flex-grow: 1; /* STICKY FOOTER FIX: tells content to expand and push the footer down */ */
   padding: 30px 0;
   background-color: #fff;
+  margin-bottom: 120px; /* Add margin to prevent content from hiding behind the fixed footer */
 }
 
 
