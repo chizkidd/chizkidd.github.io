@@ -58,9 +58,9 @@ future: true
 #       user_url: https://twitter.com/chizkidd
 
 # Navigation
-header_pages:
-    - games.md
-    - about.md
+# header_pages:
+#     - games.md
+#     - about.md
 
 # # Defaults
 # defaults:
@@ -70,6 +70,7 @@ header_pages:
 #     values:
 #       layout: "post"
 #       author: "Chizoba Obasi"
+
 
 
 
