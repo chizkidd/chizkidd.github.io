@@ -57,13 +57,10 @@ future: true
 #     - platform: twitter
 #       user_url: https://twitter.com/chizkidd
 
-# # Navigation
-# header_pages:
+# Navigation
+header_pages:
+    - flappybird-game/
 #   - about.md
-# in _config.yml under "header_pages" or "main_links"
-main_links:
-  - title: "Games"
-    url: /flappybird-game/
 
 # # Defaults
 # defaults:
@@ -73,6 +70,7 @@ main_links:
 #     values:
 #       layout: "post"
 #       author: "Chizoba Obasi"
+
 
 
 
