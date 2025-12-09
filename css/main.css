@@ -188,19 +188,6 @@ a:visited { color: #205caa; }
     border-bottom: none;
     margin-bottom: 40px;
 }
-.welcome-heading {
-    /* Large, attention-grabbing font size */
-    font-size: 3em;
-    /* Center the text for a balanced look */
-    text-align: center;
-    /* Add padding below and a subtle divider */
-    padding-bottom: 15px;
-    border-bottom: 3px solid #f0f0f0;
-    /* A bold color, maybe matching your main blog color */
-    /* color: #3f51b5; /* Example: Deep Indigo */ */
-    /* Add generous margin below to separate it from the links */
-    margin-bottom: 60px;
-}
 
 /* Posts Heading styles */
 /* ----------------------------------------------------------*/
@@ -211,6 +198,7 @@ a:visited { color: #205caa; }
     font-size: 26px; /* Match the size of the site title */
     letter-spacing: -1px; /* Match the site title */
     font-weight: 400; /* Match the general h1-h6 weight */
+    text-align: left; /* Ensure it's left-aligned */
     line-height: 1.2;
 
     /* REVISED: Keep the vertical spacing and visual separation */
@@ -233,6 +221,7 @@ a:visited { color: #205caa; }
     font-size: 26px; /* Match the size of the site title */
     letter-spacing: -1px; /* Match the site title */
     font-weight: 400; /* Match the general h1-h6 weight */
+    text-align: left; /* Ensure it's left-aligned */
     line-height: 1.2;
     
     /* REVISED: Keep the vertical spacing and visual separation */
