@@ -155,6 +155,61 @@ a:visited { color: #205caa; }
   margin-bottom: 120px; /* Add margin to prevent content from hiding behind the fixed footer */
 }
 
+/* Home Heading styles */
+/* ----------------------------------------------------------*/
+.welcome-heading {
+    /* Large, attention-grabbing font size */
+    font-size: 3em;
+    /* Center the text for a balanced look */
+    text-align: center;
+    /* Add padding below and a subtle divider */
+    padding-bottom: 15px;
+    border-bottom: 3px solid #f0f0f0;
+    /* A bold color, maybe matching your main blog color */
+    /* color: #3f51b5; /* Example: Deep Indigo */ */
+    /* Add generous margin below to separate it from the links */
+    margin-bottom: 60px;
+}
+
+/* Posts Heading styles */
+/* ----------------------------------------------------------*/
+
+.posts-heading {
+    /* Use a complementary color, perhaps blue or red, contrasting the Games green */
+    /* color: #FF5722; /* Example: Deep Orange */ */
+    /* Add a little space below the heading */
+    margin-bottom: 40px;
+    /* Maintain font size consistency with the Games page */
+    font-size: 2.2em;
+    /* A consistent divider style */
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+/* Style the icon */
+.posts-heading i {
+    margin-right: 15px;
+}
+
+/* Games Heading styles */
+/* ----------------------------------------------------------*/
+
+.games-heading {
+    /* Use a color that suits your blog's theme */
+    /* color: #4CAF50; /* A pleasant green, for example */ */
+    /* Add a little space below the heading */
+    margin-bottom: 40px;
+    /* You could increase the font size slightly if desired */
+    font-size: 2.2em;
+    /* Optional: A subtle underline effect */
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+/* Style the icon for visual separation */
+.games-heading i {
+    margin-right: 15px;
+}
 
 /* Home styles */
 /* ----------------------------------------------------------*/
