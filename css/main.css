@@ -185,8 +185,8 @@ a:visited { color: #205caa; }
     /* 1. Alignment: The .wrap container already adds the necessary padding.
           We just need to reset any default list padding. */
     padding-left: 20px; 
-    margin-top: 30px;
-    /* margin-bottom: 30px; */
+    /* margin-top: 30px; */
+    margin-bottom: 30px;
     
     /* 2. Visual Clean-up: Remove the default bullet points */
     list-style-type: disc; 
