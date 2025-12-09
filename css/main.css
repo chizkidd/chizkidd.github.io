@@ -184,17 +184,17 @@ a:visited { color: #205caa; }
 .home-nav-list {
     /* 1. Alignment: The .wrap container already adds the necessary padding.
           We just need to reset any default list padding. */
-    padding-left: 0; 
+    padding-left: 20px; 
     margin-top: 30px;
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */
     
     /* 2. Visual Clean-up: Remove the default bullet points */
-    list-style-type: none; 
+    list-style-type: disc; 
 }
 
 .home-nav-list li {
     /* Ensure there is enough vertical space between links */
-    margin-bottom: 15px;
+    margin-bottom: 5.5px;
 }
 
 .home-nav-list a {
