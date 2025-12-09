@@ -179,6 +179,40 @@ a:visited { color: #205caa; }
 }
 
 
+/* Home Navigation Links Styling (Minimalistic) */
+/* ----------------------------------------------------------*/
+.home-nav-list {
+    /* 1. Alignment: The .wrap container already adds the necessary padding.
+          We just need to reset any default list padding. */
+    padding-left: 0; 
+    margin-top: 30px;
+    margin-bottom: 30px;
+    
+    /* 2. Visual Clean-up: Remove the default bullet points */
+    list-style-type: none; 
+}
+
+.home-nav-list li {
+    /* Ensure there is enough vertical space between links */
+    margin-bottom: 15px;
+}
+
+.home-nav-list a {
+    /* Make the link text slightly larger and use the body's font weight 
+       for better readability as primary navigation links */
+    font-size: 1.1em;
+    font-weight: 400; /* Bolder than the default body text weight (300) */
+    
+    /* Ensure the link color is consistent with your existing link color */
+    color: #2a7ae2; 
+}
+
+.home-nav-list a:hover {
+    /* Maintain the default hover style */
+    color: #000;
+    text-decoration: underline;
+}
+
 /* Posts Heading styles */
 /* ----------------------------------------------------------*/
 
