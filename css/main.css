@@ -163,7 +163,7 @@ a:visited { color: #205caa; }
 .header-matched-heading {
     /* 1. Alignment & Font: Match the .site-title for size, weight, and color */
     color: #333;
-    font-size: 26px;
+    font-size: 20px;
     letter-spacing: -1px;
     font-weight: 400; /* Matching h1, h2, etc. definition */
     text-align: left; /* Ensure it's left-aligned */
@@ -171,11 +171,11 @@ a:visited { color: #205caa; }
 
     /* 2. Positioning: Use margins to create vertical space */
     margin-top: 20px;
-    margin-bottom: 20px; /* Generous space below the heading */
+    margin-bottom: 0px; /* Generous space below the heading */
     
     /* 3. Cleanup: Remove existing border styles from the old .welcome-heading */
-    border-bottom: 20px;
-    padding-bottom: 10px;
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 
@@ -185,7 +185,7 @@ a:visited { color: #205caa; }
 .posts-heading {
     /* NEW: Match the size, weight, and alignment of the header title */
     color: #333; /* Use the same text color as the site title */
-    font-size: 26px; /* Match the size of the site title */
+    font-size: 20px; /* Match the size of the site title */
     letter-spacing: -1px; /* Match the site title */
     font-weight: 400; /* Match the general h1-h6 weight */
     text-align: left; /* Ensure it's left-aligned */
@@ -204,7 +204,7 @@ a:visited { color: #205caa; }
 .games-heading {
     /* NEW: Match the size, weight, and alignment of the header title */
     color: #333; /* Use the same text color as the site title */
-    font-size: 26px; /* Match the size of the site title */
+    font-size: 20px; /* Match the size of the site title */
     letter-spacing: -1px; /* Match the site title */
     font-weight: 400; /* Match the general h1-h6 weight */
     text-align: left; /* Ensure it's left-aligned */
