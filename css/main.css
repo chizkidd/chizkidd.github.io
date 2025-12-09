@@ -155,8 +155,39 @@ a:visited { color: #205caa; }
   margin-bottom: 120px; /* Add margin to prevent content from hiding behind the fixed footer */
 }
 
+
 /* Home Heading styles */
 /* ----------------------------------------------------------*/
+
+/* NEW STYLE: Matches the "Chizoba Obasi blog" header */
+.header-matched-heading {
+    /* 1. Alignment & Font: Match the .site-title for size, weight, and color */
+    color: #333;
+    font-size: 26px;
+    letter-spacing: -1px;
+    font-weight: 400; /* Matching h1, h2, etc. definition */
+    text-align: left; /* Ensure it's left-aligned */
+    line-height: 1.2; /* A natural line height for a primary heading */
+
+    /* 2. Positioning: Use margins to create vertical space */
+    margin-top: 20px;
+    margin-bottom: 40px; /* Generous space below the heading */
+    
+    /* 3. Cleanup: Remove existing border styles from the old .welcome-heading */
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Update the old .welcome-heading class to inherit the new style */
+/* This ensures the HTML stays clean and only one style applies */
+.welcome-heading {
+    /* REMOVING/OVERRIDING OLD STYLES */
+    font-size: 100%; /* Resetting size */
+    text-align: inherit; /* Resetting alignment */
+    padding-bottom: 0;
+    border-bottom: none;
+    margin-bottom: 40px;
+}
 .welcome-heading {
     /* Large, attention-grabbing font size */
     font-size: 3em;
@@ -175,13 +206,15 @@ a:visited { color: #205caa; }
 /* ----------------------------------------------------------*/
 
 .posts-heading {
-    /* Use a complementary color, perhaps blue or red, contrasting the Games green */
-    /* color: #FF5722; /* Example: Deep Orange */ */
-    /* Add a little space below the heading */
+    /* NEW: Match the size, weight, and alignment of the header title */
+    color: #333; /* Use the same text color as the site title */
+    font-size: 26px; /* Match the size of the site title */
+    letter-spacing: -1px; /* Match the site title */
+    font-weight: 400; /* Match the general h1-h6 weight */
+    line-height: 1.2;
+
+    /* REVISED: Keep the vertical spacing and visual separation */
     margin-bottom: 40px;
-    /* Maintain font size consistency with the Games page */
-    font-size: 2.2em;
-    /* A consistent divider style */
     border-bottom: 2px solid #ddd;
     padding-bottom: 10px;
 }
@@ -195,13 +228,15 @@ a:visited { color: #205caa; }
 /* ----------------------------------------------------------*/
 
 .games-heading {
-    /* Use a color that suits your blog's theme */
-    /* color: #4CAF50; /* A pleasant green, for example */ */
-    /* Add a little space below the heading */
+    /* NEW: Match the size, weight, and alignment of the header title */
+    color: #333; /* Use the same text color as the site title */
+    font-size: 26px; /* Match the size of the site title */
+    letter-spacing: -1px; /* Match the site title */
+    font-weight: 400; /* Match the general h1-h6 weight */
+    line-height: 1.2;
+    
+    /* REVISED: Keep the vertical spacing and visual separation */
     margin-bottom: 40px;
-    /* You could increase the font size slightly if desired */
-    font-size: 2.2em;
-    /* Optional: A subtle underline effect */
     border-bottom: 2px solid #ddd;
     padding-bottom: 10px;
 }
