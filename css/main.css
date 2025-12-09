@@ -174,8 +174,8 @@ a:visited { color: #205caa; }
     margin-bottom: 20px; /* Generous space below the heading */
     
     /* 3. Cleanup: Remove existing border styles from the old .welcome-heading */
-    border-bottom: 1px;
-    padding-bottom: 0;
+    border-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 
@@ -197,10 +197,6 @@ a:visited { color: #205caa; }
     padding-bottom: 0.5px;
 }
 
-/* Style the icon */
-.posts-heading i {
-    margin-right: 15px;
-}
 
 /* Games Heading styles */
 /* ----------------------------------------------------------*/
@@ -220,10 +216,6 @@ a:visited { color: #205caa; }
     padding-bottom: 0.5px;
 }
 
-/* Style the icon for visual separation */
-.games-heading i {
-    margin-right: 15px;
-}
 
 /* Home styles */
 /* ----------------------------------------------------------*/
