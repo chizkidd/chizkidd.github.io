@@ -171,23 +171,13 @@ a:visited { color: #205caa; }
 
     /* 2. Positioning: Use margins to create vertical space */
     margin-top: 20px;
-    margin-bottom: 40px; /* Generous space below the heading */
+    margin-bottom: 20px; /* Generous space below the heading */
     
     /* 3. Cleanup: Remove existing border styles from the old .welcome-heading */
-    border-bottom: none;
+    border-bottom: 1px;
     padding-bottom: 0;
 }
 
-/* Update the old .welcome-heading class to inherit the new style */
-/* This ensures the HTML stays clean and only one style applies */
-.welcome-heading {
-    /* REMOVING/OVERRIDING OLD STYLES */
-    font-size: 100%; /* Resetting size */
-    text-align: inherit; /* Resetting alignment */
-    padding-bottom: 0;
-    border-bottom: none;
-    margin-bottom: 40px;
-}
 
 /* Posts Heading styles */
 /* ----------------------------------------------------------*/
@@ -203,8 +193,8 @@ a:visited { color: #205caa; }
 
     /* REVISED: Keep the vertical spacing and visual separation */
     margin-bottom: 40px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5px;
 }
 
 /* Style the icon */
@@ -226,8 +216,8 @@ a:visited { color: #205caa; }
     
     /* REVISED: Keep the vertical spacing and visual separation */
     margin-bottom: 40px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5px;
 }
 
 /* Style the icon for visual separation */
