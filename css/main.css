@@ -163,7 +163,7 @@ a:visited { color: #205caa; }
 .header-matched-heading {
     /* 1. Alignment & Font: Match the .site-title for size, weight, and color */
     color: #333;
-    font-size: 26px;
+    font-size: 24px;
     letter-spacing: -1px;
     font-weight: 400; /* Matching h1, h2, etc. definition */
     text-align: left; /* Ensure it's left-aligned */
@@ -200,8 +200,8 @@ a:visited { color: #205caa; }
 .home-nav-list a {
     /* Make the link text slightly larger and use the body's font weight 
        for better readability as primary navigation links */
-    font-size: 1.1em;
-    font-weight: 400; /* Bolder than the default body text weight (300) */
+    font-size: 1.0em;
+    font-weight: 300; /* Bolder than the default body text weight (300) */
     
     /* Ensure the link color is consistent with your existing link color */
     color: #2a7ae2; 
