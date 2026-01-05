@@ -14,6 +14,11 @@ body {
   line-height: 1.5;
   font-weight: 300;
   background-color: #fdfdfd;
+
+  /* GRID STICKY FOOTER */
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* Row 1: Header, Row 2: Content (Flexible), Row 3: Footer */
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 { font-size: 100%; font-weight: 400; }
