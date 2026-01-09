@@ -15,24 +15,24 @@ Backpropagation is a gradient-based optimization algorithm used to train artific
 
 ## Key Components
 
-- **Forward Pass**: Input data propagates through the network, undergoing transformations via weights, biases, and activation functions to produce a prediction.
-- **Loss Function**: Measures the error, such as mean squared error (MSE) for regression or cross-entropy for classification.
-- **Backward Pass**: Computes gradients of the loss with respect to each parameter, propagating errors backward from the output to the input layer. 
-- **Gradient Descent**: Updates parameters in the direction that reduces the loss, using a learning rate to control step size.
+- __Forward Pass__: Input data propagates through the network, undergoing transformations via weights, biases, and activation functions to produce a prediction.
+- __Loss Function__: Measures the error, such as mean squared error (MSE) for regression or cross-entropy for classification.
+- __Backward Pass__: Computes gradients of the loss with respect to each parameter, propagating errors backward from the output to the input layer. 
+- __Gradient Descent__: Updates parameters in the direction that reduces the loss, using a learning rate to control step size.
 
 ## Historical Context
 Backpropagation’s roots trace back to [Seppo Linnainmaa’s 1970 work](https://papers.baulab.info/papers/also/Linnainmaa-1976.pdf) on reverse-mode automatic differentiation, with significant contributions by [Paul Werbos (1982)](https://werbos.com/Neural/SensitivityIFIPSeptember1981.pdf) and the formalization by David E. Rumelhart, Geoffrey Hinton, and Ronald J. Williams in their 1986 paper, [“Learning representations by back-propagating errors.”](https://www.cs.utoronto.ca/~hinton/absps/naturebp.pdf) Its adoption in the 1980s, coupled with GPU advancements in the 2010s, revolutionized deep learning, enabling applications in computer vision, natural language processing, and more.
 
 ## How Backpropagation Works
 Backpropagation operates in a series of well-defined steps:
-1. **Forward Pass**
+1. __Forward Pass__
 
     - Input data ( $x$ ) is fed into the network.
     - For each layer ( $l$ ), the weighted input ( $z^l = W^l a^{l-1} + b^l$ ) is computed, where ( $W^l$ ) is the weight matrix, ( $b^l$ ) is the bias vector, and ( $a^{l-1}$ ) is the activation from the previous layer.
     - An activation function ( $f^l$ ) (e.g., sigmoid, ReLU) is applied: ( $a^l = f^l(z^l)$ ).
     - This continues until the output layer produces a prediction ( $a^L$ ).
 
-2. **Compute the Loss**
+2. __Compute the Loss__
 
     - The loss function ( $C$ ) quantifies the error. 
     - For regression, MSE is common:
@@ -49,7 +49,7 @@ Backpropagation operates in a series of well-defined steps:
 
     where ( $y_i$ ) is the true label and ( $\hat{y}_i$ ) is the predicted output.
 
-3. **Backward Pass (Gradient Computation)**
+3. __Backward Pass (Gradient Computation)__
 
     - <u>Chain Rule</u>: Gradients are computed using the chain rule. For a weight ($w_{ij}^l$), the gradient is:
 
@@ -76,7 +76,7 @@ Backpropagation operates in a series of well-defined steps:
         \frac{\partial C}{\partial W^l} = \delta^l (a^{l-1})^T, \quad \frac{\partial C}{\partial b^l} = \delta^l
         $$
 
-4. **Update Parameters**
+4. __Update Parameters__
 
     - Parameters are updated using gradient descent:
 
@@ -86,7 +86,7 @@ Backpropagation operates in a series of well-defined steps:
 
         where ( $\eta$ ) is the learning rate.
 
-5. **Iterate**
+5. __Iterate__
 
     - The process repeats for multiple epochs until the loss converges or a stopping criterion is met.
 
@@ -99,7 +99,7 @@ $$
 
 The loss function ( $C$ ) depends on the output ( $a^L$ ) and true labels ( $y$ ). The goal is to compute ( $\frac{\partial C}{\partial W^l}$ ) and ( $\frac{\partial C}{\partial b^l}$ ).
 
-* **Output Layer**: The error term is:
+* __Output Layer__: The error term is:
 
 $$
 \delta^L = \frac{\partial C}{\partial a^L} \odot f'^L(z^L)
@@ -111,7 +111,7 @@ $$
 \frac{\partial C}{\partial W^L} = \delta^L (a^{L-1})^T, \quad \frac{\partial C}{\partial b^L} = \delta^L
 $$
 
-* **Hidden Layers**: The error term is:
+* __Hidden Layers__: The error term is:
 
 $$
 \delta^l = ((W^{l+1})^T \delta^{l+1}) \odot f'^l(z^l)
@@ -130,10 +130,10 @@ This recursive computation leverages dynamic programming to avoid redundant calc
 
 ### Network Configuration
 
-* **Input:** $x = [0.05, 0.10]$
-* **Hidden Layer:** 2 neurons with sigmoid activation
-* **Output Layer:** 1 neuron with sigmoid activation
-* **True Output:** $y = 0.01$
+* __Input:__ $x = [0.05, 0.10]$
+* __Hidden Layer:__ 2 neurons with sigmoid activation
+* __Output Layer:__ 1 neuron with sigmoid activation
+* __True Output:__ $y = 0.01$
 
 ### Initial Parameters
 
@@ -355,9 +355,9 @@ This code demonstrates backpropagation for the XOR problem, achieving significan
 
 ## Why is Backpropagation Important?
 
-- **Efficiency**: Leverages the chain rule and dynamic programming to compute gradients efficiently.
-- **Scalability**: Supports training of deep networks with millions of parameters.
-- **Flexibility**: Compatible with various architectures (e.g., CNNs, RNNs) and loss functions.
+- __Efficiency:__ Leverages the chain rule and dynamic programming to compute gradients efficiently.
+- __Scalability:__ Supports training of deep networks with millions of parameters.
+- __Flexibility:__ Compatible with various architectures (e.g., CNNs, RNNs) and loss functions.
 
 ## Challenges and Solutions
 Backpropagation faces several challenges, with modern solutions to address them:
