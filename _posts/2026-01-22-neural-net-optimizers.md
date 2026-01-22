@@ -171,7 +171,7 @@ $$w_t = w_{t-1} - \eta \bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \l
 
 | Method | Working Mechanism | Pros | Cons | Improvement Over Prior Method |
 |--------|-------------------|------|------|-------------------------------|
-| **SGD** | Updates weights using gradients calculated on mini-batches. $w_t = w_{t-1} - \eta\nabla f(w_{t-1})$ | Simple, computationally efficient | Oscillates, slow convergence, fixed learning rate | N/A |
+| **SGD** | Updates weights using gradients calculated on mini-batches. $w_t = w_{t-1} - \eta\nabla f(w_{t-1})$ | Simple, computationally efficient | Oscillates, slow convergence, fixed learning rate | - |
 | **Momentum** | Accumulates gradients to build momentum for smoother updates. $v_t = \beta v_{t-1} - \eta\nabla f(w_{t-1})$, $w_t = w_{t-1} + v_t$ | Speeds up convergence, reduces oscillations | May overshoot, lacks anticipation of future gradients | Reduces oscillations and improves convergence speed |
 | **Nesterov** | Looks ahead to compute gradients at a projected future position. $v_t = \beta v_{t-1} - \eta\nabla f(w_{t-1} + \beta v_{t-1})$, $w_t = w_{t-1} + v_t$ | More precise updates, faster convergence | Slightly more computationally expensive | Anticipates future gradient directions |
 | **AdaGrad** | Adjusts learning rates based on accumulated squared gradients. $w_t = w_{t-1} - \frac{\eta}{\sqrt{G_t + \epsilon}}g_t$, $G_t = \sum g_i^2$ | Adapts learning rates, good for sparse gradients | Learning rate diminishes too quickly, potential underfitting | Introduces adaptive learning rates for sparse features |
@@ -185,19 +185,19 @@ $$w_t = w_{t-1} - \eta \bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \l
 
 | Method | Hyperparameter | Meaning | Typical Values | Tuning Suggestions |
 |--------|----------------|---------|----------------|-------------------|
-| **SGD** | Learning rate (η) | Step size for updating weights | 0.01 to 0.1 | Start with a smaller value and adjust based on convergence |
-| **Momentum** | Momentum coefficient (β) | Controls the contribution of past gradients to the current update | 0.9 | Keep fixed at 0.9 or tune slightly |
-| **Nesterov** | Momentum coefficient (β) | Same as Momentum, with anticipation of future gradients | 0.9 | Same as Momentum |
-| **AdaGrad** | Learning rate (η) | Base learning rate scaled by the inverse square root of accumulated squared gradients | 0.01 | Lower than SGD learning rates to avoid overshooting |
-| **RMSProp** | Learning rate (η) | Similar to AdaGrad, with smoothing via an exponential moving average | 0.001 to 0.01 | Tune for stability based on loss |
-| | Decay rate (β) | Smoothing parameter for the moving average of squared gradients | 0.9 | Commonly fixed at 0.9 |
-| **Adam** | Learning rate (η) | Base learning rate for parameter updates | 0.001 | Often works well without much tuning |
-| | β₁ | Decay rate for the first moment (mean of gradients) | 0.9 | Usually fixed |
-| | β₂ | Decay rate for the second moment (variance of gradients) | 0.999 | Keep fixed or tune slightly for sensitivity |
-| | ε | Small value to avoid division by zero | 10⁻⁷ or smaller | Rarely changed |
-| **AdamW** | Learning rate (η) | Same as Adam | 0.001 | Same as Adam |
-| | β₁, β₂, ε | Same as Adam | 0.9, 0.999, 10⁻⁷ | Same as Adam |
-| | Weight decay (λ) | Regularization parameter to control overfitting by penalizing large weights | 10⁻⁴ to 10⁻² | Start small and increase if overfitting is observed |
+| **SGD** | Learning rate ($\eta$) | Step size for updating weights | 0.01 to 0.1 | Start with a smaller value and adjust based on convergence |
+| **Momentum** | Momentum coefficient ($\beta$) | Controls the contribution of past gradients to the current update | 0.9 | Keep fixed at 0.9 or tune slightly |
+| **Nesterov** | Momentum coefficient ($\beta$) | Same as Momentum, with anticipation of future gradients | 0.9 | Same as Momentum |
+| **AdaGrad** | Learning rate ($\eta$) | Base learning rate scaled by the inverse square root of accumulated squared gradients | 0.01 | Lower than SGD learning rates to avoid overshooting |
+| **RMSProp** | Learning rate ($\eta$) | Similar to AdaGrad, with smoothing via an exponential moving average | 0.001 to 0.01 | Tune for stability based on loss |
+| | Decay rate ($\beta$) | Smoothing parameter for the moving average of squared gradients | 0.9 | Commonly fixed at 0.9 |
+| **Adam** | Learning rate ($\eta$) | Base learning rate for parameter updates | 0.001 | Often works well without much tuning |
+| | $\beta_1$ | Decay rate for the first moment (mean of gradients) | 0.9 | Usually fixed |
+| | $\beta_2$ | Decay rate for the second moment (variance of gradients) | 0.999 | Keep fixed or tune slightly for sensitivity |
+| | $\epsilon$ | Small value to avoid division by zero | $10^{-7}$ or smaller | Rarely changed |
+| **AdamW** | Learning rate ($\eta$) | Same as Adam | 0.001 | Same as Adam |
+| | $\beta_1$, $\beta_1$, $\epsilon$ | Same as Adam | 0.9, 0.999, $10^{-7}$ | Same as Adam |
+| | Weight decay ($\lambda$) | Regularization parameter to control overfitting by penalizing large weights | $10^{-4}$ to $10^{-2}$ | Start small and increase if overfitting is observed |
 
 ---
 
