@@ -71,7 +71,7 @@ $$w_t = w_{t-1} + v_t$$
 
 **How It Works:** Looks ahead by computing gradients at the projected position.
 
-$$v_t = \beta v_{t-1} - \eta \nabla f(w_{t-1} + \beta v_{t-1})$$
+$$v_t = \beta v_{t-1} - \eta \nabla f(w_{t-1} + \beta v_{t-1})$$<br>
 $$w_t = w_{t-1} + v_t$$
 
 **Pros:**
@@ -125,14 +125,14 @@ $$w_t = w_{t-1} - \frac{\eta}{\sqrt{v_t + \epsilon}} \nabla f(w_{t-1})$$
 
 **How It Works:** Combines Momentum (first moment) and RMSProp (second moment).
 
-- Update rules:
+- Update rules:<br>
 $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla f(w_{t-1})$$<br>
 $$v_t = \beta_2 v_{t-1} + (1 - \beta_2)(\nabla f(w_{t-1}))^2$$
 
-- Bias corrections:
+- Bias corrections:<br>
 $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
 
-- Update step:
+- Update step:<br>
 $$w_t = w_{t-1} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$$
 
 **Pros:**
