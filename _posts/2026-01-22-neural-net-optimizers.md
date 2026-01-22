@@ -18,11 +18,8 @@ In this guide, we'll explore seven key optimization techniques—SGD, Momentum, 
 
 ## 1. Stochastic Gradient Descent (SGD)
 
-**How It Works:**
+**How It Works:** Updates weights by calculating gradients using a small batch of data.
 
-Updates weights by calculating gradients using a small batch of data.
-
-Update rule: 
 $$w_t = w_{t-1} - \eta \nabla f(w_{t-1})$$
 
 **Pros:**
@@ -37,11 +34,8 @@ $$w_t = w_{t-1} - \eta \nabla f(w_{t-1})$$
 
 ## 2. Momentum
 
-**How It Works:**
+**How It Works:** Accumulates gradients to build momentum in directions with consistent gradients.
 
-Accumulates gradients to build momentum in directions with consistent gradients.
-
-Update rules:
 $$v_t = \beta v_{t-1} - \eta \nabla f(w_{t-1})$$
 $$w_t = w_{t-1} + v_t$$
 
@@ -53,19 +47,14 @@ $$w_t = w_{t-1} + v_t$$
 - Still overshoots if the learning rate is too high
 - Cannot predict future gradient directions
 
-**Improvement Over SGD:**
-
-Addresses oscillation and slow convergence by incorporating past gradients.
+**Improvement Over SGD:** Addresses oscillation and slow convergence by incorporating past gradients.
 
 ---
 
 ## 3. Nesterov Momentum
 
-**How It Works:**
+**How It Works:** Looks ahead by computing gradients at the projected position.
 
-Looks ahead by computing gradients at the projected position.
-
-Update rules:
 $$v_t = \beta v_{t-1} - \eta \nabla f(w_{t-1} + \beta v_{t-1})$$
 $$w_t = w_{t-1} + v_t$$
 
@@ -76,20 +65,15 @@ $$w_t = w_{t-1} + v_t$$
 **Cons:**
 - Slightly more computationally expensive due to gradient computation at the lookahead point
 
-**Improvement Over Momentum:**
-
-Anticipates future gradient directions, resulting in better convergence.
+**Improvement Over Momentum:** Anticipates future gradient directions, resulting in better convergence.
 
 ---
 
 ## 4. AdaGrad
 
-**How It Works:**
+**How It Works:** Adjusts the learning rate for each parameter based on the magnitude of past gradients.
 
-Adjusts the learning rate for each parameter based on the magnitude of past gradients.
-
-Update rules:
-$$g_t = \nabla f(w_{t-1})$$
+$$g_t = \nabla f(w_{t-1})$$<br>
 $$w_t = w_{t-1} - \frac{\eta}{\sqrt{G_t + \epsilon}} g_t, \quad G_t = \sum_{i=1}^t g_i^2$$
 
 **Pros:**
@@ -99,20 +83,15 @@ $$w_t = w_{t-1} - \frac{\eta}{\sqrt{G_t + \epsilon}} g_t, \quad G_t = \sum_{i=1}
 **Cons:**
 - Learning rate diminishes too quickly due to cumulative gradient sum, leading to potential underfitting
 
-**Improvement Over Nesterov Momentum:**
-
-Introduces adaptive learning rates to handle sparse gradients.
+**Improvement Over Nesterov Momentum:** Introduces adaptive learning rates to handle sparse gradients.
 
 ---
 
 ## 5. RMSProp
 
-**How It Works:**
+**How It Works:** Modifies AdaGrad by using an exponentially weighted moving average of past squared gradients instead of a cumulative sum.
 
-Modifies AdaGrad by using an exponentially weighted moving average of past squared gradients instead of a cumulative sum.
-
-Update rules:
-$$v_t = \beta v_{t-1} + (1 - \beta)(\nabla f(w_{t-1}))^2$$
+$$v_t = \beta v_{t-1} + (1 - \beta)(\nabla f(w_{t-1}))^2$$<br>
 $$w_t = w_{t-1} - \frac{\eta}{\sqrt{v_t + \epsilon}} \nabla f(w_{t-1})$$
 
 **Pros:**
@@ -122,26 +101,22 @@ $$w_t = w_{t-1} - \frac{\eta}{\sqrt{v_t + \epsilon}} \nabla f(w_{t-1})$$
 **Cons:**
 - Sensitive to hyperparameter choices (e.g., β)
 
-**Improvement Over AdaGrad:**
-
-Stabilizes learning rates by introducing an exponentially weighted average of squared gradients.
+**Improvement Over AdaGrad:** Stabilizes learning rates by introducing an exponentially weighted average of squared gradients.
 
 ---
 
 ## 6. Adam (Adaptive Moment Estimation)
 
-**How It Works:**
+**How It Works:** Combines Momentum (first moment) and RMSProp (second moment).
 
-Combines Momentum (first moment) and RMSProp (second moment).
-
-Update rules:
-$$m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla f(w_{t-1})$$
+- Update rules:
+$$m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla f(w_{t-1})$$<br>
 $$v_t = \beta_2 v_{t-1} + (1 - \beta_2)(\nabla f(w_{t-1}))^2$$
 
-Bias corrections:
+- Bias corrections:
 $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
 
-Update step:
+- Update step:
 $$w_t = w_{t-1} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$$
 
 **Pros:**
@@ -153,9 +128,7 @@ $$w_t = w_{t-1} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$$
 - May converge to suboptimal solutions in some scenarios (e.g., small datasets or high regularization)
 - Hyperparameter tuning can be challenging
 
-**Improvement Over RMSProp:**
-
-Adds momentum and bias correction to handle noisy gradients and early instability.
+**Improvement Over RMSProp:** Adds momentum and bias correction to handle noisy gradients and early instability.
 
 ---
 
@@ -165,7 +138,6 @@ Adds momentum and bias correction to handle noisy gradients and early instabilit
 
 Decouples weight decay from the gradient update to improve generalization.
 
-Update rule:
 $$w_t = w_{t-1} - \eta \bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda w_{t-1} \bigg)$$
 
 **Pros:**
@@ -175,9 +147,7 @@ $$w_t = w_{t-1} - \eta \bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \l
 **Cons:**
 - Still requires careful hyperparameter tuning
 
-**Improvement Over Adam:**
-
-Decouples weight decay from gradient updates, improving generalization performance.
+**Improvement Over Adam:** Decouples weight decay from gradient updates, improving generalization performance.
 
 ---
 
