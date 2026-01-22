@@ -542,3 +542,28 @@ a:visited { color: #205caa; }
     margin: 0 0 15px; }
 
 }
+
+/* --- TABLE STYLES --- */
+
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 15px;
+}
+
+.post-content th, 
+.post-content td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.post-content th {
+  background-color: #f8f8f8;
+  font-weight: bold;
+}
+
+.post-content tr:nth-child(even) {
+  background-color: #fafafa;
+}
