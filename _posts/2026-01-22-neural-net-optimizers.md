@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "A Complete Guide to Neural Network Optimizers: From SGD to AdamW"
+title: "A Complete Guide to Neural Network Optimizers"
 excerpt: A highly technical yet understandable exploration of various neural network optimization algorithms.
 date: 2026-01-22
 mathjax: true
