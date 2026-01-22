@@ -68,8 +68,10 @@ future: true
 #       path: ""
 #       type: "posts"
 #     values:
+#       comments: true
 #       layout: "post"
 #       author: "Chizoba Obasi"
+
 
 
 
