@@ -7,7 +7,6 @@ date: 2026-01-22
 mathjax: true
 ---
 
-# A Complete Guide to Neural Network Optimizers: From SGD to AdamW
 
 Training neural networks is fundamentally an optimization problem: we're searching for the best set of weights that minimize our loss function. While the concept sounds straightforward, the path from random initialization to a well-trained model is rarely a smooth descent. The landscape of loss functions in high-dimensional spaces is filled with valleys, plateaus, and saddle points that can trap or slow down naive optimization approaches.
 
@@ -206,7 +205,7 @@ Decouples weight decay from gradient updates, improving generalization performan
 | **AdaGrad** | Adjusts learning rates based on accumulated squared gradients. $w_t = w_{t-1} - \frac{\eta}{\sqrt{G_t + \epsilon}}g_t$, $G_t = \sum g_i^2$ | Adapts learning rates, good for sparse gradients | Learning rate diminishes too quickly, potential underfitting | Introduces adaptive learning rates for sparse features |
 | **RMSProp** | Uses exponentially weighted moving averages of squared gradients. $v_t = \beta v_{t-1} + (1-\beta)g_t^2$, $w_t = w_{t-1} - \frac{\eta}{\sqrt{v_t + \epsilon}}g_t$ | Prevents learning rate decay, handles non-stationary objectives | Sensitive to hyperparameters (e.g., β) | Stabilizes learning rates using moving averages |
 | **Adam** | Combines Momentum (1st moment) and RMSProp (2nd moment) with bias correction. | Fast convergence, handles noisy gradients | May converge to suboptimal minima in some cases | Combines momentum and adaptive learning rates |
-| **AdamW** | Decouples weight decay from gradient updates. $w_t = w_{t-1} - \eta[\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda w_{t-1}]$ | Better generalization, retains Adam's benefits | Requires tuning of decay parameter | Improves generalization by decoupling weight decay |
+| **AdamW** | Decouples weight decay from gradient updates. $w_t = w_{t-1} - \eta[\frac{\hat{m}\_t}{\sqrt{\hat{v}\_t} + \epsilon} + \lambda w_{t-1}]$ | Better generalization, retains Adam's benefits | Requires tuning of decay parameter | Improves generalization by decoupling weight decay |
 
 ---
 
