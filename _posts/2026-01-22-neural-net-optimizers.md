@@ -127,10 +127,10 @@ $$w_t = w_{t-1} - \frac{\eta}{\sqrt{v_t + \epsilon}} \nabla f(w_{t-1})$$
 
 - Update rules:<br>
 $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla f(w_{t-1})$$<br>
-$$v_t = \beta_2 v_{t-1} + (1 - \beta_2)(\nabla f(w_{t-1}))^2$$
+$$v_t = \beta_2 v_{t-1} + (1 - \beta_2)(\nabla f(w_{t-1}))^2$$<br>
 
 - Bias corrections:<br>
-$$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
+$$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$<br>
 
 - Update step:<br>
 $$w_t = w_{t-1} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$$
