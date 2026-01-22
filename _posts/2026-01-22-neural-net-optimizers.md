@@ -16,6 +16,22 @@ In this guide, we'll explore seven key optimization techniques—SGD, Momentum, 
 
 ---
 
+## Quick Reference: Optimizer Comparison
+
+| Optimizer | Key Feature | Solves Issue in | Pros | Cons |
+|-----------|-------------|-----------------|------|------|
+| SGD | Simple gradient descent | N/A | Easy to implement | Oscillation, fixed learning rate |
+| Momentum | Gradient accumulation | SGD | Reduces oscillations | No anticipation of future trends |
+| Nesterov | Lookahead gradients | Momentum | Better convergence | Slightly higher computation |
+| AdaGrad | Adaptive learning rates | Nesterov | Handles sparse gradients | Learning rate decays too fast |
+| RMSProp | Smoothed adaptive learning rates | AdaGrad | Stabilizes learning rates | Sensitive to hyperparameters |
+| Adam | Momentum + RMSProp | RMSProp | Combines best features | May converge to suboptimal minima |
+| AdamW | Decoupled weight decay | Adam | Better generalization | Requires tuning decay parameter |
+
+
+---
+
+
 ## 1. Stochastic Gradient Descent (SGD)
 
 **How It Works:** Updates weights by calculating gradients using a small batch of data.
@@ -36,7 +52,7 @@ $$w_t = w_{t-1} - \eta \nabla f(w_{t-1})$$
 
 **How It Works:** Accumulates gradients to build momentum in directions with consistent gradients.
 
-$$v_t = \beta v_{t-1} - \eta \nabla f(w_{t-1})$$
+$$v_t = \beta v_{t-1} - \eta \nabla f(w_{t-1})$$<br>
 $$w_t = w_{t-1} + v_t$$
 
 **Pros:**
@@ -148,20 +164,6 @@ $$w_t = w_{t-1} - \eta \bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \l
 - Still requires careful hyperparameter tuning
 
 **Improvement Over Adam:** Decouples weight decay from gradient updates, improving generalization performance.
-
----
-
-## Quick Reference: Optimizer Comparison
-
-| Optimizer | Key Feature | Solves Issue in | Pros | Cons |
-|-----------|-------------|-----------------|------|------|
-| SGD | Simple gradient descent | N/A | Easy to implement | Oscillation, fixed learning rate |
-| Momentum | Gradient accumulation | SGD | Reduces oscillations | No anticipation of future trends |
-| Nesterov | Lookahead gradients | Momentum | Better convergence | Slightly higher computation |
-| AdaGrad | Adaptive learning rates | Nesterov | Handles sparse gradients | Learning rate decays too fast |
-| RMSProp | Smoothed adaptive learning rates | AdaGrad | Stabilizes learning rates | Sensitive to hyperparameters |
-| Adam | Momentum + RMSProp | RMSProp | Combines best features | May converge to suboptimal minima |
-| AdamW | Decoupled weight decay | Adam | Better generalization | Requires tuning decay parameter |
 
 ---
 
