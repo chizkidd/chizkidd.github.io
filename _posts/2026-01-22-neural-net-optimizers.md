@@ -12,7 +12,7 @@ Training neural networks is fundamentally an optimization problem: we're searchi
 
 This is where optimization algorithms come in. Over the years, researchers have developed increasingly sophisticated methods to navigate these challenging landscapes more efficiently. Each optimizer builds upon the limitations of its predecessors, introducing new mechanisms to accelerate convergence, handle sparse gradients, or adapt to different learning scenarios.
 
-In this guide, we'll explore seven key optimization techniques—SGD, Momentum, Nesterov Momentum, AdaGrad, RMSProp, Adam, and AdamW—examining how each one works, what problems it solves, and when you might want to use it.
+In this guide, we'll explore seven key optimization techniques: SGD, Momentum, Nesterov Momentum, AdaGrad, RMSProp, Adam, and AdamW. We'll examine how each one works, what problems it solves, and when you might want to use it.
 
 ---
 
@@ -211,4 +211,4 @@ However, don't overlook the classics. **SGD with Momentum** remains highly compe
 
 The key takeaway is that optimizer selection should be guided by your problem's characteristics: dataset size, gradient sparsity, computational budget, and generalization requirements. Start with a well-established baseline (Adam is usually a safe bet), monitor your training dynamics, and don't hesitate to experiment with alternatives if you're not seeing the convergence behavior you expect.
 
-As the field continues to evolve, new optimizers and variants will undoubtedly emerge. But the fundamental principles underlying these seven methods—managing learning rates, leveraging momentum, and adapting to gradient statistics—will remain central to training neural networks effectively.
+As the field continues to evolve, new optimizers and variants will undoubtedly emerge. But the fundamental principles underlying these seven methods: managing learning rates, leveraging momentum, and adapting to gradient statistics, will remain central to training neural networks effectively.
