@@ -69,13 +69,13 @@ graph TD
     Q2 -->|< 1B parameters| Adam1["<b><font size=5>AdamW</font></b><br/>LR=3e-4<br/>"]
     Q2 -->|> 1B parameters| Q4{Can implement<br/>hybrid setup?}
     
-    Q4 -->|Yes| Muon1["<b><font size=5>Muon + AdamW*</font></b><br/>"]
+    Q4 -->|Yes| Muon1["<b><font size=5>Muon + AdamW</font></b><br/>"]
     Q4 -->|No| Adam1
     
     Q3 -->|Speed/Prototyping| Adam2["<b><font size=5>Adam</font></b><br/>LR=0.001<br/>"]
     Q3 -->|Best Final Accuracy| Q5{Can tune learning<br/>rate schedule?}
     
-    Q5 -->|Yes| SGD1["<b><font size=5>SGD + Momentum*</font></b><br/>LR=0.01 to 0.1, momentum=0.9<br/>+ Cosine/Step schedule<br/>"]
+    Q5 -->|Yes| SGD1["<b><font size=5>SGD + Momentum</font></b><br/>LR=0.01 to 0.1, momentum=0.9<br/>+ Cosine/Step schedule<br/>"]
     Q5 -->|No| Adam2
     
     style Start fill:#4a90e2,color:#fff
@@ -92,8 +92,8 @@ graph TD
 
 **Key for Flowchart:**
 - **Blue-filled**: Starting point and decision questions
-- **Green Border**: Recommended safe defaults (Adam/AdamW)
-- **Orange Border**: Advanced options with higher payoff (Muon, SGD+schedule)
+- **Green Border**: Recommended safe defaults, works well out-of-the-box 
+- **Orange Border**: Advanced options with higher payoff but more tuning
 
 
 ### Detailed Guidance
