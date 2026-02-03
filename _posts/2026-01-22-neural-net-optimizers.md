@@ -357,6 +357,7 @@ optimizer = MuonWithAuxAdam(param_groups)
 | **Adam** | Combines Momentum (1st moment) and RMSProp (2nd moment) with bias correction. $w_t = w_{t-1} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$ | Fast convergence, handles noisy gradients | May converge to suboptimal minima in some cases | Combines momentum and adaptive learning rates |
 | **AdamW** | Decouples weight decay from gradient updates. $w_t = w_{t-1} - \eta[\frac{\hat{m}\_t}{\sqrt{\hat{v}\_t} + \epsilon} + \lambda w_{t-1}]$ | Better generalization, retains Adam's benefits | Requires tuning of decay parameter | Improves generalization by decoupling weight decay |
 | **Muon** | Orthogonalizes gradients of weight matrices using Newton-Schulz iteration, then applies Newton-Schulz polynomial to normalize $V_t$. $V_t = \mu V_{t-1} + G_t$, $W_t = W_{t-1} - \eta \cdot \text{NS}(V_t) - \lambda W_{t-1}$ | Fast convergence, memory efficient, automatic LR transfer across model sizes | Only for 2D parameters, requires hybrid approach with AdamW | Leverages matrix geometry for better conditioning and faster training |
+
 ---
 
 ## Hyperparameter Reference
@@ -382,6 +383,7 @@ optimizer = MuonWithAuxAdam(param_groups)
 | | Nesterov | Whether to use Nesterov momentum | True | Typically enabled |
 | | NS coefficients $(a,b,c)$ | Newton-Schulz polynomial coefficients | (3.4445, -4.775, 2.0315) | Rarely changed, but can be tuned for specific architectures |
 | | **For non-2D params** | Use AdamW with standard settings | $\eta$ = 3e-4, $\beta_1$ = 0.9, $\beta_2$ = 0.95 | Keep separate learning rate for embeddings/biases |
+
 ---
 
 
@@ -469,11 +471,11 @@ optimizer = optim.AdamW([
 ```
 
 ### 9. Misunderstanding Momentum Hyperparameters
-**Problem:** Using β1=0.9 for both Adam and SGD without understanding the difference.
+**Problem:** Using $\beta_1 = 0.9$ for both Adam and SGD without understanding the difference.
 
 **Key Insight:** 
 - SGD Momentum: 0.9 is standard
-- Adam β1: 0.9 is standard
+- Adam $\beta_1$ : 0.9 is standard
 - But they behave differently! Adam's momentum is applied to normalized gradients.
 
 ### 10. Not Validating Optimizer Setup
