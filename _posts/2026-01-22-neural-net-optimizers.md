@@ -58,7 +58,7 @@ In this guide, we'll explore eight key optimization techniques: SGD, Momentum, N
 ## When to Use Which Optimizer
 
 The flowchart below will help you quickly choose the right optimizer for your task:
-```mermaid
+<div class="mermaid">
 graph TD
     Start([Choose Your Optimizer]) --> Q1{What are you training?}
     
@@ -88,7 +88,7 @@ graph TD
     classDef question fill:#e8f4f8,stroke:#4a90e2,stroke-width:2px
     
     class Q1,Q2,Q3,Q4,Q5 question
-```
+</div>
 
 **Key for Flowchart:**
 - **Blue-filled**: Starting point and decision questions
