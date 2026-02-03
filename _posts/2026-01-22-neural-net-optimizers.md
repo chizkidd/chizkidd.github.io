@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "A Complete Guide to Neural Network Optimizers"
-excerpt: A highly technical yet understandable exploration of various neural network optimization algorithms.
+excerpt: From SGD to Muon, explore how each optimizer builds on its predecessors to solve gradient descent challenges in deep learning.
 date: 2026-01-22
 mathjax: true
 ---
