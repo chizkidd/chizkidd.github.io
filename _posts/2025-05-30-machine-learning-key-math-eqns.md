@@ -179,10 +179,10 @@ print(f"CE - H = {ce - h:.4f} (should equal KL)")
 **Equation:** 
 
 $$
-P(A|B) = \frac{P(B|A) P(A)}{P(B)}
+P(A\|B) = \frac{P(B\|A) P(A)}{P(B)}
 $$
 
-**What it means:** Update beliefs about $A$ given evidence $B$. The prior $P(A)$ becomes the posterior $P(A|B)$ after observing $B$.
+**What it means:** Update beliefs about $A$ given evidence $B$. The prior $P(A)$ becomes the posterior $P(A\|B)$ after observing $B$.
 
 **Why it matters:** This is how you should update probabilities when you get new information. Most famously used in spam filters and medical diagnosis.
 
