@@ -307,9 +307,7 @@ $$
 
 **What it means:** This gives the exact solution to linear regression in one step, without iteration. It's the derivative of the MSE loss set to zero and solved algebraically.
 
-**Why it matters:** This is the analytical solution that gradient descent approximates. The term $(X^T X)^{-1} X^T$ is called the Moore-Penrose pseudoinverse.  In practice, gradient descent or regularization (Ridge: add $\lambda I$ to $X^T X$) is preferred for large datasets (computing the inverse is expensive, $O(n^3)$), but this equation reveals the underlying linear algebra structure. For small datasets (< 10,000 samples) with few features, this is often faster and gives the exact solution.
-
-**When to use it:** Small datasets (< 10,000 samples) with few features where $(X^T X)$ is invertible. For larger problems or when $X^T X$ is singular, use gradient descent or regularized versions (Ridge: add $\lambda I$ to $X^T X$).
+**Why it matters:** This is the analytical solution that gradient descent approximates. The term $(X^T X)^{-1} X^T$ is called the Moore-Penrose pseudoinverse.  In practice, gradient descent or ridge regularization, $(X^T X + \lambda I)^{-1} X^T y$, is preferred for large datasets (computing the inverse is expensive, $O(n^3)$), but this equation reveals the underlying linear algebra structure. For small datasets (< 10,000 samples) with few features where $(X^T X)$ is invertible, this is often faster and gives the exact solution.
 
 **Implementation:**
 
