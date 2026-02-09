@@ -1,112 +1,64 @@
 ---
 layout: post
 comments: true
-title: "The Most Important Machine Learning Equations: A Comprehensive Guide"
-excerpt: A comprehensive guide to the most critical machine learning mathematical equations, from probability theory to advanced concepts like diffusion models and attention mechanisms. It includes theoretical explanations and practical Python implementations.  
+title: "Essential Machine Learning Equations: A Reference Guide"
+excerpt: A reference guide to fundamental machine learning equations with correct implementations and clear explanations of how they connect to each other.
 date: 2025-05-30
 mathjax: true
 ---
 
-## Motivation
-Machine learning (ML) is a powerful field driven by mathematics. Whether you're building models, optimizing algorithms, or simply trying to understand how ML works under the hood, mastering the core equations is essential. This blog post is designed to be your go-to resource, covering the most critical and "mind-breaking" ML equations—enough to grasp most of the core math behind ML. Each section includes theoretical insights, the equations themselves, and practical implementations in Python, so you can see the math in action.
+## Why This Guide Exists
 
-This guide is for anyone with a basic background in math and programming who wants to deepen their understanding of ML and is inspired by this [tweet from @goyal__pramod](https://x.com/goyal__pramod/status/1923064911501914216). Let's dive into the equations that power this fascinating field!
+I created this as a practical reference for the mathematical foundations of machine learning. It's not comprehensive (no guide could be), but it covers equations I find myself returning to regularly. Each section includes working Python implementations that I've tested or used at some point.
+
+This started from a [tweet by @goyal__pramod](https://x.com/goyal__pramod/status/1923064911501914216) and grew as I collected formulas I actually use.
 
 ---
 
 ## Table of Contents
 
-* [Introduction](#introduction)
-* [Probability and Information Theory](#probability-and-information-theory)
-
-  * [Bayes Theorem](#bayes-theorem)
-  * [Entropy](#entropy)
-  * [Joint and Conditional Probability](#joint-and-conditional-probability)
-  * [Kullback-Leibler Divergence (KLD)](#kullback-leibler-divergence-kld)
-  * [Cross-Entropy](#cross-entropy)
+* [Information Theory](#information-theory)
+  * [The Foundation: Entropy](#the-foundation-entropy)
+  * [Cross-Entropy: Encoding with the Wrong Distribution](#cross-entropy-encoding-with-the-wrong-distribution)
+  * [KL Divergence: The Extra Cost](#kl-divergence-the-extra-cost)
+  * [Bayes' Theorem](#bayes-theorem)
 * [Linear Algebra](#linear-algebra)
-
-  * [Linear Transformation](#linear-transformation)
+  * [Affine Transformations (Not "Linear"!)](#affine-transformations-not-linear)
   * [Eigenvalues and Eigenvectors](#eigenvalues-and-eigenvectors)
   * [Singular Value Decomposition (SVD)](#singular-value-decomposition-svd)
 * [Optimization](#optimization)
-
   * [Gradient Descent](#gradient-descent)
+* [Neural Network Fundamentals](#neural-network-fundamentals)
+  * [The Multi-Layer Perceptron (Forward Pass)](#the-multi-layer-perceptron-forward-pass)
   * [Backpropagation](#backpropagation)
 * [Loss Functions](#loss-functions)
-
   * [Mean Squared Error (MSE)](#mean-squared-error-mse)
-  * [Cross-Entropy Loss](#cross-entropy-loss)
-* [Advanced ML Concepts](#advanced-ml-concepts)
-
-  * [Diffusion Process](#diffusion-process)
-  * [Convolution Operation](#convolution-operation)
+  * [Binary Cross-Entropy Loss](#binary-cross-entropy-loss)
+* [Advanced Architectures](#advanced-architectures)
   * [Softmax Function](#softmax-function)
+  * [Convolution Operation](#convolution-operation)
   * [Attention Mechanism](#attention-mechanism)
-* [Conclusion](#conclusion)
-* [Further Reading](#further-reading)
+  * [Diffusion Models (Reverse Process)](#diffusion-models-reverse-process)
+* [What's Missing](#whats-missing)
+* [References](#references)
 
 ---
 
-## Introduction
-Mathematics is the language of machine learning. From probability to linear algebra, optimization to advanced generative models, equations define how ML algorithms learn from data and make predictions. This blog post compiles the most essential equations, explains their significance, and provides practical examples using Python libraries like NumPy, scikit-learn, TensorFlow, and PyTorch. Whether you're a beginner or an experienced practitioner, this guide will equip you with the tools to understand and apply ML math effectively.
+## Information Theory
 
----
+Information theory provides the mathematical foundation for understanding uncertainty and measuring differences between probability distributions. These concepts are deeply interconnected.
 
-## Probability and Information Theory
-Probability and information theory provide the foundation for reasoning about uncertainty and measuring differences between distributions.
-
-### Bayes' Theorem
+### The Foundation: Entropy
 
 **Equation:** 
 
 $$
-P(A|B) = \frac{P(B|A) P(A)}{P(B)}
+H(P) = -\sum_{x} P(x) \log_2 P(x)
 $$
 
-**Explanation:** Bayes' Theorem describes how to update the probability of a hypothesis ($A$) given new evidence ($B$). It’s a cornerstone of probabilistic reasoning and is widely used in machine learning for tasks like classification and inference. 
+**What it means:** Entropy measures the average number of bits needed to encode events from distribution $P$. Higher entropy means more uncertainty.
 
-**Practical Use:** Applied in Naive Bayes classifiers, Bayesian networks, and Bayesian optimization.
-
-**Implementation:**
-
-```python
-def bayes_theorem(p_d, p_t_given_d, p_t_given_not_d):
-    """
-    Calculate P(D|T+) using Bayes' Theorem.
-    
-    Parameters:
-    p_d: P(D), probability of having the disease
-    p_t_given_d: P(T+|D), probability of testing positive given disease
-    p_t_given_not_d: P(T+|D'), probability of testing positive given no disease
-    
-    Returns:
-    P(D|T+), probability of having the disease given a positive test
-    """
-    p_not_d = 1 - p_d
-    p_t = p_t_given_d * p_d + p_t_given_not_d * p_not_d
-    p_d_given_t = (p_t_given_d * p_d) / p_t
-    return p_d_given_t
-
-# Example usage
-p_d = 0.01  # 1% of population has the disease
-p_t_given_d = 0.99  # Test is 99% sensitive
-p_t_given_not_d = 0.02  # Test has 2% false positive rate
-result = bayes_theorem(p_d, p_t_given_d, p_t_given_not_d) 
-print(f"P(D|T+) = {result:.4f}")  # Output: P(D|T+) = 0.3333 
-```
-
-### Entropy
-
-**Equation:** 
-
-$$
-H(X) = -\sum_{x \in X} P(x) \log P(x)
-$$
-
-**Explanation:** Entropy measures the uncertainty or randomness in a probability distribution. It quantifies the amount of information required to describe the distribution and is fundamental in understanding concepts like information gain and decision trees. 
-
-**Practical Use:** Used in decision trees, information gain calculations, and as a basis for other information-theoretic measures.
+**Why it matters:** Entropy is the baseline for all other information-theoretic measures. A fair coin flip has 1 bit of entropy; you need exactly 1 bit to encode the outcome. A biased coin (90/10) has less entropy because outcomes are more predictable.
 
 **Implementation:**
 
@@ -118,125 +70,197 @@ def entropy(p):
     Calculate entropy of a probability distribution.
     
     Parameters:
-    p: Probability distribution array
+    p: Probability distribution array (must sum to 1)
     
     Returns:
-    Entropy value
+    Entropy in bits (using log base 2)
     """
-    return -np.sum(p * np.log(p, where=p > 0))
+    # Only compute log for non-zero probabilities
+    p_nonzero = p[p > 0]
+    return -np.sum(p_nonzero * np.log2(p_nonzero))
 
-# Example usage
-fair_coin = np.array([0.5, 0.5])  # fair coin has the same probability of heads and tails
-print(f"Entropy of fair coin: {entropy(fair_coin)}")  # Output: 0.6931471805599453 
+# Fair coin: maximum uncertainty for binary outcome
+fair_coin = np.array([0.5, 0.5])
+print(f"Fair coin entropy: {entropy(fair_coin):.4f} bits")  # 1.0000
 
-biased_coin = np.array([0.9, 0.1])  # biased coin has a higher probability of heads
-print(f"Entropy of biased coin: {entropy(biased_coin)}")  # Output: 0.4698716731013394 
+# Biased coin: less uncertainty
+biased_coin = np.array([0.9, 0.1])
+print(f"Biased coin entropy: {entropy(biased_coin):.4f} bits")  # 0.4690
 ```
 
-### Joint and Conditional Probability
-
-**Equations:**
-
-* Joint Probability:
-  
-  $$
-  P(A, B) = P(A|B) P(B) = P(B|A) P(A)
-  $$
-* Conditional Probability:
-  
-  $$
-  P(A|B) = \frac{P(A, B)}{P(B)}
-  $$
-
-**Explanation:** Joint probability describes the likelihood of two events occurring together, while conditional probability measures the probability of one event given another. These are the building blocks of Bayesian methods and probabilistic models.
-
-**Practical Use:** Used in Naive Bayes classifiers and probabilistic graphical models.
-
-**Implementation:**
-
-```python
-from sklearn.naive_bayes import GaussianNB
-import numpy as np
-
-X = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
-y = np.array([0, 0, 1, 1])
-model = GaussianNB().fit(X, y)
-print(model.predict([[2.5, 3.5]]))  # Output: [1]
-```
-
-### Kullback-Leibler Divergence (KLD)
+### Cross-Entropy: Encoding with the Wrong Distribution
 
 **Equation:**
 
 $$
-D_{KL}(P \| Q) = \sum_{x \in \mathcal{X}} P(x) \log \left( \frac{P(x)}{Q(x)} \right)
+H(P, Q) = -\sum_{x} P(x) \log_2 Q(x)
 $$
 
-**Explanation:** KLD measures how much one probability distribution $P$ diverges from another $Q$. It’s asymmetric and foundational in information theory and generative models.
+**What it means:** Cross-entropy measures the average number of bits needed to encode events from distribution $P$ when using a code optimized for distribution $Q$ instead.
 
-**Practical Use:** Used in variational autoencoders (VAEs) and model evaluation.
+**Why it matters:** This is the connection to machine learning. $P$ is your true data distribution, $Q$ is your model's predictions. Cross-entropy tells you how inefficient your model's encoding is.
 
 **Implementation:**
 
 ```python
-import numpy as np
+def cross_entropy(p, q):
+    """
+    Calculate cross-entropy H(P, Q).
+    
+    Parameters:
+    p: True distribution
+    q: Predicted distribution
+    
+    Returns:
+    Cross-entropy in bits
+    """
+    # Only where p > 0 matters (can't have log(0))
+    return -np.sum(p * np.log2(q + 1e-10))  # Small epsilon for numerical stability
 
-P = np.array([0.7, 0.3])
-Q = np.array([0.5, 0.5])
-kl_div = np.sum(P * np.log(P / Q))
-print(f"KL Divergence: {kl_div}")  # Output: 0.08228287850505156
+# True distribution vs predicted distribution
+p = np.array([0.8, 0.2])
+q_good = np.array([0.75, 0.25])  # Close to truth
+q_bad = np.array([0.3, 0.7])     # Far from truth
+
+print(f"H(P, Q_good): {cross_entropy(p, q_good):.4f} bits")  # ~0.74
+print(f"H(P, Q_bad): {cross_entropy(p, q_bad):.4f} bits")   # ~1.84
 ```
 
-### Cross-Entropy
+### KL Divergence: The Extra Cost
 
 **Equation:**
 
 $$
-H(P, Q) = -\sum_{x \in \mathcal{X}} P(x) \log Q(x)
+D_{KL}(P \| Q) = \sum_{x} P(x) \log_2 \left( \frac{P(x)}{Q(x)} \right)
 $$
 
-**Explanation:** Cross-entropy quantifies the difference between the true distribution $P$ and the predicted distribution $Q$. It’s a widely used loss function in classification.
+**What it means:** KL divergence is the *extra* bits needed when using $Q$ instead of $P$. It's literally the difference:
 
-**Practical Use:** Drives training in logistic regression and neural networks.
+$$
+D_{KL}(P \| Q) = H(P, Q) - H(P)
+$$
+
+**Why it matters:** This measures how much your model $Q$ diverges from reality $P$. Unlike cross-entropy, it's relative to the irreducible entropy in the data. Note: KL divergence is asymmetric: $D_{KL}(P \| Q) \neq D_{KL}(Q \| P)$.
 
 **Implementation:**
 
 ```python
-import numpy as np
+def kl_divergence(p, q):
+    """
+    Calculate KL divergence D_KL(P || Q).
+    
+    Parameters:
+    p: True distribution
+    q: Predicted distribution
+    
+    Returns:
+    KL divergence in bits (always >= 0)
+    """
+    p_nonzero = p > 0
+    return np.sum(p[p_nonzero] * np.log2(p[p_nonzero] / (q[p_nonzero] + 1e-10)))
 
-y_true = np.array([1, 0, 1])
-y_pred = np.array([0.9, 0.1, 0.8])
-cross_entropy = -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
-print(f"Cross-Entropy: {cross_entropy}")  # Output: 0.164252033486018
+# Verify the relationship: KL = Cross-Entropy - Entropy
+p = np.array([0.8, 0.2])
+q = np.array([0.5, 0.5])
+
+kl = kl_divergence(p, q)
+ce = cross_entropy(p, q)
+h = entropy(p)
+
+print(f"KL divergence: {kl:.4f}")
+print(f"Cross-entropy: {ce:.4f}")
+print(f"Entropy: {h:.4f}")
+print(f"CE - H = {ce - h:.4f} (should equal KL)")
+```
+
+### Bayes' Theorem
+
+**Equation:** 
+
+$$
+P(A|B) = \frac{P(B|A) P(A)}{P(B)}
+$$
+
+**What it means:** Update beliefs about $A$ given evidence $B$. The prior $P(A)$ becomes the posterior $P(A|B)$ after observing $B$.
+
+**Why it matters:** This is how you should update probabilities when you get new information. Most famously used in spam filters and medical diagnosis.
+
+**Implementation:**
+
+```python
+def bayes_theorem(prior, likelihood, evidence):
+    """
+    Calculate P(A|B) using Bayes' theorem.
+    
+    Parameters:
+    prior: P(A)
+    likelihood: P(B|A)
+    evidence: P(B)
+    
+    Returns:
+    posterior: P(A|B)
+    """
+    return (likelihood * prior) / evidence
+
+# Medical test example
+p_disease = 0.01           # 1% of population has disease
+p_pos_given_disease = 0.99 # Test sensitivity
+p_pos_given_healthy = 0.02 # False positive rate
+
+# Calculate P(positive test)
+p_positive = (p_pos_given_disease * p_disease + 
+              p_pos_given_healthy * (1 - p_disease))
+
+# What's P(disease | positive test)?
+p_disease_given_pos = bayes_theorem(p_disease, p_pos_given_disease, p_positive)
+
+print(f"P(disease | positive) = {p_disease_given_pos:.4f}")  # 0.3333
+print("Only 33% chance of disease despite 99% accurate test!")
 ```
 
 ---
 
 ## Linear Algebra
-Linear algebra powers the transformations and structures in ML models.
 
-### Linear Transformation
+### Affine Transformations (Not "Linear"!)
 
 **Equation:**
 
 $$
-y = Ax + b \quad \text{where } A \in \mathbb{R}^{m \times n}, x \in \mathbb{R}^n, y \in \mathbb{R}^m, b \in \mathbb{R}^m
+y = Ax + b
 $$
 
-**Explanation:** This equation represents a linear mapping of input $x$ to output $y$ via matrix $A$ and bias $b$. It’s the core operation in neural network layers.
+**What it means:** This is actually an *affine* transformation, not a linear one. A truly linear transformation has no bias term ($b=0$). The bias term shifts the output, which breaks the definition of linearity: $f(x + y) = f(x) + f(y)$.
 
-**Practical Use:** Foundational for linear regression and neural networks.
+**Why it matters:** Every layer in a neural network is an affine transformation. The bias term is crucial because it lets your network learn patterns that don't pass through the origin.
 
 **Implementation:**
 
 ```python
 import numpy as np
 
-A = np.array([[2, 1], [1, 3]])
-x = np.array([1, 2])
-b = np.array([0, 1])
-y = A @ x + b
-print(y)  # Output: [4 7]
+def affine_transform(x, A, b):
+    """
+    Apply affine transformation y = Ax + b.
+    
+    Parameters:
+    x: Input vector (n,)
+    A: Weight matrix (m, n)
+    b: Bias vector (m,)
+    
+    Returns:
+    y: Transformed vector (m,)
+    """
+    return A @ x + b
+
+# Example: 2D to 2D transformation
+A = np.array([[2, -1], [1, 1]])
+x = np.array([3, 2])
+b = np.array([1, -1])
+
+y = affine_transform(x, A, b)
+print(f"Input: {x}")
+print(f"Output: {y}")  # [5, 4]
 ```
 
 ### Eigenvalues and Eigenvectors
@@ -244,22 +268,32 @@ print(y)  # Output: [4 7]
 **Equation:**
 
 $$
-Av = \lambda v \quad \text{where } \lambda \in \mathbb{R}, v \in \mathbb{R}^n, v \neq 0
+Av = \lambda v
 $$
 
-**Explanation:** Eigenvalues $\lambda$ and eigenvectors $v$ describe how a matrix $A$ scales and rotates space, crucial for understanding data variance.
+**What it means:** Eigenvectors are special directions where the matrix $A$ only scales the vector (by eigenvalue $\lambda$), without rotating it.
 
-**Practical Use:** Used in Principal Component Analysis (PCA).
+**Why it matters:** Eigenvectors reveal the principal directions of variation in a given dataset. Principal Component Analysis (PCA) finds eigenvectors of the covariance matrix. Eigenvectors point in the direction of maximum variance of the data, while eigenvalues correspond to the amount of variance captured along each corresponding eigenvector's direction. These vectors are essential in pattern recognition within high dimensional datasets.
 
 **Implementation:**
 
 ```python
-import numpy as np
+from numpy.linalg import eig
 
-A = np.array([[4, 2], [1, 3]])
-eigenvalues, eigenvectors = np.linalg.eig(A)
-print(f"Eigenvalues: {eigenvalues}")
-print(f"Eigenvectors:\n{eigenvectors}")
+# Covariance matrix example
+C = np.array([[4, 2], [2, 3]])
+
+eigenvalues, eigenvectors = eig(C)
+
+print("Eigenvalues:", eigenvalues)
+print("Eigenvectors:\n", eigenvectors)
+
+# Verify: Cv = λv for first eigenvector
+v1 = eigenvectors[:, 0]
+lambda1 = eigenvalues[0]
+print(f"\nVerification:")
+print(f"Cv = {C @ v1}")
+print(f"λv = {lambda1 * v1}")
 ```
 
 ### Singular Value Decomposition (SVD)
@@ -270,54 +304,167 @@ $$
 A = U \Sigma V^T
 $$
 
-**Explanation:** SVD breaks down a matrix $A$ into orthogonal matrices $U$ and $V$ and a diagonal matrix $\Sigma$ of singular values. It reveals the intrinsic structure of data.
+**What it means:** Any matrix can be decomposed into three matrices: two rotation matrices ($U$, $V^T$) and a scaling matrix ($\Sigma$). Think of it as "every transformation is rotate, scale, rotate."
 
-**Practical Use:** Applied in dimensionality reduction and recommendation systems.
+**Why it matters:** SVD is everywhere: dimensionality reduction (truncated SVD), recommendation systems (matrix factorization), image compression, and the foundation of PCA.
 
 **Implementation:**
 
 ```python
-import numpy as np
+from numpy.linalg import svd
 
-A = np.array([[1, 2], [3, 4], [5, 6]])
-U, S, Vt = np.linalg.svd(A)
-print(f"U:\n{U}\nS: {S}\nVt:\n{Vt}")
+# User-item matrix (e.g., movie ratings)
+A = np.array([
+    [5, 3, 0, 1],
+    [4, 0, 0, 1],
+    [1, 1, 0, 5],
+    [1, 0, 0, 4],
+    [0, 1, 5, 4],
+])
+
+U, S, Vt = svd(A, full_matrices=False)
+
+print("Original shape:", A.shape)
+print("U shape:", U.shape)  # Users × concepts
+print("S shape:", S.shape)  # Singular values
+print("Vt shape:", Vt.shape)  # Concepts × items
+
+# Low-rank approximation (keep top 2 components)
+k = 2
+A_approx = U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]
+print(f"\nReconstruction error: {np.linalg.norm(A - A_approx):.4f}")
 ```
 
 ---
 
 ## Optimization
-Optimization is how ML models learn from data.
 
 ### Gradient Descent
 
 **Equation:**
 
 $$
-\theta_{t+1} = \theta_t - \eta \nabla_{\theta} L(\theta)
+\theta_{t+1} = \theta_t - \eta \nabla_{\theta} L(\theta_t)
 $$
 
-**Explanation:** Gradient descent updates parameters $\theta$ by moving opposite to the gradient of the loss function $L$, scaled by learning rate $\eta$.
+**What it means:** Move parameters $\theta$ in the direction that decreases loss $L$ most rapidly. The learning rate $\eta$ controls step size.
 
-**Practical Use:** The backbone of training most ML models.
+**Why it matters:** This is how neural networks learn. The gradient $\nabla_{\theta} L$ points uphill; we go downhill by subtracting it.
+
+**Implementation:**
+
+```python
+def gradient_descent(X, y, lr=0.01, epochs=1000):
+    """
+    Fit linear regression using gradient descent.
+    
+    Parameters:
+    X: Design matrix (m, n) with intercept column
+    y: Target values (m,)
+    lr: Learning rate
+    epochs: Number of iterations
+    
+    Returns:
+    theta: Learned parameters (n,)
+    """
+    m, n = X.shape
+    theta = np.zeros(n)
+    
+    for epoch in range(epochs):
+        # Gradient of MSE loss
+        predictions = X @ theta
+        errors = predictions - y
+        gradient = (1/m) * X.T @ errors
+        
+        # Update step
+        theta = theta - lr * gradient
+        
+        if epoch % 100 == 0:
+            loss = np.mean(errors**2)
+            print(f"Epoch {epoch}, Loss: {loss:.4f}")
+    
+    return theta
+
+# Example: fit y = 2x + 3
+X = np.column_stack([np.ones(100), np.linspace(0, 10, 100)])
+y = 2 * X[:, 1] + 3 + np.random.randn(100) * 0.5
+
+theta = gradient_descent(X, y, lr=0.01, epochs=500)
+print(f"\nLearned parameters: {theta}")  # Should be close to [3, 2]
+```
+
+---
+
+## Neural Network Fundamentals
+
+### The Multi-Layer Perceptron (Forward Pass)
+
+**Equations:**
+
+$$
+z^{(l)} = W^{(l)} a^{(l-1)} + b^{(l)}
+$$
+
+$$
+a^{(l)} = \sigma(z^{(l)})
+$$
+
+**What it means:** Each layer computes a weighted sum of the previous layer's activations ($z$), then applies a nonlinear activation function ($\sigma$) to get the new activations ($a$).
+
+**Why it matters:** This is the basic building block of deep learning. Without the nonlinearity $\sigma$, stacking layers would be pointless, basically multiple affine transformations will compose into a single affine transformation.
 
 **Implementation:**
 
 ```python
 import numpy as np
 
-def gradient_descent(X, y, lr=0.01, epochs=1000):
-    m, n = X.shape
-    theta = np.zeros(n)
-    for _ in range(epochs):
-        gradient = (1/m) * X.T @ (X @ theta - y)
-        theta -= lr * gradient
-    return theta
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
-X = np.array([[1, 1], [1, 2], [1, 3]])
-y = np.array([1, 2, 3])
-theta = gradient_descent(X, y)
-print(theta)  # Output: ~[0., 1.]
+def relu(z):
+    return np.maximum(0, z)
+
+class MLP:
+    def __init__(self, layer_sizes):
+        """
+        Initialize multi-layer perceptron.
+        
+        Parameters:
+        layer_sizes: List of layer dimensions [input, hidden1, ..., output]
+        """
+        self.weights = []
+        self.biases = []
+        
+        for i in range(len(layer_sizes) - 1):
+            W = np.random.randn(layer_sizes[i+1], layer_sizes[i]) * 0.1
+            b = np.zeros(layer_sizes[i+1])
+            self.weights.append(W)
+            self.biases.append(b)
+    
+    def forward(self, x):
+        """Forward pass through network."""
+        a = x
+        activations = [a]
+        
+        for W, b in zip(self.weights[:-1], self.biases[:-1]):
+            z = W @ a + b
+            a = relu(z)  # ReLU for hidden layers
+            activations.append(a)
+        
+        # Output layer (no activation for regression)
+        W, b = self.weights[-1], self.biases[-1]
+        z = W @ a + b
+        activations.append(z)
+        
+        return activations
+
+# Example: 2 → 4 → 1 network
+mlp = MLP([2, 4, 1])
+x = np.array([1.0, 2.0])
+activations = mlp.forward(x)
+print(f"Input: {activations[0]}")
+print(f"Hidden: {activations[1]}")
+print(f"Output: {activations[2]}")
 ```
 
 ### Backpropagation
@@ -325,12 +472,16 @@ print(theta)  # Output: ~[0., 1.]
 **Equation:**
 
 $$
-\frac{\partial L}{\partial w_{ij}} = \frac{\partial L}{\partial a_j} \cdot \frac{\partial a_j}{\partial z_j} \cdot \frac{\partial z_j}{\partial w_{ij}}
+\frac{\partial L}{\partial W^{(l)}} = \delta^{(l)} (a^{(l-1)})^T
 $$
 
-**Explanation:** Backpropagation applies the chain rule to compute gradients of the loss $L$ with respect to weights $w_{ij}$ in neural networks.
+$$
+\delta^{(l)} = (W^{(l+1)})^T \delta^{(l+1)} \odot \sigma'(z^{(l)})
+$$
 
-**Practical Use:** Enables efficient training of deep networks.
+**What it means:** Backpropagation computes gradients by working backward through the network, using the chain rule. The $\delta$ terms are the "errors" at each layer.
+
+**Why it matters:** This is *not* an optimization algorithm, it's a way to efficiently compute gradients. You still need an optimizer (like gradient descent) to update the weights. Backpropagation just tells you which direction to move.
 
 **Implementation:**
 
@@ -338,174 +489,341 @@ $$
 import torch
 import torch.nn as nn
 
-model = nn.Sequential(nn.Linear(2, 1), nn.Sigmoid())
-loss_fn = nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+# Define a simple network
+model = nn.Sequential(
+    nn.Linear(2, 4),
+    nn.ReLU(),
+    nn.Linear(4, 1)
+)
 
-X = torch.tensor([[0., 0.], [1., 1.]], dtype=torch.float32)
-y = torch.tensor([[0.], [1.]], dtype=torch.float32)
+# Forward pass
+x = torch.tensor([[1.0, 2.0]])
+y_true = torch.tensor([[3.0]])
 
-optimizer.zero_grad()
-output = model(X)
-loss = loss_fn(output, y)
+y_pred = model(x)
+loss = nn.MSELoss()(y_pred, y_true)
+
+print(f"Prediction: {y_pred.item():.4f}")
+print(f"Loss: {loss.item():.4f}")
+
+# Backward pass (backpropagation computes gradients)
 loss.backward()
-optimizer.step()
-print(f"Loss: {loss.item()}")
+
+# Inspect gradients
+for name, param in model.named_parameters():
+    if param.grad is not None:
+        print(f"{name} gradient norm: {param.grad.norm().item():.4f}")
 ```
 
 ---
 
 ## Loss Functions
-Loss functions measure model performance and guide optimization.
 
 ### Mean Squared Error (MSE)
 
 **Equation:**
 
 $$
-\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
+L_{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
 $$
 
-**Explanation:** MSE calculates the average squared difference between true $y_i$ and predicted $\hat{y}_i$ values, penalizing larger errors more heavily.
+**What it means:** Average squared difference between predictions and targets. Squaring penalizes large errors more than small ones.
 
-**Practical Use:** Common in regression tasks.
+**Why it matters:** MSE is the maximum likelihood estimator when errors are normally distributed. It's also convex, which makes optimization easier. Works well for regression but is sensitive to outliers.
 
 **Implementation:**
 
 ```python
-import numpy as np
+def mse_loss(y_true, y_pred):
+    """Mean squared error loss."""
+    return np.mean((y_true - y_pred)**2)
 
-y_true = np.array([1, 2, 3])
-y_pred = np.array([1.1, 1.9, 3.2])
-mse = np.mean((y_true - y_pred)**2)
-print(f"MSE: {mse}")  # Output: 0.01
+def mse_gradient(y_true, y_pred):
+    """Gradient of MSE with respect to predictions."""
+    return 2 * (y_pred - y_true) / len(y_true)
+
+y_true = np.array([1.0, 2.0, 3.0])
+y_pred = np.array([1.1, 2.3, 2.8])
+
+loss = mse_loss(y_true, y_pred)
+grad = mse_gradient(y_true, y_pred)
+
+print(f"MSE Loss: {loss:.4f}")
+print(f"Gradient: {grad}")
 ```
 
-### Cross-Entropy Loss
-
-(See [Cross-Entropy](#cross-entropy) above for details.)
-
----
-
-## Advanced ML Concepts
-These equations power cutting-edge ML techniques.
-
-### Diffusion Process
+### Binary Cross-Entropy Loss
 
 **Equation:**
 
 $$
-x_t = \sqrt{\alpha_t} x_0 + \sqrt{1 - \alpha_t} \epsilon \quad \text{where} \quad \epsilon \sim \mathcal{N}(0, I)
+L_{BCE} = -\frac{1}{n} \sum_{i=1}^n [y_i \log(\hat{y}_i) + (1-y_i) \log(1-\hat{y}_i)]
 $$
 
-**Explanation:** This describes a forward diffusion process where data $x_0$ is gradually noised over time $t$, a key idea in diffusion models.
+**What it means:** For binary classification, this measures how well predicted probabilities $\hat{y}_i$ match the true labels $y_i \in \{0, 1\}$.
 
-**Practical Use:** Used in generative AI like image synthesis.
+**Why it matters:** This is exactly the cross-entropy between the true distribution and predicted distribution for binary outcomes. When $y=1$, we only care about $\log(\hat{y})$; when $y=0$, we only care about $\log(1-\hat{y})$.
 
 **Implementation:**
 
 ```python
-import torch
+def binary_cross_entropy(y_true, y_pred, epsilon=1e-10):
+    """
+    Binary cross-entropy loss.
+    
+    Parameters:
+    y_true: True labels (0 or 1)
+    y_pred: Predicted probabilities (0 to 1)
+    epsilon: Small value for numerical stability
+    
+    Returns:
+    loss: BCE loss value
+    """
+    # Clip predictions to avoid log(0)
+    y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
+    return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
-x_0 = torch.tensor([1.0])
-alpha_t = 0.9
-noise = torch.randn_like(x_0)
-x_t = torch.sqrt(torch.tensor(alpha_t)) * x_0 + torch.sqrt(torch.tensor(1 - alpha_t)) * noise
-print(f"x_t: {x_t}")
+y_true = np.array([1, 0, 1, 1, 0])
+y_pred = np.array([0.9, 0.1, 0.8, 0.7, 0.2])
+
+loss = binary_cross_entropy(y_true, y_pred)
+print(f"BCE Loss: {loss:.4f}")  # Lower is better
 ```
 
 ---
 
-### Convolution Operation
-
-**Equation:**
-
-$$
-(f * g)(t) = \int f(\tau) g(t - \tau) \, d\tau
-$$
-
-**Explanation:** Convolution combines two functions by sliding one over the other, extracting features in data like images.
-
-**Practical Use:** Core to convolutional neural networks (CNNs).
-
-**Implementation:**
-
-```python
-import torch
-import torch.nn as nn
-
-conv = nn.Conv2d(1, 1, kernel_size=3)
-image = torch.randn(1, 1, 28, 28)
-output = conv(image)
-print(output.shape)  # Output: torch.Size([1, 1, 26, 26])
-```
-
----
+## Advanced Architectures
 
 ### Softmax Function
 
 **Equation:**
 
 $$
-\sigma(z_i) = \frac{e^{z_i}}{\sum_j e^{z_j}}
+\text{softmax}(z_i) = \frac{e^{z_i}}{\sum_j e^{z_j}}
 $$
 
-**Explanation:** Softmax converts raw scores $z_i$ into probabilities, summing to 1, ideal for multi-class classification.
+**What it means:** Converts a vector of real numbers into a probability distribution. The exponential ensures positive values, and normalization ensures they sum to 1.
 
-**Practical Use:** Used in neural network outputs.
+**Why it matters:** This is how neural networks output class probabilities. Combined with cross-entropy loss, the gradients have a beautiful form that makes training efficient.
 
 **Implementation:**
 
 ```python
-import numpy as np
+def softmax(z):
+    """
+    Numerically stable softmax.
+    
+    Parameters:
+    z: Input logits
+    
+    Returns:
+    probabilities: Normalized probabilities
+    """
+    # Subtract max for numerical stability
+    z_shifted = z - np.max(z)
+    exp_z = np.exp(z_shifted)
+    return exp_z / np.sum(exp_z)
 
-z = np.array([1.0, 2.0, 3.0])
-softmax = np.exp(z) / np.sum(np.exp(z))
-print(f"Softmax: {softmax}")  # Output: [0.09003057 0.24472847 0.66524096]
+# Class scores for 3 classes
+logits = np.array([2.0, 1.0, 0.1])
+probs = softmax(logits)
+
+print(f"Logits: {logits}")
+print(f"Probabilities: {probs}")
+print(f"Sum: {np.sum(probs):.6f}")  # Should be 1.0
 ```
 
----
+### Convolution Operation
+
+**Equation:**
+
+$$
+(f * g)(t) = \int_{-\infty}^{\infty} f(\tau) g(t - \tau) \, d\tau
+$$
+
+**Discrete version for images:**
+
+$$
+(I * K)(i, j) = \sum_m \sum_n I(i-m, j-n) K(m, n)
+$$
+
+**What it means:** Slide a filter (kernel) across the input, computing dot products at each position. This detects local patterns.
+
+**Why it matters:** CNNs use convolutions because they're translation invariant, which means that a cat detector works whether the cat is in the corner or center of the image.
+
+**Implementation:**
+
+```python
+import torch
+import torch.nn.functional as F
+
+# Create a simple edge detection kernel
+edge_kernel = torch.tensor([
+    [[-1., -1., -1.],
+     [ 0.,  0.,  0.],
+     [ 1.,  1.,  1.]]
+])  # Shape: (1, 3, 3)
+
+# Create a dummy image
+image = torch.randn(1, 1, 28, 28)  # (batch, channels, height, width)
+
+# Apply convolution
+output = F.conv2d(image, edge_kernel.unsqueeze(0))
+
+print(f"Input shape: {image.shape}")
+print(f"Kernel shape: {edge_kernel.shape}")
+print(f"Output shape: {output.shape}")  # (1, 1, 26, 26) - smaller due to no padding
+```
 
 ### Attention Mechanism
 
 **Equation:**
 
 $$
-\text{Attention}(Q, K, V) = \text{softmax}\left( \frac{Q K^T}{\sqrt{d_k}} \right) V
+\text{Attention}(Q, K, V) = \text{softmax}\left( \frac{QK^T}{\sqrt{d_k}} \right) V
 $$
 
-**Explanation:** Attention computes a weighted sum of values $V$ based on the similarity between queries $Q$ and keys $K$, scaled by $\sqrt{d_k}$.
+**What it means:** Compute similarity between queries $Q$ and keys $K$, use these as weights to combine values $V$. The $\sqrt{d_k}$ scaling prevents dot products from getting too large.
 
-**Practical Use:** Powers transformers in NLP and beyond.
+**Why it matters:** This is the core of transformers. Unlike RNNs, attention can directly connect any two positions in a sequence, making it much more powerful for long-range dependencies.
+
+**Implementation:**
+
+```python
+import torch
+import torch.nn.functional as F
+
+def scaled_dot_product_attention(Q, K, V, mask=None):
+    """
+    Compute scaled dot-product attention.
+    
+    Parameters:
+    Q: Queries (batch, seq_len, d_k)
+    K: Keys (batch, seq_len, d_k)
+    V: Values (batch, seq_len, d_v)
+    mask: Optional mask (batch, seq_len, seq_len)
+    
+    Returns:
+    output: Attention output (batch, seq_len, d_v)
+    attention_weights: Attention weights (batch, seq_len, seq_len)
+    """
+    d_k = Q.size(-1)
+    
+    # Compute attention scores
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / torch.sqrt(torch.tensor(d_k, dtype=torch.float32))
+    
+    # Apply mask if provided (for causal attention)
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, float('-inf'))
+    
+    # Apply softmax
+    attention_weights = F.softmax(scores, dim=-1)
+    
+    # Compute weighted sum of values
+    output = torch.matmul(attention_weights, V)
+    
+    return output, attention_weights
+
+# Example: 3 words, 4-dimensional embeddings
+Q = torch.randn(1, 3, 4)  # Queries
+K = torch.randn(1, 3, 4)  # Keys  
+V = torch.randn(1, 3, 4)  # Values
+
+output, weights = scaled_dot_product_attention(Q, K, V)
+
+print(f"Output shape: {output.shape}")
+print(f"Attention weights:\n{weights[0]}")  # See which positions attend to which
+```
+
+### Diffusion Models (Reverse Process)
+
+**Forward process (noise addition):**
+
+$$
+q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t} x_{t-1}, \beta_t I)
+$$
+
+**Reverse process (denoising):**
+
+$$
+p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
+$$
+
+**What it means:** Diffusion models learn to reverse a gradual noising process. The forward process adds Gaussian noise over many steps; the learned reverse process removes it.
+
+**Why it matters:** This is how models like DALL-E and Stable Diffusion generate images. The forward process is simple (just add noise), but learning the reverse is what makes generation possible.
 
 **Implementation:**
 
 ```python
 import torch
 
-def attention(Q, K, V):
-    d_k = Q.size(-1)
-    scores = torch.matmul(Q, K.transpose(-2, -1)) / torch.sqrt(torch.tensor(d_k, dtype=torch.float32))
-    attn = torch.softmax(scores, dim=-1)
-    return torch.matmul(attn, V)
+def forward_diffusion(x_0, t, beta_schedule):
+    """
+    Add noise to x_0 at timestep t.
+    
+    Parameters:
+    x_0: Clean data
+    t: Timestep (how much noise to add)
+    beta_schedule: Noise schedule (variance at each step)
+    
+    Returns:
+    x_t: Noised data
+    noise: The noise that was added
+    """
+    beta_t = beta_schedule[t]
+    alpha_t = 1 - beta_t
+    alpha_bar_t = torch.prod(torch.tensor([1 - beta_schedule[i] for i in range(t+1)]))
+    
+    # Sample noise
+    noise = torch.randn_like(x_0)
+    
+    # Add noise according to schedule
+    x_t = torch.sqrt(alpha_bar_t) * x_0 + torch.sqrt(1 - alpha_bar_t) * noise
+    
+    return x_t, noise
 
-Q = torch.tensor([[1., 0.], [0., 1.]])
-K = torch.tensor([[1., 1.], [1., 0.]])
-V = torch.tensor([[0., 1.], [1., 0.]])
-output = attention(Q, K, V)
-print(output)
+# Example: noise a 1D signal
+x_0 = torch.tensor([1.0, 2.0, 3.0])
+T = 100
+beta_schedule = torch.linspace(0.0001, 0.02, T)
+
+# Noise at different timesteps
+for t in [0, 25, 50, 99]:
+    x_t, noise = forward_diffusion(x_0, t, beta_schedule)
+    print(f"t={t:3d}: {x_t.numpy()}")
 ```
 
 ---
 
-## Conclusion
+## What's Missing
 
-This blog post has explored the most critical equations in machine learning, from foundational probability and linear algebra to advanced concepts like diffusion and attention. With theoretical explanations, practical implementations, and visualizations, you now have a comprehensive resource to understand and apply ML math. Point anyone asking about core ML math here—they'll learn 95% of what they need in one place!
+This guide deliberately omits several important topics to keep it focused:
+
+- **Kernel methods**: SVMs, kernel PCA, Gaussian processes
+- **Reinforcement learning**: Bellman equations, policy gradients, Q-learning
+- **Statistical learning theory**: VC dimension, PAC learning, generalization bounds
+- **Probabilistic graphical models**: Belief propagation, junction tree algorithm
+- **Optimization theory**: Convex optimization, Lagrange multipliers, KKT conditions
+- **Regularization**: L1/L2 penalties, dropout, batch normalization mathematics
+
+Each of these deserves its own deep dive.
 
 ---
 
-## Further Reading
-* *Pattern Recognition and Machine Learning* by Christopher Bishop
-* *Deep Learning* by Ian Goodfellow, Yoshua Bengio, and Aaron Courville
-* [Stanford CS229: Machine Learning](https://cs229.stanford.edu/)
-* [PyTorch Tutorials](https://pytorch.org/tutorials/)
+## References
+
+**Books:**
+- *Pattern Recognition and Machine Learning* by Christopher Bishop (thorough, Bayesian perspective)
+- *Deep Learning* by Goodfellow, Bengio, and Courville (comprehensive, modern)
+- *Information Theory, Inference, and Learning Algorithms* by David MacKay (beautiful connections)
+
+**Papers:**
+- Attention Is All You Need (Vaswani et al., 2017) - Transformers
+- Denoising Diffusion Probabilistic Models (Ho et al., 2020) - Diffusion models
+- ImageNet Classification with Deep CNNs (Krizhevsky et al., 2012) - AlexNet
+
+**Courses:**
+- [Stanford CS229: Machine Learning](https://cs229.stanford.edu/)
+- [NYU Deep Learning](https://atcold.github.io/pytorch-Deep-Learning/)
+- [Fast.ai Practical Deep Learning](https://course.fast.ai/)
