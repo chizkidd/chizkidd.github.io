@@ -25,6 +25,7 @@ This started from a [tweet by @goyal__pramod](https://x.com/goyal__pramod/status
 * [Linear Algebra](#linear-algebra)
   * [Affine Transformations (Not "Linear"!)](#affine-transformations-not-linear)
   * [Eigenvalues and Eigenvectors](#eigenvalues-and-eigenvectors)
+  * [The Normal Equation (Closed-Form Linear Regression)](#the-normal-equation-closed-form-linear-regression)
   * [Singular Value Decomposition (SVD)](#singular-value-decomposition-svd)
 * [Optimization](#optimization)
   * [Gradient Descent](#gradient-descent)
@@ -296,6 +297,58 @@ print(f"Cv = {C @ v1}")
 print(f"λv = {lambda1 * v1}")
 ```
 
+### The Normal Equation (Closed-Form Linear Regression)
+
+**Equation:**
+
+$$
+\hat{\beta} = (X^T X)^{-1} X^T y
+$$
+
+**What it means:** This gives the exact solution to linear regression in one step, without iteration. It's the derivative of the MSE loss set to zero and solved algebraically.
+
+**Why it matters:** This is the analytical solution that gradient descent approximates. The term $(X^T X)^{-1} X^T$ is called the Moore-Penrose pseudoinverse.  In practice, gradient descent or regularization (Ridge: add $\lambda I$ to $X^T X$) is preferred for large datasets (computing the inverse is expensive, $O(n^3)$), but this equation reveals the underlying linear algebra structure. For small datasets (< 10,000 samples) with few features, this is often faster and gives the exact solution.
+
+**When to use it:** Small datasets (< 10,000 samples) with few features where $(X^T X)$ is invertible. For larger problems or when $X^T X$ is singular, use gradient descent or regularized versions (Ridge: add $\lambda I$ to $X^T X$).
+
+**Implementation:**
+
+```python
+import numpy as np
+
+def normal_equation(X, y):
+    """
+    Solve linear regression using the normal equation.
+    
+    Parameters:
+    X: Design matrix (m, n)
+    y: Target values (m,)
+    
+    Returns:
+    beta: Optimal parameters (n,)
+    """
+    return np.linalg.inv(X.T @ X) @ X.T @ y
+
+# Example: fit y = 2x + 3
+np.random.seed(42)
+X = np.column_stack([np.ones(100), np.linspace(0, 10, 100)])
+y = 2 * X[:, 1] + 3 + np.random.randn(100) * 0.5
+
+beta = normal_equation(X, y)
+print(f"Normal equation solution: β = {beta}")  # Should be close to [3, 2]
+
+# Compare to gradient descent
+from scipy.optimize import minimize
+def mse(beta, X, y):
+    return np.mean((X @ beta - y)**2)
+
+result = minimize(mse, x0=[0, 0], args=(X, y), method='BFGS')
+print(f"Optimization solution:   β = {result.x}")
+
+# They should match!
+print(f"Difference: {np.linalg.norm(beta - result.x):.10f}")
+```
+
 ### Singular Value Decomposition (SVD)
 
 **Equation:**
@@ -306,7 +359,7 @@ $$
 
 **What it means:** Any matrix can be decomposed into three matrices: two rotation matrices ($U$, $V^T$) and a scaling matrix ($\Sigma$). Think of it as "every transformation is rotate, scale, rotate."
 
-**Why it matters:** SVD is everywhere: dimensionality reduction (truncated SVD), recommendation systems (matrix factorization), image compression, and the foundation of PCA.
+**Why it matters:** SVD is everywhere: dimensionality reduction (truncated SVD), recommendation systems (matrix factorization), image compression, and the foundation of PCA. It's also how you compute the pseudoinverse in the normal equation when $X^T X$ is not invertible.
 
 **Implementation:**
 
