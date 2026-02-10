@@ -1,15 +1,16 @@
 ---
 layout: post
 comments: true
-title: "Architectural and Mathematical Foundations of Machine Learning: A Rigorous Synthesis"
+title: "Architectural and Mathematical Foundations of Machine Learning: A Rigorous Synthesis of Theory, Geometry, and Implementation"
 excerpt: A rigorous exploration of machine learning mathematics, from information theory and linear algebra to optimization dynamics and generative models, with correct implementations and theoretical connections.
 date: 2026-02-09
 mathjax: true
 ---
 
-# Architectural and Mathematical Foundations of Machine Learning: A Rigorous Synthesis of Theory, Geometry, and Implementation
+---
+>**Abstract:** The maturation of machine learning from a subfield of heuristic-driven statistics into a cornerstone of modern computational science has necessitated a re-evaluation of its pedagogical foundations. Modern practitioners often rely on high-level libraries that abstract away the underlying mathematics, but as evidenced by critical reviews from the research community, this abstraction often leads to a superficial understanding of model dynamics, failure modes, and optimization bottlenecks.[^1] A robust understanding of machine learning is not merely a collection of isolated equations but a synthesis of linear algebra, information theory, multivariate calculus, and probabilistic estimation. This report provides an exhaustive analysis of these mathematical pillars, correcting common technical misconceptions and bridging the gap between theoretical derivation and numerically stable implementation.
 
-The maturation of machine learning from a subfield of heuristic-driven statistics into a cornerstone of modern computational science has necessitated a re-evaluation of its pedagogical foundations. Modern practitioners often rely on high-level libraries that abstract away the underlying mathematics, but as evidenced by critical reviews from the research community, this abstraction often leads to a superficial understanding of model dynamics, failure modes, and optimization bottlenecks.[^1] A robust understanding of machine learning is not merely a collection of isolated equations but a synthesis of linear algebra, information theory, multivariate calculus, and probabilistic estimation. This report provides an exhaustive analysis of these mathematical pillars, correcting common technical misconceptions and bridging the gap between theoretical derivation and numerically stable implementation.
+---
 
 ## The Geometry of Representation: Linear and Affine Transformations
 
@@ -175,7 +176,7 @@ The frontier of machine learning math is currently dominated by generative model
 
 ### Variational Autoencoders (VAEs) and the ELBO
 
-VAEs treat generation as a latent variable problem: we assume data $x$ is generated from a hidden code $z$. The true posterior $P(z|x)$ is intractable, so we approximate it with $Q(z|x)$ (the encoder).[^39] To train this, we maximize the Evidence Lower Bound (ELBO)[^12]:
+VAEs treat generation as a latent variable problem: we assume data $x$ is generated from a hidden code $z$. The true posterior $P(z{|}x)$ is intractable, so we approximate it with $Q(z{|}x)$ (the encoder).[^39] To train this, we maximize the Evidence Lower Bound (ELBO)[^12]:
 
 $$\text{ELBO} = \mathbb{E}_{Q(z|x)}[\log P(x|z)] - D_{KL}(Q(z|x) \| P(z))$$
 
