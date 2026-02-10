@@ -176,7 +176,7 @@ The frontier of machine learning math is currently dominated by generative model
 
 ### Variational Autoencoders (VAEs) and the ELBO
 
-VAEs treat generation as a latent variable problem: we assume data $x$ is generated from a hidden code $z$. The true posterior $P(z \mix x)$ is intractable, so we approximate it with $Q(z \mix x)$ (the encoder).[^39] To train this, we maximize the Evidence Lower Bound (ELBO)[^12]:
+VAEs treat generation as a latent variable problem: we assume data $x$ is generated from a hidden code $z$. The true posterior $P(z \mid x)$ is intractable, so we approximate it with $Q(z \mid x)$ (the encoder).[^39] To train this, we maximize the Evidence Lower Bound (ELBO)[^12]:
 
 $$\text{ELBO} = \mathbb{E}_{Q(z|x)}[\log P(x|z)] - D_{KL}(Q(z|x) \| P(z))$$
 
