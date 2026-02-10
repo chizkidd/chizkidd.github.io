@@ -296,7 +296,7 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 [^32]: How GPT works: A Metaphoric Explanation of Key, Value, Query in Attention, using a Tale of Potion - by Lili Jiang. TDS Archive, Medium, accessed February 9, 2026, https://medium.com/data-science/how-gpt-works-a-metaphoric-explanation-of-key-value-query-in-attention-using-a-tale-of-potion-8c66ace1f470
 
-[^35]: Kernel Trick Under The Hood. Understanding how SVMs handle… | by Nguyen Ha Thai Son | Data Science Collective, accessed February 9, 2026, https://medium.com/data-science-collective/kernel-trick-under-the-hood-246ca9b36bae
+[^35]: Kernel Trick Under The Hood: Untangle complex patterns without heavy feature engineering - by Nguyen Ha Thai Son. Data Science Collective, accessed February 9, 2026, https://medium.com/data-science-collective/kernel-trick-under-the-hood-246ca9b36bae 
 
 [^36]: Machine learning - How to intuitively explain what a kernel is? - Stats StackExchange, accessed February 9, 2026, https://stats.stackexchange.com/questions/152897/how-to-intuitively-explain-what-a-kernel-is
 
