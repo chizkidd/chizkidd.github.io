@@ -24,7 +24,7 @@ This shift renders the transformation affine. An affine transformation is the co
 
 | Feature | Linear Transformation ($Ax$) | Affine Transformation ($Ax+b$) |
 |---------|------------------------------|--------------------------------|
-| Origin Preservation | Maps zero vector to zero vector ($f(0) = 0$) | Shifts the origin by the vector $b$ ($f(0) = b$) |
+| Origin Preservation | Maps zero vector to zero vector ($f(0) = 0$) | Shifts the origin by the vector $b$ <br>($f(0) = b$) |
 | Algebraic Properties | Satisfies $f(x+y) = f(x) + f(y)$ and $f(cx) = cf(x)$ | Violates both unless $b = 0$[^2] |
 | Geometric Action | Rotation, scaling, reflection, shearing | Rotation/Scaling followed by Translation |
 | Machine Learning Role | Feature interaction and dimensionality change | Decision boundary positioning and normalization |
@@ -176,7 +176,7 @@ The frontier of machine learning math is currently dominated by generative model
 
 ### Variational Autoencoders (VAEs) and the ELBO
 
-VAEs treat generation as a latent variable problem: we assume data $x$ is generated from a hidden code $z$. The true posterior $P(z{|}x)$ is intractable, so we approximate it with $Q(z{|}x)$ (the encoder).[^39] To train this, we maximize the Evidence Lower Bound (ELBO)[^12]:
+VAEs treat generation as a latent variable problem: we assume data $x$ is generated from a hidden code $z$. The true posterior $P(z \mix x)$ is intractable, so we approximate it with $Q(z \mix x)$ (the encoder).[^39] To train this, we maximize the Evidence Lower Bound (ELBO)[^12]:
 
 $$\text{ELBO} = \mathbb{E}_{Q(z|x)}[\log P(x|z)] - D_{KL}(Q(z|x) \| P(z))$$
 

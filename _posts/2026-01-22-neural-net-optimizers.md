@@ -8,7 +8,7 @@ mathjax: true
 ---
 
 ---
->**TLDR:** This guide covers 8 neural network optimizers from SGD to Muon. **For most tasks, start with Adam or AdamW**—they're robust and require minimal tuning. **For large language models, consider Muon** for 2x faster training. **For computer vision with proper learning rate scheduling, SGD+Momentum often achieves the best final accuracy**. Each optimizer builds on the limitations of its predecessors, from basic SGD through adaptive methods (Adam/AdamW) to modern matrix-aware approaches (Muon).
+>**TLDR:** This guide covers 8 neural network optimizers from SGD to Muon. **For most tasks, start with Adam or AdamW**, they're robust and require minimal tuning. **For large language models, consider Muon** for 2x faster training. **For computer vision with proper learning rate scheduling, SGD+Momentum often achieves the best final accuracy**. Each optimizer builds on the limitations of its predecessors, from basic SGD through adaptive methods (Adam/AdamW) to modern matrix-aware approaches (Muon).
 
 ---
 ## Table of Contents
