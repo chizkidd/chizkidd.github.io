@@ -242,6 +242,22 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 ---
 
+Cited as:
+
+```bibtex
+@article{obasi2026MLmathfoundations,
+  title   = "Architectural and Mathematical Foundations of Machine Learning: A Rigorous Synthesis of Theory, Geometry, and Implementation",
+  author  = "Obasi, Chizoba",
+  journal = "chizkidd.github.io",
+  year    = "2026",
+  month   = "Feb",
+  url     = "https://chizkidd.github.io/2026/02/09/mathematical-machine-learning-foundations/"
+}
+```
+
+
+---
+
 ## References
 
 [^1]: Important machine learning equations. Hacker News, accessed February 9, 2026, https://news.ycombinator.com/item?id=45050931
