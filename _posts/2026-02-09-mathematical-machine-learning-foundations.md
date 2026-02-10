@@ -244,19 +244,19 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 ## References
 
-[^1]: Important machine learning equations | Hacker News, accessed February 9, 2026, https://news.ycombinator.com/item?id=45050931
+[^1]: Important machine learning equations. Hacker News, accessed February 9, 2026, https://news.ycombinator.com/item?id=45050931
 
 [^2]: Fundamentals Part 2: Hessians and Jacobians - Ian Quah, accessed February 9, 2026, https://ianq.ai/Hessian-Jacobian/
 
 [^3]: Eigen Intuitions: Understanding Eigenvectors and Eigenvalues - Towards Data Science, accessed February 9, 2026, https://towardsdatascience.com/eigen-intuitions-understanding-eigenvectors-and-eigenvalues-630e9ef1f719/
 
-[^4]: Introduction The geometry of linear transformations - Department of Mathematics | University of Toronto, accessed February 9, 2026, https://www.math.utoronto.ca/mpugh/Teaching/MAT267_19/Geometric_description_of_SVD.pdf
+[^4]: Introduction: The geometry of linear transformations - Department of Mathematics @ University of Toronto, accessed February 9, 2026, https://www.math.utoronto.ca/mpugh/Teaching/MAT267_19/Geometric_description_of_SVD.pdf
 
 [^5]: Intuitively, what is the difference between Eigendecomposition and Singular Value Decomposition? - Mathematics Stack Exchange, accessed February 9, 2026, https://math.stackexchange.com/questions/320220/intuitively-what-is-the-difference-between-eigendecomposition-and-singular-valu
 
 [^6]: Geometrical interpretations of SVD - Math Stack Exchange, accessed February 9, 2026, https://math.stackexchange.com/questions/1450097/geometrical-interpretations-of-svd
 
-[^7]: Entropy, Cross-Entropy, and KL Divergence: Mathematical Foundations and Applications | by Sidharth SS | Medium, accessed February 9, 2026, https://medium.com/@sidharth.ss/entropy-cross-entropy-and-kl-divergence-mathematical-foundations-and-applications-6a6f23da5ef1
+[^7]: Entropy, Cross-Entropy, and KL Divergence: Mathematical Foundations and Applications - by Sidharth SS. Medium, accessed February 9, 2026, https://medium.com/@sidharth.ss/entropy-cross-entropy-and-kl-divergence-mathematical-foundations-and-applications-6a6f23da5ef1
 
 [^8]: Cross-entropy and KL divergence - Eli Bendersky's website, accessed February 9, 2026, https://eli.thegreenplace.net/2025/cross-entropy-and-kl-divergence/
 
@@ -280,7 +280,7 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 [^21]: The Generalization Mystery: Sharp vs Flat Minima - inFERENCe, accessed February 9, 2026, https://www.inference.vc/sharp-vs-flat-minima-are-still-a-mystery-to-me/
 
-[^22]: Connection between Flatness and Generalization | Tuan-Anh Bui, accessed February 9, 2026, https://tuananhbui89.github.io/blog/2024/sharpness/
+[^22]: Connection between Flatness and Generalization - Tuan-Anh Bui, accessed February 9, 2026, https://tuananhbui89.github.io/blog/2024/sharpness/
 
 [^24]: 7.5: Maximum A Posteriori Estimation, accessed February 9, 2026, https://web.stanford.edu/class/archive/cs/cs109/cs109.1218/files/student_drive/7.5.pdf
 
@@ -288,21 +288,21 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 [^26]: MLE vs MAP - GeeksforGeeks, accessed February 9, 2026, https://www.geeksforgeeks.org/data-science/mle-vs-map/
 
-[^28]: The Intuition behind Maximum Likelihood Estimation (MLE)and Maximum A Posteriori Estimation (MAP) | by Bohsun Chen | Medium, accessed February 9, 2026, https://medium.com/@devcharlie2698619/the-intuition-behind-maximum-likelihood-estimation-mle-and-maximum-a-posteriori-estimation-map-b8ba1ba1078f
+[^28]: The Intuition behind Maximum Likelihood Estimation (MLE)and Maximum A Posteriori Estimation (MAP) - by Bohsun Chen. Medium, accessed February 9, 2026, https://medium.com/@devcharlie2698619/the-intuition-behind-maximum-likelihood-estimation-mle-and-maximum-a-posteriori-estimation-map-b8ba1ba1078f
 
-[^30]: Understanding Attention in Transformers: A Visual Guide | by Nitin Mittapally | Medium, accessed February 9, 2026, https://medium.com/@nitinmittapally/understanding-attention-in-transformers-a-visual-guide-df416bfe495a
+[^30]: Understanding Attention in Transformers: A Visual Guide - by Nitin Mittapally. Medium, accessed February 9, 2026, https://medium.com/@nitinmittapally/understanding-attention-in-transformers-a-visual-guide-df416bfe495a
 
 [^31]: Query, Key, Value: The Foundation of Transformer Attention - Michael Brenndoerfer, accessed February 9, 2026, https://mbrenndoerfer.com/writing/query-key-value-attention-mechanism
 
-[^32]: How GPT works: A Metaphoric Explanation of Key, Value, Query in Attention, using a Tale of Potion | by Lili Jiang | TDS Archive | Medium, accessed February 9, 2026, https://medium.com/data-science/how-gpt-works-a-metaphoric-explanation-of-key-value-query-in-attention-using-a-tale-of-potion-8c66ace1f470
+[^32]: How GPT works: A Metaphoric Explanation of Key, Value, Query in Attention, using a Tale of Potion - by Lili Jiang. TDS Archive, Medium, accessed February 9, 2026, https://medium.com/data-science/how-gpt-works-a-metaphoric-explanation-of-key-value-query-in-attention-using-a-tale-of-potion-8c66ace1f470
 
 [^35]: Kernel Trick Under The Hood. Understanding how SVMs handle… | by Nguyen Ha Thai Son | Data Science Collective, accessed February 9, 2026, https://medium.com/data-science-collective/kernel-trick-under-the-hood-246ca9b36bae
 
-[^36]: machine learning - How to intuitively explain what a kernel is? - Stats StackExchange, accessed February 9, 2026, https://stats.stackexchange.com/questions/152897/how-to-intuitively-explain-what-a-kernel-is
+[^36]: Machine learning - How to intuitively explain what a kernel is? - Stats StackExchange, accessed February 9, 2026, https://stats.stackexchange.com/questions/152897/how-to-intuitively-explain-what-a-kernel-is
 
 [^37]: Support Vector Machines (and the Kernel Trick) - Columbia University, accessed February 9, 2026, http://www.columbia.edu/~mh2078/MachineLearningORFE/SVMs_MasterSlides.pdf
 
-[^38]: Mastering SVM Kernel Tricks: A Comprehensive Guide to Dual Problems and Kernel Functions | by Sanghavi harsh | Medium, accessed February 9, 2026, https://medium.com/@sanghaviharsh666/mastering-svm-kernel-tricks-a-comprehensive-guide-to-dual-problems-and-kernel-functions-612bfff2061e
+[^38]: Mastering SVM Kernel Tricks: A Comprehensive Guide to Dual Problems and Kernel Functions - by Sanghavi harsh. Medium, accessed February 9, 2026, https://medium.com/@sanghaviharsh666/mastering-svm-kernel-tricks-a-comprehensive-guide-to-dual-problems-and-kernel-functions-612bfff2061e
 
 [^39]: Variational autoencoder implemented in PyTorch. Derives the ELBO, Log-Derivative trick, Reparameterization trick. - GitHub, accessed February 9, 2026, https://github.com/tonyduan/variational-autoencoders
 
@@ -310,7 +310,7 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 [^43]: Understanding Diffusion Objectives as the ELBO with Simple Data Augmentation, accessed February 9, 2026, https://openreview.net/forum?id=NnMEadcdyD
 
-[^44]: Diffusion Models and (Many) Differential Equations | Katie Keegan | Emory University, accessed February 9, 2026, https://katiekeegan.org/2025/08/11/diffeqs.html
+[^44]: Diffusion Models and (Many) Differential Equations - Katie Keegan. Emory University, accessed February 9, 2026, https://katiekeegan.org/2025/08/11/diffeqs.html
 
 [^45]: Notes on Diffusion Model: Intuition - Flaneur2020, accessed February 9, 2026, https://flaneur2020.github.io/posts/2024-07-22-diffusion-model/
 
