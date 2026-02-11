@@ -567,3 +567,43 @@ a:visited { color: #205caa; }
 .post-content tr:nth-child(even) {
   background-color: #fafafa;
 }
+
+/* =========================
+   Callouts
+========================= */
+
+.callout {
+  border: 1px solid #e8e8e8;
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-radius: 6px;
+  margin: 20px 0;       /* matches .post-content > * spacing */
+  overflow: hidden;
+}
+
+.callout__title {
+  font-weight: 400;     /* matches your heading weight */
+  padding: 8px 14px;
+  font-size: inherit;   /* matches post text sizing */
+  line-height: inherit;
+}
+
+.callout__body {
+  padding: 14px 16px;
+  font-size: inherit;   /* inherit 16px */
+  line-height: inherit; /* inherit 1.5 */
+  font-weight: inherit; /* inherit 300 */
+}
+
+/* Variants */
+.callout--important { border-left-color: #16a34a; }
+.callout--important .callout__title { background-color: #dcfce7; color: #065f46; }
+
+.callout--note { border-left-color: #2563eb; }
+.callout--note .callout__title { background-color: #dbeafe; color: #1e40af; }
+
+.callout--warning { border-left-color: #d97706; }
+.callout--warning .callout__title { background-color: #ffedd5; color: #9a3412; }
+
+.callout--danger { border-left-color: #dc2626; }
+.callout--danger .callout__title { background-color: #fee2e2; color: #991b1b; }
