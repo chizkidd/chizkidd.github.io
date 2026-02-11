@@ -1,0 +1,11 @@
+{%- assign type = include.type | default: "important" -%}
+{%- assign title = include.title | default: "Important" -%}
+
+<div class="callout callout--{{ type }}">
+  <div class="callout__title">
+    {{ title }}
+  </div>
+  <div class="callout__body">
+    {{ include.content | markdownify }}
+  </div>
+</div>
