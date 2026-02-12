@@ -208,21 +208,24 @@ a:visited { color: #205caa; }
 
 /* NEW STYLE: Matches the "Chizoba Obasi blog" header */
 .header-matched-heading {
-    /* 1. Alignment & Font: Match the .site-title for size, weight, and color */
     color: #333;
-    font-size: 26px;
-    letter-spacing: -1px;
-    font-weight: 400; /* Matching h1, h2, etc. definition */
-    text-align: left; /* Ensure it's left-aligned */
-    line-height: 1.2; /* A natural line height for a primary heading */
+    font-size: 32px; /* Increased for better impact */
+    letter-spacing: -1.2px; /* Slightly tighter for larger text */
+    font-weight: 400;
+    text-align: left;
+    line-height: 1.1;
+    margin-top: 30px;
+    margin-bottom: 25px;
+}
 
-    /* 2. Positioning: Use margins to create vertical space */
-    margin-top: 20px;
-    margin-bottom: 20px; /* Generous space below the heading */
-    
-    /* 3. Cleanup: Remove existing border styles from the old .welcome-heading */
-    /* border-bottom: none; */
-    /* padding-bottom: 0; */
+.section-heading {
+    font-size: 20px; /* Scaled slightly to match the 32px H1 */
+    font-weight: 500;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 5px;
+    margin-top: 40px;
+    margin-bottom: 15px;
 }
 
 
