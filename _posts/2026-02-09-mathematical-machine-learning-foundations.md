@@ -260,76 +260,76 @@ Cited as:
 
 ## References
 
-[^1]: Important machine learning equations. Hacker News, accessed February 9, 2026, https://news.ycombinator.com/item?id=45050931
+[^1]: [Important machine learning equations](https://news.ycombinator.com/item?id=45050931). Hacker News. 2025.
 
-[^2]: Fundamentals Part 2: Hessians and Jacobians - Ian Quah, accessed February 9, 2026, https://ianq.ai/Hessian-Jacobian/
+[^2]: Ian Quah. [Fundamentals Part 2: Hessians and Jacobians](https://ianq.ai/Hessian-Jacobian/). ianq.ai. 2018.
 
-[^3]: Eigen Intuitions: Understanding Eigenvectors and Eigenvalues - Towards Data Science, accessed February 9, 2026, https://towardsdatascience.com/eigen-intuitions-understanding-eigenvectors-and-eigenvalues-630e9ef1f719/
+[^3]: [Eigen Intuitions: Understanding Eigenvectors and Eigenvalues](https://towardsdatascience.com/eigen-intuitions-understanding-eigenvectors-and-eigenvalues-630e9ef1f719/). Towards Data Science. 2022.
 
-[^4]: Introduction: The geometry of linear transformations - Department of Mathematics @ University of Toronto, accessed February 9, 2026, https://www.math.utoronto.ca/mpugh/Teaching/MAT267_19/Geometric_description_of_SVD.pdf
+[^4]: [The geometry of linear transformations](https://www.math.utoronto.ca/mpugh/Teaching/MAT267_19/Geometric_description_of_SVD.pdf). Department of Mathematics, University of Toronto. 2019.
 
-[^5]: Intuitively, what is the difference between Eigendecomposition and Singular Value Decomposition? - Mathematics Stack Exchange, accessed February 9, 2026, https://math.stackexchange.com/questions/320220/intuitively-what-is-the-difference-between-eigendecomposition-and-singular-valu
+[^5]: [Intuitively, what is the difference between Eigendecomposition and Singular Value Decomposition?](https://math.stackexchange.com/questions/320220/intuitively-what-is-the-difference-between-eigendecomposition-and-singular-valu) Mathematics Stack Exchange. 2013.
 
-[^6]: Geometrical interpretations of SVD - Math Stack Exchange, accessed February 9, 2026, https://math.stackexchange.com/questions/1450097/geometrical-interpretations-of-svd
+[^6]: [Geometrical interpretations of SVD](https://math.stackexchange.com/questions/1450097/geometrical-interpretations-of-svd). Mathematics Stack Exchange. 2018.
 
-[^7]: Entropy, Cross-Entropy, and KL Divergence: Mathematical Foundations and Applications - by Sidharth SS. Medium, accessed February 9, 2026, https://medium.com/@sidharth.ss/entropy-cross-entropy-and-kl-divergence-mathematical-foundations-and-applications-6a6f23da5ef1
+[^7]: Sidharth SS. [Entropy, Cross-Entropy, and KL Divergence: Mathematical Foundations and Applications](https://medium.com/@sidharth.ss/entropy-cross-entropy-and-kl-divergence-mathematical-foundations-and-applications-6a6f23da5ef1). Medium. 2025.
 
-[^8]: Cross-entropy and KL divergence - Eli Bendersky's website, accessed February 9, 2026, https://eli.thegreenplace.net/2025/cross-entropy-and-kl-divergence/
+[^8]: Eli Bendersky. [Cross-entropy and KL divergence](https://eli.thegreenplace.net/2025/cross-entropy-and-kl-divergence/). eli.thegreenplace. 2025.
 
-[^10]: [D] A Short Introduction to Entropy, Cross-Entropy and KL-Divergence : r/MachineLearning, accessed February 9, 2026, https://www.reddit.com/r/MachineLearning/comments/7vhmp7/d_a_short_introduction_to_entropy_crossentropy/
+[^10]: [A Short Introduction to Entropy, Cross-Entropy and KL-Divergence](https://www.reddit.com/r/MachineLearning/comments/7vhmp7/d_a_short_introduction_to_entropy_crossentropy/). r/MachineLearning. Reddit. 2018.
 
-[^12]: The evidence lower bound (ELBO) - Matthew N. Bernstein, accessed February 9, 2026, https://mbernste.github.io/posts/elbo/
+[^12]: Matthew N. Bernstein. [The evidence lower bound (ELBO)](https://mbernste.github.io/posts/elbo/). mbernste.github.io. 2020.
 
-[^13]: Derivative of the Softmax Function and the Categorical Cross-Entropy Loss - Medium, accessed February 9, 2026, https://medium.com/data-science/derivative-of-the-softmax-function-and-the-categorical-cross-entropy-loss-ffceefc081d1
+[^13]: Thomas Kurbiel. [Derivative of the Softmax Function and the Categorical Cross-Entropy Loss](https://medium.com/data-science/derivative-of-the-softmax-function-and-the-categorical-cross-entropy-loss-ffceefc081d1). Medium. 2021.
 
-[^15]: Why are the Hessian and Jacobian matrices important for quant? - Reddit, accessed February 9, 2026, https://www.reddit.com/r/quant/comments/1muhmro/why_are_the_hessian_and_jacobian_matrices/
+[^15]: [Why are the Hessian and Jacobian matrices important?](https://www.reddit.com/r/quant/comments/1muhmro/why_are_the_hessian_and_jacobian_matrices/). r/quant. Reddit. 2025.
 
-[^16]: Hessian Matrix: A Guide to Second-Order Derivatives in Optimization and Beyond, accessed February 9, 2026, https://www.datacamp.com/tutorial/hessian-matrix
+[^16]: [Hessian Matrix: A Guide to Second-Order Derivatives in Optimization and Beyond](https://www.datacamp.com/tutorial/hessian-matrix). DataCamp. 2025.
 
-[^17]: Jacobian and Hessian Matrices - GeeksforGeeks, accessed February 9, 2026, https://www.geeksforgeeks.org/engineering-mathematics/jacobian-and-hessian-matrices/
+[^17]: [Jacobian and Hessian Matrices](https://www.geeksforgeeks.org/engineering-mathematics/jacobian-and-hessian-matrices/). GeeksforGeeks. 2025.
 
-[^18]: Back-propagation with Cross-Entropy and Softmax - MLDawn Academy, accessed February 9, 2026, https://www.mldawn.com/back-propagation-with-cross-entropy-and-softmax/
+[^18]: [Back-propagation with Cross-Entropy and Softmax](https://www.mldawn.com/back-propagation-with-cross-entropy-and-softmax/). MLDawn Academy. 
 
-[^19]: A Scalable Measure of Loss Landscape Curvature for Analyzing the Training Dynamics of LLMs - arXiv, accessed February 9, 2026, https://arxiv.org/html/2601.16979
+[^19]: Dayal Singh Kalra, et al. [A Scalable Measure of Loss Landscape Curvature for Analyzing the Training Dynamics of LLMs](https://arxiv.org/abs/2601.16979). arXiv:2601.16979 (2026).
 
-[^20]: Flat Minima and Generalization - Emergent Mind, accessed February 9, 2026, https://www.emergentmind.com/topics/flat-minima-and-generalization
+[^20]: [Flat Minima and Generalization](https://www.emergentmind.com/topics/flat-minima-and-generalization). Emergent Mind. 2025.
 
-[^21]: The Generalization Mystery: Sharp vs Flat Minima - inFERENCe, accessed February 9, 2026, https://www.inference.vc/sharp-vs-flat-minima-are-still-a-mystery-to-me/
+[^21]: Ferenc Huszár. [The Generalization Mystery: Sharp vs Flat Minima](https://www.inference.vc/sharp-vs-flat-minima-are-still-a-mystery-to-me/). inFERENCe.vc. 2018.
 
-[^22]: Connection between Flatness and Generalization - Tuan-Anh Bui, accessed February 9, 2026, https://tuananhbui89.github.io/blog/2024/sharpness/
+[^22]: Tuan-Anh Bui. [Connection between Flatness and Generalization](https://tuananhbui89.github.io/blog/2024/sharpness/). tuananhbui89.github.io. 2024.
 
-[^24]: 7.5: Maximum A Posteriori Estimation, accessed February 9, 2026, https://web.stanford.edu/class/archive/cs/cs109/cs109.1218/files/student_drive/7.5.pdf
+[^24]: Stanford CS109. [7.5: Maximum A Posteriori Estimation](https://web.stanford.edu/class/archive/cs/cs109/cs109.1218/files/student_drive/7.5.pdf). 2018.
 
-[^25]: MLE vs MAP: the connection between Maximum Likelihood and Maximum A Posteriori Estimation - Agustinus Kristiadi, accessed February 9, 2026, https://agustinus.kristia.de/blog/mle-vs-map/
+[^25]: Agustinus Kristiadi. [MLE vs MAP: the connection between Maximum Likelihood and Maximum A Posteriori Estimation](https://agustinus.kristia.de/blog/mle-vs-map/). agustinus.kristia.de. 2017.
 
-[^26]: MLE vs MAP - GeeksforGeeks, accessed February 9, 2026, https://www.geeksforgeeks.org/data-science/mle-vs-map/
+[^26]: [MLE vs MAP](https://www.geeksforgeeks.org/data-science/mle-vs-map/). GeeksforGeeks. 2025.
 
-[^28]: The Intuition behind Maximum Likelihood Estimation (MLE)and Maximum A Posteriori Estimation (MAP) - by Bohsun Chen. Medium, accessed February 9, 2026, https://medium.com/@devcharlie2698619/the-intuition-behind-maximum-likelihood-estimation-mle-and-maximum-a-posteriori-estimation-map-b8ba1ba1078f
+[^28]: Bohsun Chen. [The Intuition behind Maximum Likelihood Estimation (MLE) and Maximum A Posteriori Estimation (MAP)](https://medium.com/@devcharlie2698619/the-intuition-behind-maximum-likelihood-estimation-mle-and-maximum-a-posteriori-estimation-map-b8ba1ba1078f). Medium. 2024.
 
-[^30]: Understanding Attention in Transformers: A Visual Guide - by Nitin Mittapally. Medium, accessed February 9, 2026, https://medium.com/@nitinmittapally/understanding-attention-in-transformers-a-visual-guide-df416bfe495a
+[^30]: Nitin Mittapally. [Understanding Attention in Transformers: A Visual Guide](https://medium.com/@nitinmittapally/understanding-attention-in-transformers-a-visual-guide-df416bfe495a). Medium. 2025.
 
-[^31]: Query, Key, Value: The Foundation of Transformer Attention - Michael Brenndoerfer, accessed February 9, 2026, https://mbrenndoerfer.com/writing/query-key-value-attention-mechanism
+[^31]: Michael Brenndoerfer. [Query, Key, Value: The Foundation of Transformer Attention](https://mbrenndoerfer.com/writing/query-key-value-attention-mechanism). mbrenndoerfer.com. 2025.
 
-[^32]: How GPT works: A Metaphoric Explanation of Key, Value, Query in Attention, using a Tale of Potion - by Lili Jiang. TDS Archive, Medium, accessed February 9, 2026, https://medium.com/data-science/how-gpt-works-a-metaphoric-explanation-of-key-value-query-in-attention-using-a-tale-of-potion-8c66ace1f470
+[^32]: Lili Jiang. [How GPT works: A Metaphoric Explanation of Key, Value, Query in Attention](https://medium.com/data-science/how-gpt-works-a-metaphoric-explanation-of-key-value-query-in-attention-using-a-tale-of-potion-8c66ace1f470). Medium. 2023.
 
-[^35]: Kernel Trick Under The Hood: Untangle complex patterns without heavy feature engineering - by Nguyen Ha Thai Son. Data Science Collective, accessed February 9, 2026, https://medium.com/data-science-collective/kernel-trick-under-the-hood-246ca9b36bae 
+[^35]: Nguyen Ha Thai Son. [Kernel Trick Under The Hood](https://medium.com/data-science-collective/kernel-trick-under-the-hood-246ca9b36bae). Medium. 2025.
 
-[^36]: Machine learning - How to intuitively explain what a kernel is? - Stats StackExchange, accessed February 9, 2026, https://stats.stackexchange.com/questions/152897/how-to-intuitively-explain-what-a-kernel-is
+[^36]: [How to intuitively explain what a kernel is?](https://stats.stackexchange.com/questions/152897/how-to-intuitively-explain-what-a-kernel-is) Stats StackExchange. 2018.
 
-[^37]: Support Vector Machines (and the Kernel Trick) - Columbia University, accessed February 9, 2026, http://www.columbia.edu/~mh2078/MachineLearningORFE/SVMs_MasterSlides.pdf
+[^37]: [Support Vector Machines (and the Kernel Trick)](http://www.columbia.edu/~mh2078/MachineLearningORFE/SVMs_MasterSlides.pdf). Columbia University. 
 
-[^38]: Mastering SVM Kernel Tricks: A Comprehensive Guide to Dual Problems and Kernel Functions - by Sanghavi harsh. Medium, accessed February 9, 2026, https://medium.com/@sanghaviharsh666/mastering-svm-kernel-tricks-a-comprehensive-guide-to-dual-problems-and-kernel-functions-612bfff2061e
+[^38]: Sanghavi Harsh. [Mastering SVM Kernel Tricks: A Comprehensive Guide to Dual Problems and Kernel Functions](https://medium.com/@sanghaviharsh666/mastering-svm-kernel-tricks-a-comprehensive-guide-to-dual-problems-and-kernel-functions-612bfff2061e). Medium. 2024.
 
-[^39]: Variational autoencoder implemented in PyTorch. Derives the ELBO, Log-Derivative trick, Reparameterization trick. - GitHub, accessed February 9, 2026, https://github.com/tonyduan/variational-autoencoders
+[^39]: Tony Duan. [Variational autoencoder implemented in PyTorch](https://github.com/tonyduan/variational-autoencoders). GitHub.
 
-[^41]: Evidence lower bound - Wikipedia, accessed February 9, 2026, https://en.wikipedia.org/wiki/Evidence_lower_bound
+[^41]: [Evidence lower bound](https://en.wikipedia.org/wiki/Evidence_lower_bound). Wikipedia. 
 
-[^43]: Understanding Diffusion Objectives as the ELBO with Simple Data Augmentation, accessed February 9, 2026, https://openreview.net/forum?id=NnMEadcdyD
+[^43]: Diederik P Kingma, Ruiqi Gao.[Understanding Diffusion Objectives as the ELBO with Simple Data Augmentation](https://openreview.net/forum?id=NnMEadcdyD). OpenReview. 2023.
 
-[^44]: Diffusion Models and (Many) Differential Equations - Katie Keegan. Emory University, accessed February 9, 2026, https://katiekeegan.org/2025/08/11/diffeqs.html
+[^44]: Katie Keegan. [Diffusion Models and (Many) Differential Equations](https://katiekeegan.org/2025/08/11/diffeqs.html). katiekeegan.org. 2025.
 
-[^45]: Notes on Diffusion Model: Intuition - Flaneur2020, accessed February 9, 2026, https://flaneur2020.github.io/posts/2024-07-22-diffusion-model/
+[^45]: Yazhou Li. [Notes on Diffusion Model: Intuition](https://flaneur2020.github.io/posts/2024-07-22-diffusion-model/). flaneur2020.github.io. 2024.
 
-[^49]: Implementing Softmax From Scratch: Avoiding the Numerical Stability Trap - MarkTechPost, accessed February 9, 2026, https://www.marktechpost.com/2026/01/06/implementing-softmax-from-scratch-avoiding-the-numerical-stability-trap/
+[^49]: [Implementing Softmax From Scratch: Avoiding the Numerical Stability Trap](https://www.marktechpost.com/2026/01/06/implementing-softmax-from-scratch-avoiding-the-numerical-stability-trap/). MarktechPost. 2026.
 
-[^51]: Numerically Stable Softmax and Cross Entropy - Jay Mody, accessed February 9, 2026, https://jaykmody.com/blog/stable-softmax/
+[^51]: Jay Mody. [Numerically Stable Softmax and Cross Entropy](https://jaykmody.com/blog/stable-softmax/). jaykmody.com. 2022.
