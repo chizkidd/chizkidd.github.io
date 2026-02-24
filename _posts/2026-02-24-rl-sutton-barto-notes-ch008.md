@@ -215,9 +215,9 @@ Loop forever:
 - We've also discussed sampling methods like Monte Carlo (MC), temporal-difference (TD), and $n$-step bootstrapping to estimate value functions in the absence of a model.
 - Given a fixed computational budget, are expected or sample updates more efficient for planning?
 
-![One-Step Update backup diagrams](/assets/images/ch08-8-5-one-step-title-border.png)
+![One-Step Update backup diagrams](/assets/images/ch08-8-5-one-step.png)
 
-> **Backup diagrams for one-step updates**: a large tree rooted at the current state, with branches for each action and subtrees for each successor. The tree policy traverses the tree greedily, evaluating and backing up values from the leaf nodes toward the root.
+> **Backup diagrams for one-step updates**: showing 7 out of 8 possible cases for one-step updates (sample and expected) for state-value and action-value functions and their optimal versions too.
 
 | Value estimated | Expected updates (DP) | Sample updates (one-step TD) |
 |---|---|---|
