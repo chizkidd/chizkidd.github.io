@@ -236,6 +236,7 @@ Loop forever:
 
 - Any of these one-step updates can be used in planning methods:
   - **Dyna-Q** uses $q_*(s,a)$  sample updates, but could also use $q_*(s,a)$  expected updates, or either expected or sample $q_\pi(s,a)$ updates.
+  - **Dyna-Q** uses $q\_*$  sample updates, but could also use $q\_*$  expected updates, or either expected or sample $q\_\pi$ updates
   - **Dyna-AC** uses $V_\pi$ sample updates together with a learning policy structure.
   - For stochastic problems, prioritized sweeping is always done using one of the expected updates.
 
