@@ -610,3 +610,11 @@ a:visited { color: #205caa; }
 
 .callout--danger { border-left-color: #dc2626; }
 .callout--danger .callout__title { background-color: #fee2e2; color: #991b1b; }
+
+/* Post images */
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
