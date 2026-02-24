@@ -7,10 +7,6 @@ date: 2026-02-24
 mathjax: true
 ---
 
-# Reinforcement Learning: An Introduction — Sutton & Barto, 2nd Ed.
-
-# Chapter 8: Planning & Learning with Tabular Methods
-
 - **Model-Based RL methods** require a model of the environment and rely on **planning** as their primary component.
   - Dynamic Programming (DP), Heuristic Search
 - **Model-Free RL methods** don't require a model of the environment and primarily rely on **learning**.
@@ -89,7 +85,7 @@ Loop forever:
 
 ## 8.2 Dyna: Integrated Planning, Acting, and Learning
 
-![Dyna](https://github.com/chizkidd/RL-Sutton-Barto-notes/blob/main/figures/ch08-8-2-title-border.png)
+![Dyna](../assets/images/ch08-8-2-title-border.png)
 
 - When planning is done online, while interacting with the environment, a number of interesting issues arise:
   - New information gained from the interaction may change the model (and thus the planning).
@@ -194,7 +190,7 @@ Loop forever:
 - Mechanism:
   1. Maintain priority queue of $(s,a)$ pairs ranked by Bellman error magnitude.
   2. Propagate updates **backward** from states with changed values.
-  3. Queue predecessors weighted by: $|R + \gamma V(s') - Q(s,a)|$
+  3. Queue predecessors weighted by: ${|}R + \gamma V(s') - Q(s,a){|}$
 
 - Key advantages:
   1. **Efficiency**: avoid wasteful updates (such as $0 \to 0$ reward transitions).
@@ -219,9 +215,9 @@ Loop forever:
 - We've also discussed sampling methods like Monte Carlo (MC), temporal-difference (TD), and $n$-step bootstrapping to estimate value functions in the absence of a model.
 - Given a fixed computational budget, are expected or sample updates more efficient for planning?
 
-![One-Step Update backup diagrams](https://github.com/chizkidd/RL-Sutton-Barto-notes/blob/main/figures/ch08-8-5-one-step-title-border.png)
+![One-Step Update backup diagrams](../assets/images/ch08-8-5-one-step-title-border.png)
 
-**Backup diagrams for one-step updates** (7 of 8 cases shown):
+> **Backup diagrams for one-step updates**: a large tree rooted at the current state, with branches for each action and subtrees for each successor. The tree policy traverses the tree greedily, evaluating and backing up values from the leaf nodes toward the root.
 
 | Value estimated | Expected updates (DP) | Sample updates (one-step TD) |
 |---|---|---|
@@ -230,6 +226,8 @@ Loop forever:
 | $q_\pi(s,a)$ | $q$-policy evaluation | Sarsa |
 | $q_*(s,a)$ | $q$-value iteration | Q-learning |
 
+**Backup diagrams for one-step updates** (7 of 8 cases shown)
+
 - We have considered many value function updates. If we focus on one-step updates, they vary along 3 binary dimensions:
   - Whether they update state values or action values.
   - Whether they estimate the value for the optimal policy or for an arbitrary given policy.
@@ -237,7 +235,7 @@ Loop forever:
 - These 3 binary dimensions give rise to 8 cases, 7 of which are shown in the figure above. The 8th case does not seem to correspond to any useful update.
 
 - Any of these one-step updates can be used in planning methods:
-  - **Dyna-Q** uses $q_*$ sample updates, but could also use $q_*$ expected updates, or either expected or sample $q_\pi$ updates.
+  - **Dyna-Q** uses $q_{*}$ sample updates, but could also use $q_{*}$ expected updates, or either expected or sample $q_\pi$ updates.
   - **Dyna-AC** uses $V_\pi$ sample updates together with a learning policy structure.
   - For stochastic problems, prioritized sweeping is always done using one of the expected updates.
 
@@ -248,9 +246,9 @@ Loop forever:
 
 ### Computational Requirements & Formal Comparison (given discrete states/actions)
 
-- <u>Model:</u> $\hat{p}(s', r | s, a)$ known.
-- <u>Goal:</u> Approximate $q_*$ (optimal action values).
-- <u>Branching factor:</u> $b = |\{s': p(s'|s,a) > 0\}|$ (effective stochasticity).
+- <u>Model:</u> $\hat{p}(s', r \mid s, a)$ known.
+- <u>Goal:</u> Approximate $q_{*}$ (optimal action values).
+- <u>Branching factor:</u> $b = {|}\{s': p(s' \mid s,a) > 0\}{|}$ (effective stochasticity).
 
 - **Expected Update (exact):**
   - <u>Computational complexity:</u> $O(b)$.
@@ -266,7 +264,7 @@ $$\boxed{Q(s,a) \leftarrow Q(s,a) + \alpha\left[R + \gamma \max_{a'} Q(S', a') -
 
 ### Theoretical Comparison (Empirical Analysis)
 
-- Assume all $b$ successors are equiprobable, and initial $|\text{error}| = 1$ at $(s,a)$; successor values are assumed already correct.
+- Assume all $b$ successors are equiprobable, and initial $ {|}\text{error}{|} = 1$ at $(s,a)$; successor values are assumed already correct.
 - Expected update: error $= 0$ after one update (cost: $\sim b$ units).
 - Sample updates (assuming sample averages, i.e. $\alpha = \frac{1}{t}$): error $\approx \sqrt{\frac{b-1}{bt}}$.
   - For moderate $b$ (e.g. $b = 10$) and large $b$, the error falls dramatically with a tiny fraction of $b$ updates.
@@ -311,19 +309,19 @@ $$b=100,\ \text{error} \approx \frac{1}{\sqrt{t}} \implies \text{error}(t=1) \ap
 ### Formal Comparison
 
 - **Uniform distribution:**
-  - Cycle systematically through all $|S| \times |A|$ state-action pairs.
+  - Cycle systematically through all ${|}S{|} \times {|}A{|}$ state-action pairs.
   - Each pair receives equal computational resources.
   - Complete coverage regardless of policy.
   - Starting state distribution $\approx$ uniform or some fixed distribution $\mu(S_t)$.
 
 - **On-policy trajectory sampling:**
   - Sample states $S_t \sim d^\pi$ where $d^\pi$ is the on-policy state distribution under policy $\pi$.
-  - Select actions $a_t \sim \pi(\cdot | S_t)$.
+  - Select actions $a_t \sim \pi(\cdot \mid S_t)$.
   - Generate trajectories $\{S_0, a_0, S_1, a_1, \ldots\}$ following current policy.
   - Update only visited state-action pairs.
 
 - **Advantages of trajectory sampling:**
-  - **Computational focusing**: for large state spaces where $|S| \gg$ states reachable under $\pi$, trajectory sampling concentrates updates on the reachable subset.
+  - **Computational focusing**: for large state spaces where ${|}S{|} \gg$ states reachable under $\pi$, trajectory sampling concentrates updates on the reachable subset.
   - **Irrelevant state pruning**: 3 categories emerge:
     - Initial states (starting distribution).
     - States reachable under optimal control.
@@ -370,10 +368,10 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
     - TS can use any policy; 
     - RTDP uses greedy policy for sampling.
 
-- **Computational Complexity: **
+- **Computational Complexity:**
 
-- Traditional Value Iteration $\Rightarrow O(|S|^2|A|)$ per iteration.
-- RTDP Trial $\Rightarrow O(L)$ where $L$ = episode length, typically $L \ll |S|$.
+  - Traditional Value Iteration $\Rightarrow O({|}S{|}^2{|}A{|})$ per iteration.
+  - RTDP Trial $\Rightarrow O(L)$ where $L$ = episode length, typically $L \ll {|}S{|}$.
 
 - RTDP bridges pure planning and pure learning (focusing on relevant state space regions).
 - RTDP is guaranteed to find an optimal policy for the relevant states under certain conditions:
@@ -386,7 +384,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
   - RTDP can find optimal policies for these tasks with approximately 50% of the computation required by traditional sweep-based value iteration (i.e. dynamic programming).
   - These kinds of problems are usually expressed in cost minimization not reward maximization.
 
-![RTDP](https://github.com/chizkidd/RL-Sutton-Barto-notes/blob/main/figures/ch08-8-7-rtdp.png)
+![RTDP](../assets/images/ch08-8-7-RTDP.png)
 
 > **State space diagram**: Start states on the left, irrelevant states (unreachable from any start state under any optimal policy) in the outer region, and relevant states (reachable from some start state under some optimal policy) in the inner region.
 
@@ -425,7 +423,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 - This kind of planning is effective because it focuses only on pertinent next states and actions, and focuses resource on obtaining the next best one-step action.
 - Heuristic search is an extension of greedy policy beyond one-step to multi-step lookahead to obtain better action selections.
 
-![heuristic-search](https://github.com/chizkidd/RL-Sutton-Barto-notes/blob/main/figures/ch08-8-9-Heuristic-Search-title-border.png)
+![heuristic-search](../assets/images/ch08-8-9-Heuristic-Search.png)
 
 > **Heuristic Search diagram (selective depth-first search)**: a large tree rooted at the current state, with branches for each action and subtrees for each successor. The tree policy traverses the tree greedily, evaluating and backing up values from the leaf nodes toward the root.
 
@@ -461,7 +459,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 ### Computational Complexity (quite expensive due to many full episodes)
 
 - Per decision $\Rightarrow:
-  - $|A(s)|$ = number of actions to evaluate, 
+  - ${|}A(s){|}$ = number of actions to evaluate, 
   - $n$ = rollouts per action, 
   - $L$ = average episode length.
 
@@ -523,7 +521,7 @@ $$\boxed{\text{UCT}(s,a) = \underbrace{\frac{W(s,a)}{N(s,a)}}_{\text{exploitatio
 - MCTS continues executing these 4 steps, starting each time at the tree's root node, until no more time is left, or some other computational resource is exhausted. 
 - Then finally, an action from the root node (representative of the environment's current state) is selected according to some mechanism that depends on the accumulated statistics in the tree (action with largest action value or action with largest visit count to avoid outliers).
 
-![MCTS](https://github.com/chizkidd/RL-Sutton-Barto-notes/blob/main/figures/ch08-8-11-MCTS-title-border.png)
+![MCTS](../assets/images/ch08-8-11-MCTS.png)
 
 > **MCTS diagram**: 4 stages shown left to right: Selection (tree policy traverses with blue arrows to a leaf), Expansion (leaf expanded), Simulation (rollout policy runs from expanded node to terminal $\Delta$), Backup (return propagated back up with blue arrows).
 
@@ -631,7 +629,7 @@ $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \tex
 >$$\text{HORIZONTAL (L to R): sample backups} \xrightarrow{\text{width of update}} \text{full/expected backups}$$
 >$$\text{VERTICAL (Top to Bottom): shallow backups} \xrightarrow{\text{depth/length of update}} \text{deep backups}$$
 
-![Unified  View of RL depicting a slice through the space of RL methods](https://github.com/chizkidd/RL-Sutton-Barto-notes/blob/main/figures/ch08-8-13-summary-unified-rl.png)
+![Unified  View of RL depicting a slice through the space of RL methods](../assets/images/ch08-8-13-summary-unified-rl.png)
 
 > **Unified View of RL** depicting a slice through the space of RL methods
 
