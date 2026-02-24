@@ -190,7 +190,7 @@ Loop forever:
 - Mechanism:
   1. Maintain priority queue of $(s,a)$ pairs ranked by Bellman error magnitude.
   2. Propagate updates **backward** from states with changed values.
-  3. Queue predecessors weighted by: ${|}R + \gamma V(s') - Q(s,a){|}$
+  3. Queue predecessors weighted by: $\vert R + \gamma V(s') - Q(s,a) \vert$
 
 - Key advantages:
   1. **Efficiency**: avoid wasteful updates (such as $0 \to 0$ reward transitions).
@@ -235,7 +235,7 @@ Loop forever:
 - These 3 binary dimensions give rise to 8 cases, 7 of which are shown in the figure above. The 8th case does not seem to correspond to any useful update.
 
 - Any of these one-step updates can be used in planning methods:
-  - **Dyna-Q** uses $q\_{*}$ sample updates, but could also use $q\_{*}$ expected updates, or either expected or sample $q_\pi$ updates.
+  - **Dyna-Q** uses $q_*(s,a)$  sample updates, but could also use $q_*(s,a)$  expected updates, or either expected or sample $q_\pi(s,a)$ updates.
   - **Dyna-AC** uses $V_\pi$ sample updates together with a learning policy structure.
   - For stochastic problems, prioritized sweeping is always done using one of the expected updates.
 
@@ -246,9 +246,9 @@ Loop forever:
 
 ### Computational Requirements & Formal Comparison (given discrete states/actions)
 
-- <u>Model:</u> $\hat{p}(s', r \mid s, a)$ known.
+- <u>Model:</u> $\hat{p}(s', r \vert s, a)$ known.
 - <u>Goal:</u> Approximate $q_{*}$ (optimal action values).
-- <u>Branching factor:</u> $b = {|}\{s': p(s' \mid s,a) > 0\}{|}$ (effective stochasticity).
+- <u>Branching factor:</u> $b = \vert \{s': p(s' \vert s,a) > 0\} \vert$ (effective stochasticity).
 
 - **Expected Update (exact):**
   - <u>Computational complexity:</u> $O(b)$.
@@ -264,7 +264,7 @@ $$\boxed{Q(s,a) \leftarrow Q(s,a) + \alpha\left[R + \gamma \max_{a'} Q(S', a') -
 
 ### Theoretical Comparison (Empirical Analysis)
 
-- Assume all $b$ successors are equiprobable, and initial $ {|}\text{error}{|} = 1$ at $(s,a)$; successor values are assumed already correct.
+- Assume all $b$ successors are equiprobable, and initial $ \vert \text{error} \vert = 1$ at $(s,a)$; successor values are assumed already correct.
 - Expected update: error $= 0$ after one update (cost: $\sim b$ units).
 - Sample updates (assuming sample averages, i.e. $\alpha = \frac{1}{t}$): error $\approx \sqrt{\frac{b-1}{bt}}$.
   - For moderate $b$ (e.g. $b = 10$) and large $b$, the error falls dramatically with a tiny fraction of $b$ updates.
@@ -309,19 +309,19 @@ $$b=100,\ \text{error} \approx \frac{1}{\sqrt{t}} \implies \text{error}(t=1) \ap
 ### Formal Comparison
 
 - **Uniform distribution:**
-  - Cycle systematically through all ${|}S{|} \times {|}A{|}$ state-action pairs.
+  - Cycle systematically through all $\vert S \vert \times \vert A \vert$ state-action pairs.
   - Each pair receives equal computational resources.
   - Complete coverage regardless of policy.
   - Starting state distribution $\approx$ uniform or some fixed distribution $\mu(S_t)$.
 
 - **On-policy trajectory sampling:**
   - Sample states $S_t \sim d^\pi$ where $d^\pi$ is the on-policy state distribution under policy $\pi$.
-  - Select actions $a_t \sim \pi(\cdot \mid S_t)$.
+  - Select actions $a_t \sim \pi(\cdot \vert S_t)$.
   - Generate trajectories $\{S_0, a_0, S_1, a_1, \ldots\}$ following current policy.
   - Update only visited state-action pairs.
 
 - **Advantages of trajectory sampling:**
-  - **Computational focusing**: for large state spaces where ${|}S{|} \gg$ states reachable under $\pi$, trajectory sampling concentrates updates on the reachable subset.
+  - **Computational focusing**: for large state spaces where $\vert S \vert \gg$ states reachable under $\pi$, trajectory sampling concentrates updates on the reachable subset.
   - **Irrelevant state pruning**: 3 categories emerge:
     - Initial states (starting distribution).
     - States reachable under optimal control.
@@ -370,8 +370,8 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 
 - **Computational Complexity:**
 
-  - Traditional Value Iteration $\Rightarrow O({|}S{|}^2{|}A{|})$ per iteration.
-  - RTDP Trial $\Rightarrow O(L)$ where $L$ = episode length, typically $L \ll {|}S{|}$.
+  - Traditional Value Iteration $\Rightarrow O(\vert S \vert ^2 \vert A \vert)$ per iteration.
+  - RTDP Trial $\Rightarrow O(L)$ where $L$ = episode length, typically $L \ll \vert S \vert$.
 
 - RTDP bridges pure planning and pure learning (focusing on relevant state space regions).
 - RTDP is guaranteed to find an optimal policy for the relevant states under certain conditions:
@@ -459,7 +459,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 ### Computational Complexity (quite expensive due to many full episodes)
 
 - Per decision $\Rightarrow:
-  - ${|}A(s){|}$ = number of actions to evaluate, 
+  - $\vert A(s) \vert$ = number of actions to evaluate, 
   - $n$ = rollouts per action, 
   - $L$ = average episode length.
 
