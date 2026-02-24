@@ -235,7 +235,7 @@ Loop forever:
 - These 3 binary dimensions give rise to 8 cases, 7 of which are shown in the figure above. The 8th case does not seem to correspond to any useful update.
 
 - Any of these one-step updates can be used in planning methods:
-  - **Dyna-Q** uses $q_\{*\}$ sample updates, but could also use $q_\{*\}$ expected updates, or either expected or sample $q_\pi$ updates.
+  - **Dyna-Q** uses $q\_{*}$ sample updates, but could also use $q\_{*}$ expected updates, or either expected or sample $q_\pi$ updates.
   - **Dyna-AC** uses $V_\pi$ sample updates together with a learning policy structure.
   - For stochastic problems, prioritized sweeping is always done using one of the expected updates.
 
