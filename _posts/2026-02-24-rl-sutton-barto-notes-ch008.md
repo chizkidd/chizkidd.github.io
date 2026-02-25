@@ -182,17 +182,17 @@ Loop forever:
 
 - **Prioritized sweeping** optimizes Dyna-style planning by selectively updating state-action pairs based on expected magnitude of value change, rather than uniform random selection.
 
-- Steps:
+- <u>Steps:</u>
   1. Keep a priority queue of which state-action pairs need updating most.
   2. Update the ones with biggest potential changes first.
   3. Work backwards from important states (like the goal).
 
-- Mechanism:
+- <u>Mechanism:</u>
   1. Maintain priority queue of $(s,a)$ pairs ranked by Bellman error magnitude.
   2. Propagate updates **backward** from states with changed values.
   3. Queue predecessors weighted by: $\vert R + \gamma V(s') - Q(s,a) \vert$
 
-- Key advantages:
+- <u>Key advantages:</u>
   1. **Efficiency**: avoid wasteful updates (such as $0 \to 0$ reward transitions).
   2. **Convergence speed**: dramatic empirical improvements.
   3. **Backward focusing**: value propagation follows reverse trajectory from changed states.
@@ -203,8 +203,8 @@ Loop forever:
   - Essentially, when outcomes are random, one can either update based on all possibilities (slow but thorough) or sample specific outcomes (faster, focuses effort).
 
 - All planning entails sequences of value updates varying in:
-  - Update type $\Rightarrow$ expected/sample, full/partial backup.
-  - Update ordering $\Rightarrow$ backward/forward focusing, prioritization heuristic.
+  - <u>Update type</u> $\Rightarrow$ expected/sample, full/partial backup.
+  - <u>Update ordering</u> $\Rightarrow$ backward/forward focusing, prioritization heuristic.
 - Forward focusing prioritizes states by reachability under current policy rather than backward value propagation.
 
 ---
@@ -432,8 +432,8 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 
 1. **Optimality horizon**: for sufficiently large depth $K$ where $\gamma^K \approx 0$, the selected action approaches the optimal action $a^*(s)$.
 2. **Computational complexity**:
-   - Full tree expansion: $O(b^K)$ where $b$ = branching factor.
-   - With pruning/selection: $O(f(b, K))$ where $f < b^K$.
+   - <u>Full tree expansion:</u> $O(b^K)$ where $b$ = branching factor.
+   - <u>With pruning/selection:</u> $O(f(b, K))$ where $f < b^K$.
 3. **Memory**: $O(bK)$ with depth-first implementation.
 4. **Backed-up value interpretation**: $V_{\text{tree}}(s)$ estimates the $K$-step optimal value starting from $s$.
 
@@ -459,7 +459,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 
 ### Computational Complexity (quite expensive due to many full episodes)
 
-- Per decision $\Rightarrow:
+- Per decision $\Rightarrow$:
   - $\vert A(s) \vert$ = number of actions to evaluate, 
   - $n$ = rollouts per action, 
   - $L$ = average episode length.
