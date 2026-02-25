@@ -87,6 +87,8 @@ Loop forever:
 
 ![Dyna](/assets/images/ch08-8-2-title-border.png)
 
+> **Dyna-Q interactions and General Dyna architecture**
+
 - When planning is done online, while interacting with the environment, a number of interesting issues arise:
   - New information gained from the interaction may change the model (and thus the planning).
   - How do we divide the computational resources available between decision making and model learning?
