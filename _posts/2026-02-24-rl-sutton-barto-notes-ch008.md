@@ -104,7 +104,7 @@ Loop forever:
   - Indirect methods often make fuller use of a limited amount of experience.
   - Direct methods are much simpler and are not affected by biases in the design of the model.
 
-**Dyna-Q includes all of the RL processes in the interactions diagram shown above occurring continuously: planning, acting, model-learning, and direct RL.**
+- **Dyna-Q includes all of the RL processes in the interactions diagram shown above occurring continuously: planning, acting, model-learning, and direct RL.**
 
 - The planning method is the random-sample, one-step tabular Q-planning.
 - The model-learning method is also table-based and assumes the environment is deterministic.
@@ -184,20 +184,20 @@ Loop forever:
 
 - **Prioritized sweeping** optimizes Dyna-style planning by selectively updating state-action pairs based on expected magnitude of value change, rather than uniform random selection.
 
-- <u>Steps:</u>
-  1. Keep a priority queue of which state-action pairs need updating most.
-  2. Update the ones with biggest potential changes first.
-  3. Work backwards from important states (like the goal).
+    - <u>Steps:</u>
+        1. Keep a priority queue of which state-action pairs need updating most.
+        2. Update the ones with biggest potential changes first.
+        3. Work backwards from important states (like the goal).
 
-- <u>Mechanism:</u>
-  1. Maintain priority queue of $(s,a)$ pairs ranked by Bellman error magnitude.
-  2. Propagate updates **backward** from states with changed values.
-  3. Queue predecessors weighted by: $\vert R + \gamma V(s') - Q(s,a) \vert$
+    - <u>Mechanism:</u>
+        1. Maintain priority queue of $(s,a)$ pairs ranked by Bellman error magnitude.
+        2. Propagate updates **backward** from states with changed values.
+        3. Queue predecessors weighted by: $\vert R + \gamma V(s') - Q(s,a) \vert$
 
-- <u>Key advantages:</u>
-  1. **Efficiency**: avoid wasteful updates (such as $0 \to 0$ reward transitions).
-  2. **Convergence speed**: dramatic empirical improvements.
-  3. **Backward focusing**: value propagation follows reverse trajectory from changed states.
+    - <u>Key advantages:</u>
+        1. **Efficiency**: avoid wasteful updates (such as $0 \to 0$ reward transitions).
+        2. **Convergence speed**: dramatic empirical improvements.
+        3. **Backward focusing**: value propagation follows reverse trajectory from changed states.
 
 - Extensions of prioritized sweeping to **stochastic environments** are straightforward:
   - **Expected updates**: enumerate all $s'$ with transition probabilities, which is comprehensive but computationally expensive on low-probability transitions.
@@ -227,8 +227,6 @@ Loop forever:
 | $V_*(s)$ | Value iteration (max over actions, full branching) | — |
 | $q_\pi(s,a)$ | $q$-policy evaluation | Sarsa |
 | $q_*(s,a)$ | $q$-value iteration | Q-learning |
-
-**Backup diagrams for one-step updates** (7 of 8 cases shown)
 
 - We have considered many value function updates. If we focus on one-step updates, they vary along 3 binary dimensions:
   - Whether they update state values or action values.
