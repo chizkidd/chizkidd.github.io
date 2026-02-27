@@ -111,6 +111,7 @@ h(s) &= \text{probability that an episode begins in each state } s \\
 $$
 
 >This is the ***visitation equation:*** the expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.
+
 - This system of equations can be solved for the expected number of visits $\eta(s)$.
 - The on-policy distribution is the fraction of time spent in each state, normalized to sum to 1:
 
@@ -344,14 +345,12 @@ j &\equiv \text{dimensions}
 \end{aligned}
 $$
 
-![Unified  View of RL depicting a slice through the space of RL methods](/assets/images/ch08-8-13-summary-unified-rl.png)
-![coarse coding](/assets/images/ch09-9-7-ann.png)
 
 ### 9.5.3 Coarse Coding
 
 - Mapping circles to the features of a state space for 2-dimension.
 
-![coarse coding](/assets/images/ch09-9-5-3-coarse-coding-title.png)
+![coarse coding](/assets/images/ch09-9-5-3-coarse-coding.png)
 
 > **Coarse coding**: Generalization from state s to state s0 depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them.
 
