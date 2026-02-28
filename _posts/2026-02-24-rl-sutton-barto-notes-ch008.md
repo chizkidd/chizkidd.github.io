@@ -30,6 +30,8 @@ mathjax: true
 - [8.12 Summary](#812-summary)
 - [8.13 Summary of Part I: Dimensions](#813-summary-of-part-i-dimensions)
 
+## Appendix
+- [Citation](#citation)
 ---
 
 ## 8.1 Models & Planning
@@ -668,7 +670,9 @@ $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \tex
 
 ---
 
-Cited
+## Citation
+
+If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh08notes,

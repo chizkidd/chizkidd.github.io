@@ -242,7 +242,9 @@ The future of machine learning lies in this intersection of physics-inspired dyn
 
 ---
 
-Cited as:
+## Citation
+
+If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026MLmathfoundations,

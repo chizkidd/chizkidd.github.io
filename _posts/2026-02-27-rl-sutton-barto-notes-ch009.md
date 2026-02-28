@@ -38,6 +38,9 @@ $$\hat{v}(s, \mathbf{w}) \approx V_\pi(s)$$
 - [9.11 Looking Deeper at On-Policy Learning: Interest & Emphasis](#911-looking-deeper-at-on-policy-learning-interest--emphasis)
 - [9.12 Summary](#912-summary)
 
+## Appendix
+- [Citation](#citation)
+
 ---
 
 ## 9.1 Value-Function Approximation
@@ -633,7 +636,9 @@ $$\text{with } M_t \doteq 0, \quad \forall t < 0$$
 
 ---
 
-Cited as:
+## Citation
+
+If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh09notes,
