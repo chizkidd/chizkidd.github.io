@@ -155,10 +155,12 @@ $$
 
 - Although $\overline{\text{VE}}$ is a good starting point, it's not completely clear that it is the right performance objective.
 - The **ultimate goal** (reason for learning a value function) is to find a better policy.
-- If we use $\overline{\text{VE}}$, the goal is to find a **global optimum**:
-$$\text{optimal weight vector} \hspace{.5em} \mathbf{w}^* \hspace{.5em} \text{for which} \hspace{.75em} \overline{\text{VE}}(\mathbf{w}^*) \leq \overline{\text{VE}}(\mathbf{w}), \quad \forall \mathbf{w}$$
+- If we use $\overline{\text{VE}}$, the goal is to find a **global optimum** (optimal weight vector, $\mathbf{w}^*$):
+
+$$\mathbf{w}^* \hspace{.5em} \text{for which} \hspace{.75em} \overline{\text{VE}}(\mathbf{w}^*) \leq \overline{\text{VE}}(\mathbf{w}), \quad \forall \mathbf{w}$$
 
 - Complex function approximators may converge to a **local optimum**: 
+
 $$\mathbf{w}^* \hspace{.5em} \text{for which} \hspace{.75em} \overline{\text{VE}}(\mathbf{w}^*) \leq \overline{\text{VE}}(\mathbf{w}), \quad \forall \mathbf{w} \hspace{.5em} \text{in some neighborhood of} \hspace{.5em} \mathbf{w}^*$$
 
 ---
