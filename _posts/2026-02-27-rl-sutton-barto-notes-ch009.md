@@ -556,8 +556,9 @@ $$\boxed{\mathbf{\hat{A}_t^{-1}} = \mathbf{\hat{A}_{t-1}^{-1}} - \frac{\mathbf{\
   - Do not limit approximations to pre-specified functional forms.
   - The more data accumulated, the better the accuracy.
   - Allow for relatively immediate effect on value estimates in the neighborhood of the current state.
-  - Handle/address the curse of dimensionality, which is a big problem for global approximation. 
-    - For example, for a state space with $K$ dimensions, a **tabular method** storing a global approximation requires memory ***exponential in $K$,*** while storing examples in a **memory-based method** requires only memory ***proportional to $K$, or linear in the number of examples $n$.***
+  - Handle/address the curse of dimensionality, which is a big problem for global approximation. For example, for a state space with $K$ dimensions, 
+    - A **tabular method** storing a global approximation requires memory ***exponential in $K$,*** while
+    - Storing examples in a **memory-based method** requires only memory ***proportional to $K$, or linear in the number of examples $n$.***
 
 ---
 
