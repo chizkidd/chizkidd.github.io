@@ -83,8 +83,11 @@ $$\boxed{\overline{\text{VE}}(\mathbf{w}) \doteq \sum_{s \in S} \mu(s) \left[V_\
 - Often $\mu$ is chosen to be the fraction of time spent in $s$, called the **on-policy distribution** under on-policy training.
 
 ### On-policy Distribution
+<ol>
 
-1. **Continuing tasks**: the on-policy distribution is the stationary distribution under $\pi$:
+<li>
+
+**Continuing tasks**: the on-policy distribution is the stationary distribution under $\pi$:
 
 $$\mu(s) = \sum_{s'} \mu(s') \sum_a \pi(a \vert s')\, p(s \vert s', a), \quad \forall s \in S$$
 
@@ -96,9 +99,13 @@ s' &= \text{preceding state}
 \end{aligned}
 $$
 
->This is the ***balance equation:*** the probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.
+>**Balance equation:** the probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.
 
-2. **Episodic tasks**: it depends on how the initial states of episodes are chosen:
+</li>
+
+<li>
+
+**Episodic tasks**: it depends on how the initial states of episodes are chosen:
 
 $$\eta(s) = h(s) + \sum_{\bar{s}} \eta(\bar{s}) \sum_a \pi(a \vert \bar{s})\, p(s \vert \bar{s}, a), \quad \forall s \in S$$
 
@@ -111,7 +118,8 @@ h(s) &= \text{probability that an episode begins in each state } s \\
 \end{aligned}
 $$
 
->This is the ***visitation equation:*** the expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.
+>**Visitation equation:** the expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.
+
 
 - This system of equations can be solved for the expected number of visits $\eta(s)$.
 - The on-policy distribution is the fraction of time spent in each state, normalized to sum to 1:
@@ -128,6 +136,10 @@ $$
 \gamma &= \text{discount factor }
 \end{aligned}
 $$
+
+</li>
+
+</ol>
 
 ### Performance Objective
 
