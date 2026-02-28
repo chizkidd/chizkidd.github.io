@@ -21,7 +21,7 @@ $$\hat{v}(s, \mathbf{w}) \approx V_\pi(s)$$
 
 ## Table of Contents
 - [9.1 Value-Function Approximation](#91-value-function-approximation)
-- [9.2 The Prediction Objective (VE)](#92-the-prediction-objective-ve)
+- [9.2 The Prediction Objective (VE)](#92-the-prediction-objective-overlinetextve)
 - [9.3 Stochastic-Gradient & Semi-Gradient Methods](#93-stochastic-gradient--semi-gradient-methods)
 - [9.4 Linear Methods](#94-linear-methods)
 - [9.5 Feature Construction for Linear Methods](#95-feature-construction-for-linear-methods)
@@ -65,13 +65,14 @@ $$
 
 ---
 
-## 9.2 The Prediction Objective ($\overline{\text{VE}}$)  {#92-prediction-objective-ve}
+## 9.2 The Prediction Objective ($\overline{\text{VE}}$)
 
 - We have more states $s$ than weights $\mathbf{w}$, therefore we cannot feasibly approximate the value function perfectly.
 - Making one state's estimate more accurate invariably leads to making the others' less accurate.
 - Therefore, it is necessary to define which states we care most about, based on a **state distribution,** $\mu(s)$, that represents how much we care about the error in each state $s$.
 
 <!-- $$\text{state distribution, }  \hspace{1em} \mu(s) \geq 0, \sum_s \mu(s) = 1$$ -->
+
 $$\mu(s) \geq 0, \quad \sum_s \mu(s) = 1$$
 
 - Weighting the error in a state $s$, the difference between the approximate value $\hat{v}(s, \mathbf{w})$ and the true value $V_\pi(s)$, over the state space by $\mu$ leads to obtaining a natural objective function called the **mean squared value error**, denoted by $\overline{\text{VE}}$:
@@ -186,7 +187,7 @@ $$U_t = G_t$$
 
 $$\mathbf{w} \leftarrow \mathbf{w} + \alpha\!\left[G_t - \hat{v}(S_t, \mathbf{w})\right] \nabla \hat{v}(S_t, \mathbf{w}), \quad \alpha > 0$$
 
-- **Bootstrapping methods** are <u>***biased***</u> in that their target is dependent on the current value of the weights $\mathbf{w}$.
+- **Bootstrapping methods** are ***<u>biased</u>*** in that their target is dependent on the current value of the weights $\mathbf{w}$.
     - **Semi-gradient** (bootstrapping) methods converge reliably in linear cases. 
     - Bootstrapping targets could be **$n$-step returns** or **dynamic programming (DP)** targets.
 
