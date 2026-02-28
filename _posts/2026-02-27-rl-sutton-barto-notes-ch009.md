@@ -65,7 +65,7 @@ $$
 
 ---
 
-## 9.2 The Prediction Objective ($\overline{\text{VE}}$)
+## 9.2 The Prediction Objective ($\overline{\text{VE}}$)  {#92-prediction-objective-ve}
 
 - We have more states $s$ than weights $\mathbf{w}$, therefore we cannot feasibly approximate the value function perfectly.
 - Making one state's estimate more accurate invariably leads to making the others' less accurate.
@@ -168,7 +168,7 @@ $$
 
 $$\nabla f(\mathbf{w}) \doteq \left(\frac{\partial f(\mathbf{w})}{\partial w_1},\ \frac{\partial f(\mathbf{w})}{\partial w_2},\ \frac{\partial f(\mathbf{w})}{\partial w_3},\ \ldots,\ \frac{\partial f(\mathbf{w})}{\partial w_d}\right)^T$$
 
-- SGD methods are ***"gradient descent"*** methods because the overall step in $\mathbf{w}_t$ is proportional to the negative gradient of the example's squared error ($w_{t+1}$). This is the direction in which the error falls most rapidly.
+- SGD methods are ***"gradient descent"*** methods because the overall step in $\mathbf{w}\_t$ is proportional to the negative gradient of the example's squared error ($w\_{t+1}$). This is the direction in which the error falls most rapidly.
 - Gradient descent methods are called ***"stochastic"*** because the update is done on only a single example, which might have been selected stochastically.
 - If $\alpha$ decreases as expected in satisfaction of the standard stochastic approximation conditions, then SGD is guaranteed to converge to a local optimum.
 
