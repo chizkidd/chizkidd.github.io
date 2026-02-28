@@ -311,7 +311,7 @@ $$\mathbf{x}(s) = \bigl(1,\ s_1,\ s_2,\ s_1 s_2\bigr)^T$$
 
 - For $k$ numerical dimensions, suppose each state $s$ corresponds to $k$ numbers $$s_1, s_2, s_3, \ldots, s_k \text{ with each } s_i \in \mathbb{R.}$$ each order-$n$ polynomial-basis feature $x_i$ can be written as:
 
-$$x_i(s) = \prod_{j=1}^{k} s_j^{c_{i,j}}$$
+$$\boxed{x_i(s) = \prod_{j=1}^{k} s_j^{c_{i,j}}}$$
 
 $$
 \begin{aligned}
@@ -333,7 +333,7 @@ $$x_i(s) = \cos(i \pi s), \quad s \in [0, 1] \quad \text{for } i = 0, 1, 2, \ldo
 
 - For $k$-dimensional state space, the $i$-th feature in the order-$n$ Fourier cosine basis is:
 
-$$x_i(s) = \cos\!\left(\pi \mathbf{s}^T \mathbf{c}^i\right)$$
+$$\boxed{x_i(s) = \cos\!\left(\pi \mathbf{s}^T \mathbf{c}^i\right)}$$
 
 $$
 \begin{aligned}
@@ -352,7 +352,7 @@ $$
 
 ![coarse coding](/assets/images/ch09-9-5-3-coarse-coding.png)
 
-> **Coarse coding**: Generalization from state s to state s0 depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them.
+>**Coarse coding:** Generalization from state $s$ to state $s'$ depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them.
 
 - In the diagram above, if the state is inside a circle, then the corresponding feature has the value of 1 and is said to be **present**; otherwise the feature is 0 and is said to be **absent**.
 - This kind of 1-0 valued feature is called a **binary feature**.
@@ -368,34 +368,69 @@ $$
 - Each such partition is called a **tiling**, and each element of the partition is called a **tile**.
 - These tiles can be sets that are overlapping, uniform, or asymmetrically distributed.
 - The tiles do not need to be squares; they can be irregular shapes, horizontal/vertical/log lines.
+- **Advantages:** 
+  - Because tile coding works with partitions, the overall number of features that are active at one time is the **same** for any state.
+  - Because tile coding uses binary feature vectors, computing the approximate value function reduces to simply summing the $n$ weight components corresponding to the $n$ active tiles, rather than performing $d$ multiplications.
+
+- Generalization extends to states sharing tiles with the trained state, proportional to **tiles in common.** 
+  - **Uniform offsets** can introduce directional artifacts (e.g. diagonal bias); 
+  - **Asymmetric offsets** produce better-centered patterns.
+- Tilings are offset by $\frac{w}{n}$ (the fundamental unit). 
+  - **Uniform offsets** use displacement vector $(1,1)$; 
+  - **Asymmetric offsets** use $(1,3)$ for superior generalization.
+- Miller & Glanz (1996) recommend displacement vectors of **first odd integers** $(1, 3, 5, \ldots, 2k-1)$ for $k$ dimensions, with $n$ set to a **power of 2** $\geq 4k$.
+- Tile **number & size** determine resolution, while tile **shape** determines generalization.
+  - Square tiles generalize equally
+  - Elongated tiles generalize along their longer dimension
+  - Diagonal tiles generalize along a diagonal.
+- **Mixed tile shapes** (horizontal, vertical, conjunctive) allow per-dimension generalization while still learning values for specific conjunctions. Tile choice fully determines generalization behavior.
+- **Hashing** pseudorandomly collapses a large tiling into a much smaller set of tiles (each consisting of noncontiguous, disjoint regions), drastically reducing memory requirements with little performance loss.
+  - This sidesteps the curse of dimensionality since memory need only match the task's real demands rather than grow exponentially with dimensions.
+
+![hashing](/assets/images/ch09-9-5-4-hashing-border.png)
+
+>**Hashing:** 4 subtiles collapse into 1 tile in the above diagram
 
 ### 9.5.5 Radial Basis Functions (RBF)
 
 - RBFs are the natural extension/generalization of coarse coding to continuous-valued domain/feature space.
   - Rather than a feature being 0 or 1 (binary), it can take any value in the interval $[0, 1]$.
-- A typical RBF feature, $x_i$, has a Gaussian (bell-shaped) response $x_i(s)$ dependent only on the distance between the state $s$ and the feature's center state $c_i$ relative to the feature's width $\sigma_i$:
+- A typical RBF feature, $x_i$, has a Gaussian (bell-shaped) response $x_i(s)$ dependent only on the distance between the state $s$ and the feature's center state $c_i$, and relative to the feature's width $\sigma_i$:
 
-$$x_i(s) \doteq \exp\!\left(-\frac{\lVert s - c_i \rVert^2}{2\sigma_i^2}\right)$$
+$$\boxed{x_i(s) \doteq \exp\!\left(-\frac{\lVert s - c_i \rVert^2}{2\sigma_i^2}\right)}$$
+
+- let's see a 1-D example with a Euclidean distance metric
+
+![1D RBF](/assets/images/ch09-9-5-5-1dim-rbf.png)
+
+>**1-D RBF**: One-dimensional radial basis function
 
 - RBFs are more advantageous to binary features: they produce approximate functions that vary smoothly and are differentiable.
 - An **RBF network** is a linear function approximator using RBFs for its features.
 - Some learning methods for RBF networks change the features' centers and widths, making them nonlinear function approximators.
-- Nonlinear methods including nonlinear RBF networks are much more precise but are more computationally complex.
+- Nonlinear methods are much more precise in fitting the target functions, but (nonlinear) RBF networks are ***much more computationally complex*** and require more manual tuning before learning.
 
 ---
 
 ## 9.6 Selecting Step-Size Parameters Manually
 
 - What is the best way to select $\alpha$ for function approximation?
-  - The theory of stochastic approximation gives us conditions on a slowly decreasing step-size sequence that are sufficient to guarantee convergence, but these tend to result in learning that is too slow.
+- So far,
+  - The theory of stochastic approximation gives us conditions on a slowly decreasing step-size sequence that are sufficient to guarantee convergence, but these tend to result in learning that is **too slow.**
   - The sample-average classical method $\alpha_t = \frac{1}{t}$ is **not appropriate** for TD methods, for nonstationary problems, or for any function approximation method.
   - For linear methods, there are recursive least-square methods that set an optimal matrix step size which can be extended to LSTD methods (seen in Section 9.8), but these require $O(d^2)$ step-size parameters, or $d$ times more parameters than we are learning. Therefore, it is inappropriate for function approximation.
 
 - A good rule of thumb for setting the step-size parameter of linear SGD models is:
 
-$$\alpha \doteq \left(\tau\, \mathbb{E}\!\left[\mathbf{x}^T \mathbf{x}\right]\right)^{-1}$$
+$$\boxed{\alpha \doteq \left(\tau\, \mathbb{E}\!\left[\mathbf{x}^T \mathbf{x}\right]\right)^{-1}}$$
 
-where $\mathbf{x}$ = a random feature vector chosen from the same distribution as input vectors will be in the SGD, and $\tau$ = number of experiences within which learning converges.
+$$
+\begin{aligned}
+\text{where} \\
+\mathbf{x} &= \text{random feature vector chosen from the same distribution as input vectors in the SGD} \\
+\tau &= \text{number of experiences within which learning converges}
+\end{aligned}
+$$
 
 - This rule of thumb works best if the feature vectors do not vary greatly in length; ideally $\mathbf{x}^T \mathbf{x}$ is a constant.
 
@@ -405,16 +440,25 @@ where $\mathbf{x}$ = a random feature vector chosen from the same distribution a
 
 - ANNs are widely used for nonlinear function approximation.
 - An ANN is a network of interconnected units that have some of the properties of neurons, the main components of nervous systems.
-- The units (circles in the figure) compute a weighted sum of their input signals, and then apply a nonlinear function, called the **activation function**, to the result.
+
+![Generic ANN](/assets/images/ch09-9-7-ann.png)
+
+>**ANN**: A generic feedforward ANN with 4 input units, 2 output units, and 2 hidden layers.
+
+- The units (circles in the figure above) compute a weighted sum of their input signals, and then apply a nonlinear function, called the **activation function**, to the result.
 - Some activation functions include:
-  - Logistic function: $f(x) = 1/(1 + e^{-x})$
-  - Rectifier nonlinearity: $f(x) = \max(0, x)$
-  - Step function: $f(x) = \begin{cases} 1 & \text{if } x \geq 0 \\ 0 & \text{otherwise} \end{cases}$
+$$
+\begin{aligned}
+\text{Sigmoid:} \quad & f(x) = \frac{1}{1 + e^{-x}} \\ \\
+\text{ReLU:} \quad & f(x) = \max(0, x) \\ \\
+\text{Binary step:} \quad & f(x) = \left\{ \begin{array}{ll} 1 & \text{if } x \geq 0 \\ 0 & \text{if } x < 0 \end{array} \right\}
+\end{aligned}
+$$
 
 - ANNs can use TD errors to learn value functions, or they can aim to maximize expected reward as in a gradient bandit (Section 2.8) or a policy gradient algorithm (Chapter 13).
 - Overfitting in ANNs is a problem for function approximation that can be reduced through the **dropout** method [Srivastava, Hinton, Krizhevsky, Sutskever & Salakhutdinov, 2014].
-- Deep belief networks presented a major step towards solving the training problem of deep layers of a deep ANN [Hinton, Osindero & Teh, 2006].
-- **Batch normalization** makes it easier to train deep ANNs by normalizing the output of deep layers before they feed into the following layer; this improves the learning rate of deep ANNs [Ioffe & Szegedy, 2015].
+- **Deep belief networks** presented a major step towards solving the training problem of deep layers of a deep ANN [Hinton, Osindero & Teh, 2006].
+- **Batch normalization** makes it easier to train deep ANNs by normalizing the output of deep layers before they feed into the following layer. This improves the learning rate of deep ANNs [Ioffe & Szegedy, 2015].
 - **Deep residual learning** is another technique useful for training deep ANNs [He, Zhang, Ren & Sun, 2016].
 - **Deep Convolutional Networks** have proven to be very successful in impressive RL algorithms [LeCun, Bottou, Bengio & Haffner, 1998].
 - In summary, advances in the design and training of ANNs, of which we have only mentioned a few, all contribute to RL.
@@ -426,32 +470,44 @@ where $\mathbf{x}$ = a random feature vector chosen from the same distribution a
 
 - As established earlier, TD(0) with linear function approximator converges asymptotically (for appropriately decreasing step sizes) to the TD fixed point:
 
-$$\mathbf{w}_\text{TD} = \mathbf{A}^{-1}\mathbf{b}$$
+$$\boxed{\mathbf{w}_\text{TD} = \mathbf{A}^{-1}\mathbf{b}}$$
 
-where $A \doteq \mathbb{E}\!\left[\mathbf{x}_t\!\left(\mathbf{x}_t - \gamma \mathbf{x}_{t+1}\right)^T\right]$ and $b \doteq \mathbb{E}\!\left[R_{t+1}\, \mathbf{x}_t\right]$.
+$$
+\begin{aligned}
+\text{where} \\
+A &\doteq \mathbb{E}\!\left[\mathbf{x}_t\!\left(\mathbf{x}_t - \gamma \mathbf{x}_{t+1}\right)^T\right] \\
+b &\doteq \mathbb{E}\!\left[R_{t+1}\, \mathbf{x}_t\right]
+\end{aligned}
+$$
 
-- Instead of computing $\mathbf{w}_\text{TD}$ iteratively, let's compute estimates of $\mathbf{A}$ and $\mathbf{b}$ and then directly compute the TD fixed point. This is what **Least-Squares TD (LSTD)** does exactly.
-- The natural estimates are:
+- Instead of computing $\mathbf{w}_\text{TD}$ iteratively, let's compute estimates of $\mathbf{A}$ and $\mathbf{b}$ and then directly compute the TD fixed point. This is what **Least-Squares TD (LSTD)** does exactly. It forms the natural estimates:
 
-$$\hat{A}_t \doteq \sum_{k=0}^{t-1} x_k\!\left(\mathbf{x}_k - \gamma \mathbf{x}_{k+1}\right)^T + \varepsilon \mathbf{I}$$
+$$\mathbf{\hat{A}_t} \doteq \sum_{k=0}^{t-1} \mathbf{x_k}\!\left(\mathbf{x}_k - \gamma \mathbf{x}_{k+1}\right)^T + \varepsilon \mathbf{I}$$
 
-$$\hat{b}_t \doteq \sum_{k=0}^{t-1} R_{k+1}\, \mathbf{x}_k$$
+$$\mathbf{\hat{b}_t} \doteq \sum_{k=0}^{t-1} R_{k+1}\, \mathbf{x}_k$$
 
-where $\mathbf{I}$ is the identity matrix and $\varepsilon \mathbf{I}$ for some small $\varepsilon > 0$ ensures that $\hat{A}_t$ is always invertible.
+$$
+\begin{aligned}
+\text{where} \\
+\mathbf{I} &= \text{identity matrix}, \text{and} \\
+\varepsilon & \mathbf{I} \text{, for some small } \varepsilon > 0 \text{, ensures that } \mathbf{\hat{A}_t} \text{ is always invertible}
+\end{aligned}
+$$
 
 - The LSTD estimated TD fixed point is:
 
-$$\mathbf{w}_t \doteq \hat{A}_t^{-1} \hat{b}_t$$
+$$\boxed{\mathbf{w}_t \doteq \mathbf{\hat{A}_t}^{-1} \mathbf{\hat{b}_t}}$$
 
-**Computational Complexity:**
+### Computational Complexity
 
-- The inverse of $\hat{A}_t$ computation costs $O(d^3)$, but this can be reduced to $O(d^2)$ using the **Sherman-Morrison** formula:
+- The inverse of $\mathbf{\hat{A}_t}$ computation costs $O(d^3)$, but this can be reduced to $O(d^2)$ using the **Sherman-Morrison** formula:
 
-$$\hat{A}_t^{-1} = \left(\hat{A}_{t-1} + x_{t-1}\!\left(x_{t-1} - \gamma \mathbf{x}_t\right)^T\right)^{-1}$$
+$$\mathbf{\hat{A}_t^{-1}} = \left(\mathbf{\hat{A}_{t-1}} + \mathbf{x_{t-1}}\!\left(\mathbf{x_{t-1}} - \gamma \mathbf{x}_t\right)^T\right)^{-1}$$
 
-$$\hat{A}_t^{-1} = \hat{A}_{t-1}^{-1} - \frac{\hat{A}_{t-1}^{-1} \mathbf{x}_{t-1}\!\left(\mathbf{x}_{t-1} - \gamma \mathbf{x}_t\right)^T \hat{A}_{t-1}^{-1}}{1 + \left(\mathbf{x}_{t-1} - \gamma \mathbf{x}_t\right)^T A_{t-1}^{-1} \mathbf{x}_{t-1}}, \quad \text{for } t > 0, \text{ with } \hat{A}_0 \doteq \varepsilon \mathbf{I}$$
+$$\boxed{\mathbf{\hat{A}_t^{-1}} = \mathbf{\hat{A}_{t-1}^{-1}} - \frac{\mathbf{\hat{A}_{t-1}^{-1}} \mathbf{x}_{t-1}\!\left(\mathbf{x}_{t-1} - \gamma \mathbf{x}_t\right)^T \mathbf{\hat{A}_{t-1}^{-1}}}{1 + \left(\mathbf{x}_{t-1} - \gamma \mathbf{x}_t\right)^T \mathbf{\hat{A}_t^{-1}} \mathbf{x}_{t-1}}, \quad \text{for } t > 0, \text{ with } \mathbf{\hat{A}_0} \doteq \varepsilon \mathbf{I}}$$
 
 - LSTD does **not** require a step-size and as such means that it never forgets, which is sometimes desirable but often not in RL problems where both the policy and environment change with time.
+- However in control applications, LSTD typically has to be combined with some other mechanism to induce forgetting, negating its advantage of not requiring a step-size parameter.
 
 ---
 
@@ -475,7 +531,8 @@ $$\hat{A}_t^{-1} = \hat{A}_{t-1}^{-1} - \frac{\hat{A}_{t-1}^{-1} \mathbf{x}_{t-1
   - Do not limit approximations to pre-specified functional forms.
   - The more data accumulated, the better the accuracy.
   - Allow for relatively immediate effect on value estimates in the neighborhood of the current state.
-  - Handle/address the curse of dimensionality, which is a big problem for global approximation. For example, for a state space with $K$ dimensions, a tabular method storing a global approximation requires memory exponential in $K$, while storing examples in a memory-based method requires only memory proportional to $K$, or linear in the number of examples $n$.
+  - Handle/address the curse of dimensionality, which is a big problem for global approximation. 
+    - For example, for a state space with $K$ dimensions, a **tabular method** storing a global approximation requires memory ***exponential in $K$,*** while storing examples in a **memory-based method** requires only memory ***proportional to $K$, or linear in the number of examples $n$.***
 
 ---
 
@@ -488,17 +545,24 @@ $$\hat{A}_t^{-1} = \hat{A}_{t-1}^{-1} - \frac{\hat{A}_{t-1}^{-1} \mathbf{x}_{t-1
 $$k : S \times S \to \mathbb{R}$$
 
 - $k(s, s')$ is a measure of the strength of generalization from $s'$ to $s$.
-- Kernel functions numerically express how relevant knowledge about any state is to any other state.
-- **Kernel regression** is the memory-based method that computes a kernel weighted average of the targets of all examples stored in memory:
+- Kernel functions numerically express **how relevant** knowledge about any state is to any other state.
+- **Kernel regression** is the memory-based method that computes a kernel weighted average of the targets of **all examples** stored in memory:
 
-$$\hat{v}(s, D) = \sum_{s' \in D} k(s, s')\, g(s')$$
+$$\boxed{\hat{v}(s, D) = \sum_{s' \in D} k(s, s')\, g(s')}$$
 
-where $\hat{v}(s, D)$ = value function approximation for query state $s$ for $D$ set of stored examples, $D$ = set of stored examples, $g(s')$ = target for state $s'$ in a stored example (Gaussian RBF discussed earlier in Section 9.5.5).
+$$
+\begin{aligned}
+\text{where} \\
+\hat{v}(s, D) &= \text{value function approximation for query state } s \text{ over stored examples } D \\
+D &= \text{set of stored examples} \\
+g(s') &= \text{target for state } s' \text{ in a stored example}
+\end{aligned}
+$$
 
-- A common kernel is the Gaussian Radial Basis Function (RBF).
+- A common kernel is the Gaussian Radial Basis Function (RBF) discussed earlier in Section 9.5.5.
 - Kernel regression with RBF differs from linear-based RBF in 2 ways:
-  - It is memory-based $\Rightarrow$ RBFs are centered on the states of the stored examples.
-  - It is non-parametric $\Rightarrow$ no parameters to learn.
+  - It is **memory-based** $\Rightarrow$ RBFs are centered on the states of the stored examples.
+  - It is **non-parametric** $\Rightarrow$ no parameters to learn.
 
 - We can recast any linear parametric regression method with feature vectors $\mathbf{x}(s) = (x_1(s), x_2(s), x_3(s), \ldots, x_d(s))^T$ into a kernel regression as:
 
@@ -513,13 +577,13 @@ $$k(s, s') = \mathbf{x}(s)^T \mathbf{x}(s')$$
 - So far we have treated all encountered states with equal importance, however it seems more likely that we often have more interest in some states than others.
 - For this scenario, we introduce 2 new concepts: **Interest** and **Emphasis**.
 
-**Interest:**
+### Interest
 
 - Interest is the degree to which we value an accurate estimate of the values of a given state. How interested are we in the accurate valuation of a given state at time $t$?
 
 $$\mathcal{I}_t \in [0, 1]$$
 
-**Emphasis:**
+### Emphasis
 
 - Emphasis is a non-negative scalar random variable that multiplies the learning update and thus emphasizes or de-emphasizes the learning done at time $t$.
 - The general $n$-step learning update is:
@@ -530,19 +594,19 @@ $$G_{t:t+n} \doteq R_{t+1} + \gamma R_{t+2} + \cdots + \gamma^{n-1} R_{t+n} + \g
 
 - The emphasis is determined recursively from the interest:
 
-$$M_t = \mathcal{I}_t + \gamma^n M_{t-n}, \quad 0 \leq t < T$$
+$$\boxed{M_t = \mathcal{I}_t + \gamma^n M_{t-n}, \quad 0 \leq t < T}$$
 
-with $M_t \doteq 0$, $\forall t < 0$.
+$$\text{with } M_t \doteq 0, \quad \forall t < 0$$
 
 ---
 
 ## 9.12 Summary
 
-- Generalization is a must for RL systems for AI applications and supervised-learning function approximation helps achieve this.
-- The prediction objective $\overline{\text{VE}}(\mathbf{w})$, called the mean squared value error, gives us a clear way to rank different value-function approximations in the on-policy case.
+- **Generalization** is a must for RL systems for AI applications and **supervised-learning function approximation** helps achieve this.
+- The prediction objective $\overline{\text{VE}}(\mathbf{w})$, called the **mean squared value error,** gives us a clear way to rank different value-function approximations in the on-policy case.
 - Most techniques use stochastic gradient descent (SGD) to find the set of weight parameters that minimize $\overline{\text{VE}}(\mathbf{w})$.
 - Linear methods converge to the global optimum under certain conditions.
-- Features constructed for linear function approximations could be represented as: polynomials, Fouriers, coarse codings, tile codings, and radial basis functions (RBFs).
+- Features constructed for linear function approximations could be represented as: **polynomials, Fouriers, coarse codings, tile codings, and radial basis functions (RBFs).**
 - A huge success in notable RL applications could be attributed to multi-layer ANNs as nonlinear function approximators.
-- Non-parametric models help us avoid the curse of dimensionality.
-- Interest and Emphasis enable us to focus the function approximation on the states we're more interested in.
+- Non-parametric models help us **avoid the curse of dimensionality.**
+- **Interest and Emphasis** enable us to focus the function approximation on the states we're more interested in.
