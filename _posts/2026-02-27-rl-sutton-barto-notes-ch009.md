@@ -329,7 +329,7 @@ $$\boxed{\overline{\text{VE}}(\mathbf{w}_\text{TD}) \leq \frac{1}{1-\gamma} \min
 
 $$\mathbf{x}(s) = \bigl(1,\ s_1,\ s_2,\ s_1 s_2\bigr)^T$$
 
-- For $k$ numerical dimensions, suppose each state $s$ corresponds to $k$ numbers $$s_1, s_2, s_3, \ldots, s_k \text{ with each } s_i \in \mathbb{R.}$$ each order-$n$ polynomial-basis feature $x_i$ can be written as:
+- For $k$ numerical dimensions, suppose each state $s$ corresponds to $k$ numbers, $s_1, s_2, s_3, \ldots, s_k \text{ with each } s_i \in \mathbb{R}$, each order-$n$ polynomial-basis feature $x_i$ can be written as:
 
 $$\boxed{x_i(s) = \prod_{j=1}^{k} s_j^{c_{i,j}}}$$
 
