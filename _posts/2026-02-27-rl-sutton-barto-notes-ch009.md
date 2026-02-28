@@ -87,7 +87,7 @@ $$\boxed{\overline{\text{VE}}(\mathbf{w}) \doteq \sum_{s \in S} \mu(s) \left[V_\
 
 <li>
 
-**Continuing tasks**: the on-policy distribution is the stationary distribution under $\pi$:
+<strong>Continuing tasks</strong>: the on-policy distribution is the stationary distribution under $\pi$:
 
 $$\mu(s) = \sum_{s'} \mu(s') \sum_a \pi(a \vert s')\, p(s \vert s', a), \quad \forall s \in S$$
 
@@ -99,13 +99,15 @@ s' &= \text{preceding state}
 \end{aligned}
 $$
 
->**Balance equation:** the probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.
+<blockquote>
+<p><strong><em>Balance Equation:</em></strong> the probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.</p>
+</blockquote>
 
 </li>
 
 <li>
 
-**Episodic tasks**: it depends on how the initial states of episodes are chosen:
+<strong>Episodic tasks</strong>: it depends on how the initial states of episodes are chosen:
 
 $$\eta(s) = h(s) + \sum_{\bar{s}} \eta(\bar{s}) \sum_a \pi(a \vert \bar{s})\, p(s \vert \bar{s}, a), \quad \forall s \in S$$
 
@@ -118,15 +120,20 @@ h(s) &= \text{probability that an episode begins in each state } s \\
 \end{aligned}
 $$
 
->**Visitation equation:** the expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.
+<blockquote>
+<p><strong><em>Visitation Equation:</em></strong> the expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.</p>
+</blockquote>
 
-
-- This system of equations can be solved for the expected number of visits $\eta(s)$.
-- The on-policy distribution is the fraction of time spent in each state, normalized to sum to 1:
+<ul>
+<li>This system of equations can be solved for the expected number of visits $\eta(s)$.</li>
+<li>The on-policy distribution is the fraction of time spent in each state, normalized to sum to 1:</li>
+</ul>
 
 $$\mu(s) = \frac{\eta(s)}{\sum_{s'} \eta(s')}, \quad \forall s \in S$$
 
-- If discounting exists, then we redefine $\eta(s)$:
+<ul>
+<li>If discounting exists, then we redefine $\eta(s)$:</li>
+</ul>
 
 $$\eta(s) = h(s) + \gamma \sum_{\bar{s}} \eta(\bar{s}) \sum_a \pi(a \vert \bar{s})\, p(s \vert \bar{s}, a), \quad \forall s \in S$$
 
