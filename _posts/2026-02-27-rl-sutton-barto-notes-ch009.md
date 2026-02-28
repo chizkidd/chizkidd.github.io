@@ -630,3 +630,21 @@ $$\text{with } M_t \doteq 0, \quad \forall t < 0$$
 - A huge success in notable RL applications could be attributed to multi-layer ANNs as nonlinear function approximators.
 - Non-parametric models help us **avoid the curse of dimensionality.**
 - **Interest and Emphasis** enable us to focus the function approximation on the states we're more interested in.
+
+---
+
+Cited as:
+
+```bibtex
+@article{obasi2026RLsuttonBartoCh09notes,
+  title   = "Sutton & Barto, Ch. 09: On-Policy Prediction with Approximation (Personal Notes)",
+  author  = "Obasi, Chizoba",
+  journal = "chizkidd.github.io",
+  year    = "2026",
+  month   = "Feb",
+  url     = "https://chizkidd.github.io/2026/02/27/rl-sutton-barto-notes-ch009/"
+}
+```
+
+
+---

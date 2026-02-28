@@ -664,3 +664,22 @@ $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \tex
 
 - The most important dimension not mentioned or covered yet is that of **function approximation**:
   - Function approximation can be viewed as an orthogonal spectrum of possibilities ranging from **tabular methods** at one extreme through **state aggregation**, a variety of **linear methods**, and then a diverse set of **non-linear methods**.
+
+
+---
+
+Cited
+
+```bibtex
+@article{obasi2026RLsuttonBartoCh08notes,
+  title   = "Sutton & Barto, Ch. 08: Planning & Learning with Tabular Methods (Personal Notes)",
+  author  = "Obasi, Chizoba",
+  journal = "chizkidd.github.io",
+  year    = "2026",
+  month   = "Feb",
+  url     = "https://chizkidd.github.io/2026/02/24/rl-sutton-barto-notes-ch008/"
+}
+```
+
+
+---
