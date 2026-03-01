@@ -32,6 +32,7 @@ mathjax: true
 
 ## Appendix
 - [Citation](#citation)
+
 ---
 
 ## 8.1 Models & Planning
@@ -225,8 +226,8 @@ Loop forever:
 
 | Value estimated | Expected updates (DP) | Sample updates (one-step TD) |
 |---|---|---|
-| $V_\pi(s)$ | Policy evaluation<br>(full branching over actions & next states) | TD(0)<br>(single sampled transition) |
-| $V_*(s)$ | Value iteration (max over actions, full branching) | — |
+| $v_\pi(s)$ | Policy evaluation<br>(full branching over actions & next states) | TD(0)<br>(single sampled transition) |
+| $v_*(s)$ | Value iteration (max over actions, full branching) | — |
 | $q_\pi(s,a)$ | $q$-policy evaluation | Sarsa |
 | $q_*(s,a)$ | $q$-value iteration | Q-learning |
 
@@ -239,7 +240,7 @@ Loop forever:
 - Any of these one-step updates can be used in planning methods:
   - **Dyna-Q** uses $q_*$ sample or expected updates, or either expected or sample $q_\pi$ updates.
   <!-- - **Dyna-Q** uses $q_*$  sample updates, but could also use $q_{*}$  expected updates, or either expected or sample $q_{\pi}$ updates -->
-  - **Dyna-AC** uses $V_\pi$ sample updates together with a learning policy structure.
+  - **Dyna-AC** uses $v_\pi$ sample updates together with a learning policy structure.
   - For stochastic problems, prioritized sweeping is always done using one of the expected updates.
 
 - Absence of a distribution model means that expectation is impossible, but sampling can be done.
@@ -437,7 +438,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
    - <u>Full tree expansion:</u> $O(b^K)$ where $b$ = branching factor.
    - <u>With pruning/selection:</u> $O(f(b, K))$ where $f < b^K$.
 3. **Memory**: $O(bK)$ with depth-first implementation.
-4. **Backed-up value interpretation**: $V_{\text{tree}}(s)$ estimates the $K$-step optimal value starting from $s$.
+4. **Backed-up value interpretation**: $v_{\text{tree}}(s)$ estimates the $K$-step optimal value starting from $s$.
 
 ---
 
