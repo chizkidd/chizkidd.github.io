@@ -173,7 +173,7 @@ If you want to explore the data or replicate the analysis:
 - **Code:** [GitHub](https://github.com/chizkidd/igbo-asr-tonal-evaluation)
 - **Audio samples:** You can actually listen to the 21 clips and see the transcription failures yourself
 
-The dataset is CC-BY-4.0, the code is MIT licensed. If this is useful for your work, cite it, remix it, build on it. That's the point.
+The dataset is CC-BY-4.0 licensed, while the code is MIT licensed. If this is useful for your work, feel free to use it, cite it, and build on it.
 
 ## Final Thoughts
 
