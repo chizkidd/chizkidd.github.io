@@ -96,10 +96,10 @@ Imagine you're dictating a text message in Igbo and the system confidently trans
 
 {% capture c %}
 75.5% diacritic loss means:
-- 3 out of 4 tone marks disappear
-- "cloth" → could mean "crying"
-- "egg" → meaning lost entirely
-- "bridge" → wrong word
+3 out of 4 tone marks disappear
+"cloth" → could mean "crying"
+"egg" → meaning lost entirely
+"bridge" → wrong word
 <br>
 In English, this would be like dropping 75% of consonants.
 {% endcapture %}
@@ -115,7 +115,7 @@ Igbo is interesting because by speaker population (45 million people), it's not 
 
 {% capture c %}
 omniASR claims support for 1,600+ languages. Igbo has 45 million speakers, but its tonal accuracy is 24.5% (only 1 in 4 tone marks preserved).<br>
-> Coverage (in training data) ≠ Competence (preserves meaning)
+- Coverage (in training data) ≠ Competence (preserves meaning)
 {% endcapture %}
 {% include callout.html type="note" title="'Supported' ≠ Works Well" content=c %}
 
