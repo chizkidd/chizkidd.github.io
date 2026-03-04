@@ -216,17 +216,20 @@ The model ADDED tone marks I never spoke. This is clear evidence of orthographic
 ### Hypothesis Testing
 
 ```
-H0: Diacritic loss in tonal category ≤ other categories
-H1: Tonal category shows higher loss
+Null hypothesis (H0): Diacritic loss in tonal category ≤ other categories  
+Alternative (H1): Tonal category shows higher loss
 
-Test: Bootstrap confidence intervals
-Result: Tonal CI [57.1%, 89.7%] does not overlap with other categories
-Conclusion: Tonal degradation is statistically distinguishable
+Test: Bootstrap confidence intervals (10,000 iterations, 95% CI)
+
+Result: Tonal bootstrap mean (75.5%) substantially exceeds all other categories (highest alternative: 38.9% for script hallucination). While confidence intervals show some overlap due to small sample size, the tonal category's point estimate is nearly 2x higher than the next closest category.
+
+Conclusion: Tonal degradation exhibits the highest loss rate across all categories (bootstrap mean: 75.5%). While confidence intervals show some overlap with script hallucination due to small sample size (N=21), the effect size is large and consistent across resamples.
 ```
 
 ### Robustness Check
 
-Even under worst-case assumptions using the lower bound of the confidence interval, tonal loss remains at 57.1%, which is still greater than 50%. Overall loss stays at 30.3%, which is still substantial. This suggests effects are unlikely to be sampling artifacts.
+Even under worst-case assumptions using the lower bound of the confidence interval, tonal loss remains at 57.1%, which is still greater than 50%. Overall loss stays at 30.3%, which is still substantial. This suggests the observed tonal degradation is unlikely to be driven solely by sampling variability.
+
 
 ## Code
 
