@@ -136,6 +136,14 @@ Example result:
 
 The bootstrap mean exceeds the raw percentage because resampling at utterance level gives more weight to samples with extreme loss rates. Both values are reported for transparency.
 
+{% capture c %}
+With only 21 samples, we need uncertainty quantification. Bootstrap resampling (10,000 iterations) shows:
+> - Worst-case lower bound: 57.1%
+> - Even pessimistically, loss is still >50%
+> - Not a small-sample fluke
+{% endcapture %}
+{% include callout.html type="note" title="Why Bootstrap Matters" content=c %}
+
 ## Results
 
 ### Quantitative Summary
@@ -203,6 +211,15 @@ Model output: "ọne rị ọjí nụ tútú"    (7 diacritics)
 
 The model ADDED tone marks I never spoke. This is clear evidence of orthographic bias over acoustic conditioning. The model is using statistical patterns from training data to guess where diacritics should go, not listening to the audio.
 
+{% capture c %}
+**File 09:** Spoke "O na-eri oji n'ututu" with FLAT intonation  
+**Expected:** 0 diacritics (no tonal variation in audio)  
+**Result:** Model added 7 tone marks that weren't spoken  
+<br>
+This is evidence of orthographic bias, not acoustic perception.
+{% endcapture %}
+{% include callout.html type="note" title="Key Diagnostic: The Monotone Test" content=c %}
+
 ## Statistical Analysis
 
 ### Hypothesis Testing
@@ -263,6 +280,15 @@ Saved: results/visualizations/fig2_cer_vs_loss.png
 Saved: results/visualizations/fig3_bootstrap_ci.png
 ```
 
+{% capture c %}
+**Model:** omniASR-CTC-1B (975M params)  
+**Data:** 21 samples, 4 categories  
+**Metrics:** Custom DER (Diacritic Error Rate)  
+**Stats:** Bootstrap with utterance-level resampling  
+**Code:** github.com/chizkidd/igbo-asr-tonal-evaluation
+{% endcapture %}
+{% include callout.html type="note" title="Reproducibility" content=c %}
+
 ## Scope and Limitations
 
 This study demonstrates three things. First, systematic diacritic loss in omniASR on Igbo across 21 controlled samples. Second, failure to preserve tonal minimal pairs in this evaluation setup. Third, diacritic hallucination on monotone speech, which is evidence of orthographic bias.
@@ -270,6 +296,14 @@ This study demonstrates three things. First, systematic diacritic loss in omniAS
 This study does not claim four things. It doesn't claim universal failure on all Igbo speech. It doesn't claim that tone modeling is architecturally absent from the model. It doesn't claim that Igbo is uniquely disadvantaged compared to all other low-resource languages. And it doesn't claim that the observed error rates generalize to all dialects or all speakers.
 
 What would strengthen these claims? Multi-speaker evaluation with 10+ speakers across different dialects. Acoustic analysis with F0 contour extraction and pitch tracking validation. Comparative evaluation on other models like Whisper, MMS, USM, and Azure Speech. And controlled resynthesis experiments that isolate acoustic factors from lexical priors.
+
+{% capture c %}
+**Current:** Single speaker, 21 samples (proof-of-concept)  
+**Next:** 200 samples, 10+ speakers, 5 dialects  
+**Then:** Comparative evaluation (Whisper, MMS, Azure)  
+**Finally:** Fine-tuning intervention with tone-annotated data
+{% endcapture %}
+{% include callout.html type="note" title="Future Work" content=c %}
 
 ## Real Production Systems
 

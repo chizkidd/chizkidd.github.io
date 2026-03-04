@@ -7,7 +7,7 @@ date: 2026-03-04
 mathjax: true
 ---
 
-I grew up speaking Igbo in Northern Nigeria, code-switching between English, Igbo, and Hausa almost unconsciously. Like many bilingual Nigerians, I've watched voice assistants and ASR systems get better and better at English while struggling with our languages. When Meta released omniASR claiming support for over 1,600 languages including Igbo, I was curious. Does "supported" mean it actually works?
+I grew up in an Igbo household in Northern Nigeria, that code-switched between English, Igbo, and Hausa almost unconsciously. Like many bilingual Nigerians, I've watched voice assistants and ASR systems get better and better at English while struggling with our languages. When Meta released omniASR claiming support for over 1,600 languages including Igbo, I was curious. Does "supported" mean it actually works?
 
 Turns out, the answer is more complicated than I expected.
 
@@ -44,13 +44,13 @@ But here's what really convinced me the model isn't actually listening to tones:
 If the model were using acoustic information to place diacritics, it shouldn't be adding tones to flat speech. This suggests it's doing something else: probably using statistical patterns from training data to guess where diacritics should go, rather than actually hearing them.
 
 {% capture c %}
-> **File 09:** Spoke "O na-eri oji n'ututu" with FLAT intonation  
-> **Expected:** 0 diacritics (no tonal variation in audio)  
-> **Result:** Model added 7 tone marks that weren't spoken  
->
-> This is evidence of orthographic bias, not acoustic perception.
+**File 09:** Spoke "O na-eri oji n'ututu" with FLAT intonation  
+**Expected:** 0 diacritics (no tonal variation in audio)  
+**Result:** Model added 7 tone marks that weren't spoken  
+<br>
+This is evidence of orthographic bias, not acoustic perception.
 {% endcapture %}
-{% include callout.html type="note" title="**🔬 Key Diagnostic: The Monotone Test**" content=c %}
+{% include callout.html type="note" title="Key Diagnostic: The Monotone Test" content=c %}
 
 ### What the Data Shows
 
@@ -94,6 +94,17 @@ I keep coming back to the monotone hallucination test. If I were building a voic
 
 Imagine you're dictating a text message in Igbo and the system confidently transcribes "crying" when you said "cloth." Not just a typo you can spot and fix. A completely different word that makes semantic nonsense but looks plausible.
 
+{% capture c %}
+75.5% diacritic loss means:
+- 3 out of 4 tone marks disappear
+- "cloth" → could mean "crying"
+- "egg" → meaning lost entirely
+- "bridge" → wrong word
+<br>
+In English, this would be like dropping 75% of consonants.
+{% endcapture %}
+{% include callout.html type="note" title="What 75% Loss Means" content=c %}
+
 This isn't just about transcription accuracy. It's about whether "supporting 1,600+ languages" means anything more than "we trained on data from 1,600+ languages and didn't check if it actually works for tonal distinctions."
 
 ## The Bigger Picture: Zeno's Paradox of Low-Resource Languages
@@ -101,6 +112,12 @@ This isn't just about transcription accuracy. It's about whether "supporting 1,6
 There's a paper from EMNLP 2024 that talks about "The Zeno's Paradox of Low-Resource Languages." The basic idea: models keep claiming to support more and more languages, but the quality asymptote never actually reaches parity with high-resource languages. We get closer and closer, but never quite there.
 
 Igbo is interesting because by speaker population (45 million people), it's not low-resource. But by model performance, it clearly behaves like one. The gap between coverage (we trained on Igbo data) and competence (the model preserves linguistically meaningful distinctions) is huge.
+
+{% capture c %}
+omniASR claims support for 1,600+ languages. Igbo has 45 million speakers, but its tonal accuracy is 24.5% (only 1 in 4 tone marks preserved).<br>
+> Coverage (in training data) ≠ Competence (preserves meaning)
+{% endcapture %}
+{% include callout.html type="note" title=""Supported" ≠ Works Well" content=c %}
 
 This makes me think about all the other languages in that 1,600+ list. How many of them have this same gap? How many communities are using systems that confidently produce nonsense because nobody with native speaker expertise has stress-tested them?
 
@@ -182,18 +199,6 @@ If you found this work helpful, please consider citing it:
 }
 ```
 
-**For the dataset:**
-```bibtex
-@misc{obasi2026igbodataset,
-  title={Igbo Blind Spot Dataset for omniASR-CTC-1B: Systematic Evaluation of Tonal Diacritic Loss},
-  author={Obasi, Chizoba},
-  year={2026},
-  publisher={HuggingFace},
-  howpublished={\url{https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots}},
-  note={Model evaluated: facebook/omniASR-CTC-1B (975M parameters)}
-}
-```
-
 ---
 
-*All code and data for this project are openly available. Special thanks to everyone who reviewed early versions of this analysis and helped me think through the statistical approaches. All errors and interpretations are my own.*
+*All code and data for this project are openly available. All errors and interpretations are my own.*
