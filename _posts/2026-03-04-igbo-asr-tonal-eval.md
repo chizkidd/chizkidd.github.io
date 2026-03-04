@@ -31,7 +31,7 @@ I designed a simple test. Using my iPhone Voice Memos app, I recorded 21 short a
 
 Then I ran everything through omniASR and compared what I actually said to what it transcribed.
 
-## The Results: 75% Tone Loss
+## The Results: 75% Bootstrap Tone Loss
 
 The numbers were worse than I expected.
 
@@ -58,7 +58,7 @@ I created three visualizations to make the patterns clear.
 
 ![loss by category](/assets/images/fig1_loss_by_category.png)
 
-**Figure 1** shows diacritic loss by category. The tonal category (in red) jumps out immediately at 61.2% loss. For comparison, the domain-specific category had only 6.3% loss. But look at the cross-lingual interference category: it's at -38.9%, which means the model was adding diacritics that don't exist. It's not just dropping tones, it's hallucinating them in the wrong places.
+**Figure 1** shows diacritic loss by category. The tonal category (in red) jumps out immediately at 61.2% raw count loss. For comparison, the domain-specific category had only 6.3% loss. But look at the cross-lingual interference category: it's at -38.9%, which means the model was adding diacritics that don't exist. It's not just dropping tones, it's hallucinating them in the wrong places.
 
 ![char error rate vs diacritic loss](/assets/images/fig2_cer_vs_diacritic_loss.png)
 
@@ -95,7 +95,7 @@ I keep coming back to the monotone hallucination test. If I were building a voic
 Imagine you're dictating a text message in Igbo and the system confidently transcribes "crying" when you said "cloth." Not just a typo you can spot and fix. A completely different word that makes semantic nonsense but looks plausible.
 
 {% capture c %}
-75.5% diacritic loss means:<br>
+75.5% bootstrap diacritic loss means:<br>
 3 out of 4 tone marks disappear<br>
 "cloth" → could mean "crying"<br>
 "egg" → meaning lost entirely<br>
@@ -103,7 +103,7 @@ Imagine you're dictating a text message in Igbo and the system confidently trans
 <br>
 In English, this would be like dropping 75% of consonants.
 {% endcapture %}
-{% include callout.html type="note" title="What 75% Loss Means" content=c %}
+{% include callout.html type="note" title="What 75% Tonal Loss Means" content=c %}
 
 This isn't just about transcription accuracy. It's about whether "supporting 1,600+ languages" means anything more than "we trained on data from 1,600+ languages and didn't check if it actually works for tonal distinctions."
 

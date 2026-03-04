@@ -7,7 +7,7 @@ date: 2026-03-01
 mathjax: true
 ---
 
-This is a brief guide to my evaluation of tonal preservation in facebook/omniASR-CTC-1B for Igbo, a tonal Niger-Congo language with 45 million speakers. The model claims support for 1,600+ languages including Igbo, but what does "support" mean when tone changes word meaning? I created 21 systematically designed audio samples, ran them through the model, and measured a 75.5% diacritic loss rate on tonal markers. The core finding: the model appears to generate tone marks probabilistically based on orthographic priors rather than acoustic conditioning. I cannot simplify this investigation any further.
+This is a brief guide to my evaluation of tonal preservation in facebook/omniASR-CTC-1B for Igbo, a tonal Niger-Congo language with 45 million speakers. The model claims support for 1,600+ languages including Igbo, but what does "support" mean when tone changes word meaning? I created 21 systematically designed audio samples, ran them through the model, and measured a 75.5% bootstrapped diacritic loss rate on tonal markers. The core finding: the model appears to generate tone marks probabilistically based on orthographic priors rather than acoustic conditioning. I cannot simplify this investigation any further.
 
 Where to find it: The dataset with audio is on [HuggingFace](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots). The code and analysis are on [GitHub](https://github.com/chizkidd/igbo-asr-tonal-evaluation). The full analysis notebook is available at [analysis.ipynb](https://github.com/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb).
 
@@ -131,7 +131,7 @@ Bootstrap resampling occurs at the **utterance level**, not event level. This ma
 Example result:
 
 * Raw count: 30/49 = 61.2% drop rate
-* Bootstrap mean: 75.5%
+* Bootstrap mean: 75.5% 
 * 95% CI: [57.1%, 89.7%]
 
 The bootstrap mean exceeds the raw percentage because resampling at utterance level gives more weight to samples with extreme loss rates. Both values are reported for transparency.
@@ -148,9 +148,9 @@ With only 21 samples, we need uncertainty quantification. Bootstrap resampling (
 
 ### Quantitative Summary
 
-| Category | Samples | Diacritic Loss | Avg CER |
+| Category | Samples | Raw Diacritic Loss | Avg CER |
 |----------|---------|----------------|---------|
-| **Phonemic Tone Sensitivity** | 6 | **75.5%** | 50.6% |
+| **Phonemic Tone Sensitivity** | 6 | **61.2%** | 50.6% |
 | Cross-lingual Interference | 5 | -38.9% | 28.8% |
 | Domain-Specific Coverage | 5 | 6.3% | 30.1% |
 | Language Boundary Effects | 5 | 14.3% | 20.0% |
@@ -168,7 +168,7 @@ Even under the worst-case lower bound (57.1%), tonal diacritic loss remains seve
 ### Visualizations
 
 ![loss by category](/assets/images/fig1_loss_by_category.png)
-Bar chart showing 61.2% loss for tonal category (red), with error bars from bootstrap CIs.
+Bar chart showing 61.2% raw count loss for tonal category (red), with error bars from bootstrap CIs.
 
 ![char error rate vs diacritic loss](/assets/images/fig2_cer_vs_diacritic_loss.png)
 Scatter plot showing tonal samples (red) have high diacritic loss even when CER is moderate.
