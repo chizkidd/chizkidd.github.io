@@ -2,14 +2,14 @@
 layout: post
 comments: true
 title: "Tonal Fidelity in Multilingual ASR: A Diagnostic Evaluation"
-excerpt: Controlled evaluation of omniASR-CTC-1B on Igbo using 21 systematically designed samples. Diacritic Error Rate (DER) quantifies tone-specific failures. Bootstrap resampling (10,000 iterations) yields 75.5% loss (95% CI [57.1%, 89.7%]). Monotone control reveals orthographic bias. Includes full methodology, code, and reproducibility guide.
+excerpt: Controlled evaluation of omniASR-CTC-1B on Igbo language using 21 systematically designed samples. Diacritic Error Rate (DER) quantifies tone-specific failures. Bootstrap resampling (10,000 iterations) yields 75.5% loss (95% CI [57.1%, 89.7%]). Monotone control reveals orthographic bias. Includes full methodology, code, and reproducibility guide.
 date: 2026-03-01
 mathjax: true
 ---
 
 This is a brief guide to my evaluation of tonal preservation in facebook/omniASR-CTC-1B for Igbo, a tonal Niger-Congo language with 45 million speakers. The model claims support for 1,600+ languages including Igbo, but what does "support" mean when tone changes word meaning? I created 21 systematically designed audio samples, ran them through the model, and measured a 75.5% diacritic loss rate on tonal markers. The core finding: the model appears to generate tone marks probabilistically based on orthographic priors rather than acoustic conditioning. I cannot simplify this investigation any further.
 
-Where to find it: The dataset with audio is on HuggingFace at [huggingface.co/datasets/chiz/omniASR-igbo-blindspots](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots). The code and analysis are on GitHub at [github.com/chizkidd/igbo-asr-tonal-evaluation](https://github.com/chizkidd/igbo-asr-tonal-evaluation). The full analysis notebook is available at [analysis.ipynb](https://github.com/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb).
+Where to find it: The dataset with audio is on [HuggingFace](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots). The code and analysis are on [GitHub](https://github.com/chizkidd/igbo-asr-tonal-evaluation). The full analysis notebook is available at [analysis.ipynb](https://github.com/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb).
 
 The following is my guide to stepping through the evaluation methodology.
 

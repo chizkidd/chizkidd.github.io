@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "When Your Voice Assistant Can't Hear Tones: Evaluating ASR Bias in Igbo"
-excerpt: A systematic evaluation of tonal fidelity in facebook/omniASR-CTC-1B reveals 75% diacritic loss on Igbo tone marks. Evidence suggests the model generates tones probabilistically rather than acoustically. Includes 21 audio samples, bootstrap analysis, and a monotone hallucination test.
+excerpt: A systematic evaluation of tonal fidelity in facebook/omniASR-CTC-1B reveals 75% diacritic loss on Igbo language tone marks. Evidence suggests the model generates tones probabilistically rather than acoustically.
 date: 2026-03-04
 mathjax: true
 ---
