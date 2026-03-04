@@ -200,6 +200,3 @@ If you found this work helpful, please consider citing it:
 }
 ```
 
----
-
-*All code and data for this project are openly available. All errors and interpretations are my own.*
