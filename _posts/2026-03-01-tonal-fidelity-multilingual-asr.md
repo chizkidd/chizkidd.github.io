@@ -216,7 +216,7 @@ The model ADDED tone marks I never spoke. This is clear evidence of orthographic
 **Expected:** 0 diacritics (no tonal variation in audio)  
 **Result:** Model added 7 tone marks that weren't spoken  
 <br>
-This is evidence of orthographic bias, not acoustic perception.
+This is evidence of **orthographic bias,** not acoustic perception.
 {% endcapture %}
 {% include callout.html type="note" title="Key Diagnostic: The Monotone Test" content=c %}
 
