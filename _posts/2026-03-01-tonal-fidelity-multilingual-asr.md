@@ -323,7 +323,7 @@ If you found this evaluation helpful, please consider citing it:
   journal = "chizkidd.github.io",
   year    = "2026",
   month   = "Mar",
-  url     = "https://chizkidd.github.io/2026/03/04/tonal-fidelity-diagnostic-evaluation/"
+  url     = "https://chizkidd.github.io/2026/03/01/tonal-fidelity-diagnostic-evaluation/"
 }
 ```
 
