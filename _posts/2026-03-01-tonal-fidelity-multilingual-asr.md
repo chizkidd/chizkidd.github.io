@@ -138,9 +138,9 @@ The bootstrap mean exceeds the raw percentage because resampling at utterance le
 
 {% capture c %}
 With only 21 samples, we need uncertainty quantification. Bootstrap resampling (10,000 iterations) shows:
-(+) Worst-case lower bound: 57.1%
-(+) Even pessimistically, loss is still >50%
-(+) Not a small-sample fluke
+**Worst-case lower bound:** 57.1%
+**Even pessimistically,** loss is still >50%
+**Not** a small-sample fluke
 {% endcapture %}
 {% include callout.html type="note" title="Why Bootstrap Matters" content=c %}
 
@@ -352,7 +352,7 @@ If you found this evaluation helpful, please consider citing it:
 }
 ```
 
-**For the dataset:**
+For the dataset:
 ```bibtex
 @misc{obasi2026igbodataset,
   title={Igbo Blind Spot Dataset for omniASR-CTC-1B: Systematic Evaluation of Tonal Diacritic Loss},
