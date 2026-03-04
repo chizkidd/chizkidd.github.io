@@ -245,7 +245,8 @@ pip install -r requirements.txt
 jupyter notebook analysis.ipynb
 ```
 
-Or run in Google Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb)
+Or run in Google Colab: 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb)
 
 The notebook takes about 5-10 minutes to run on Colab with a T4 GPU. You'll see the analysis output:
 
