@@ -311,7 +311,7 @@ If every voice interface does this, what happens to how people write Igbo? Do th
 
 ## Resources
 
-The dataset is available at huggingface.co/datasets/chiz/omniASR-igbo-blindspots. The code is at github.com/chizkidd/igbo-asr-tonal-evaluation. The model evaluated is facebook/omniASR-CTC-1B on HuggingFace. The dataset is licensed under CC-BY-4.0 and the code under MIT. Use it, cite it, build on it.
+The dataset is available on [Huggingface](huggingface.co/datasets/chiz/omniASR-igbo-blindspots). The code is on [github](github.com/chizkidd/igbo-asr-tonal-evaluation). The model evaluated is [facebook/omniASR-CTC-1B](https://huggingface.co/facebook/omniASR-CTC-1B) on HuggingFace. The dataset is licensed under CC-BY-4.0 and the code under MIT. Feel free to use it, cite it, and build on it.
 
 ## Citation
 
