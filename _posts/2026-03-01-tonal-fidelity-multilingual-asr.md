@@ -211,15 +211,6 @@ Model output: "ọne rị ọjí nụ tútú"    (7 diacritics)
 
 The model ADDED tone marks I never spoke. This is clear evidence of orthographic bias over acoustic conditioning. The model is using statistical patterns from training data to guess where diacritics should go, not listening to the audio.
 
-{% capture c %}
-**File 09:** Spoke "O na-eri oji n'ututu" with FLAT intonation  
-**Expected:** 0 diacritics (no tonal variation in audio)  
-**Result:** Model added 7 tone marks that weren't spoken  
-<br>
-This is evidence of **orthographic bias,** not acoustic perception.
-{% endcapture %}
-{% include callout.html type="note" title="Key Diagnostic: The Monotone Test" content=c %}
-
 ## Statistical Analysis
 
 ### Hypothesis Testing
