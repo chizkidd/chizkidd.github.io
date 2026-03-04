@@ -138,9 +138,9 @@ The bootstrap mean exceeds the raw percentage because resampling at utterance le
 
 {% capture c %}
 With only 21 samples, we need uncertainty quantification. Bootstrap resampling (10,000 iterations) shows:
-- Worst-case lower bound: 57.1%
-- Even pessimistically, loss is still >50%
-- Not a small-sample fluke
+(+) Worst-case lower bound: 57.1%
+(+) Even pessimistically, loss is still >50%
+(+) Not a small-sample fluke
 {% endcapture %}
 {% include callout.html type="note" title="Why Bootstrap Matters" content=c %}
 
@@ -168,7 +168,7 @@ Even under the worst-case lower bound (57.1%), tonal diacritic loss remains seve
 ### Visualizations
 
 ![loss by category](/assets/images/fig1_loss_by_category.png)
-Bar chart showing 61.2% raw count loss for tonal category (red), with error bars from bootstrap CIs.
+Bar chart showing 61.2% raw count loss for tonal category (red), with negative values indicating diacritic hallucination (script interference).
 
 ![char error rate vs diacritic loss](/assets/images/fig2_cer_vs_diacritic_loss.png)
 Scatter plot showing tonal samples (red) have high diacritic loss even when CER is moderate.
