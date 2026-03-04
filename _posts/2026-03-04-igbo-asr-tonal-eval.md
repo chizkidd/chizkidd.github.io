@@ -56,7 +56,7 @@ This is evidence of **orthographic bias,** not acoustic perception.
 
 I created three visualizations to make the patterns clear.
 
-**Figure 1** shows diacritic loss by category. The tonal category (in red) jumps out immediately at 75.5% loss. For comparison, the domain-specific category had only 6.3% loss. But look at the cross-lingual interference category: it's at -38.9%, which means the model was adding diacritics that don't exist. It's not just dropping tones, it's hallucinating them in the wrong places.
+**Figure 1** shows diacritic loss by category. The tonal category (in red) jumps out immediately at 61.2% loss. For comparison, the domain-specific category had only 6.3% loss. But look at the cross-lingual interference category: it's at -38.9%, which means the model was adding diacritics that don't exist. It's not just dropping tones, it's hallucinating them in the wrong places.
 
 ![loss by category](/assets/images/fig1_loss_by_category.png)
 
