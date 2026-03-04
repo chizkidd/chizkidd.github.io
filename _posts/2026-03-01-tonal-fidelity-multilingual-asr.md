@@ -301,7 +301,7 @@ All of these are important, but if you understand this 21-sample evaluation, you
 
 **Why does the bootstrap mean exceed the raw percentage?** Bootstrap resamples at utterance level. Samples with extreme loss rates (e.g., file 09 with 0 expected, 7 hallucinated) get resampled more in some iterations, pulling the mean up. This reflects uncertainty about which utterances are "typical."
 
-**What's next?** I'm collecting a 200-sample multi-speaker dataset across 5 Igbo dialects. After that: comparative model evaluation (Whisper vs MMS vs omniASR) and fine-tuning experiments with tone-annotated data.
+**What's next?** Collect a 200-sample multi-speaker dataset across 5 Igbo dialects. After that: comparative model evaluation (Whisper vs MMS vs omniASR) and fine-tuning experiments with tone-annotated data.
 
 ## Why This Matters
 
