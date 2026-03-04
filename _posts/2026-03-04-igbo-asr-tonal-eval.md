@@ -117,7 +117,8 @@ Igbo is interesting because by speaker population (45 million people), it's not 
 omniASR claims support for 1,600+ languages. Igbo has 45 million speakers, but its tonal accuracy is 24.5% (only 1 in 4 tone marks preserved).<br>
 > Coverage (in training data) ≠ Competence (preserves meaning)
 {% endcapture %}
-{% include callout.html type="note" title=""Supported" ≠ Works Well" content=c %}
+<!-- {% include callout.html type="note" title=""Supported" ≠ Works Well" content=c %} -->
+{% include callout.html type="note" title="&quot;Supported&quot; ≠ Works Well" content=c %}
 
 This makes me think about all the other languages in that 1,600+ list. How many of them have this same gap? How many communities are using systems that confidently produce nonsense because nobody with native speaker expertise has stress-tested them?
 
