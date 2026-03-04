@@ -148,9 +148,9 @@ With only 21 samples, we need uncertainty quantification. Bootstrap resampling (
 
 ### Quantitative Summary
 
-| Category | Samples | Raw Diacritic Loss | Avg CER |
+| Category | Samples | Diacritic Loss | Avg CER |
 |----------|---------|----------------|---------|
-| **Phonemic Tone Sensitivity** | 6 | **61.2%** | 50.6% |
+| **Phonemic Tone Sensitivity** | 6 | **75.5%** | 50.6% |
 | Cross-lingual Interference | 5 | -38.9% | 28.8% |
 | Domain-Specific Coverage | 5 | 6.3% | 30.1% |
 | Language Boundary Effects | 5 | 14.3% | 20.0% |

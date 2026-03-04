@@ -31,11 +31,11 @@ I designed a simple test. Using my iPhone Voice Memos app, I recorded 21 short a
 
 Then I ran everything through omniASR and compared what I actually said to what it transcribed.
 
-## The Results: 75% Bootstrap Tone Loss
+## The Results: 75% Tone Loss
 
 The numbers were worse than I expected.
 
-For the tonal samples, the model dropped 75.5% of the tone marks. Not just a few mistakes here and there. Three out of every four tone marks, gone.
+For the tonal sample after bootstrapping, the model dropped 75.5% of the tone marks. Not just a few mistakes here and there. Three out of every four tone marks, gone.
 
 When I said the four different "akwa" words, the model output was: "akua akua akua akua akwa akwa akwa akua akwa ọkua ọkua ọkua". Random variations. The semantic distinctions completely lost.
 
