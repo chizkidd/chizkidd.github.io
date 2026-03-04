@@ -167,13 +167,13 @@ Even under the worst-case lower bound (57.1%), tonal diacritic loss remains seve
 
 ### Visualizations
 
-[PLACEHOLDER: Figure 1 - Diacritic Loss by Category]
-Bar chart showing 75.5% loss for tonal category (red), with error bars from bootstrap CIs.
+![loss by category](/assets/images/fig1_loss_by_category.png)
+Bar chart showing 61.2% loss for tonal category (red), with error bars from bootstrap CIs.
 
-[PLACEHOLDER: Figure 2 - CER vs. Diacritic Loss Scatter]
+![char error rate vs diacritic loss](/assets/images/fig2_cer_vs_diacritic_loss.png)
 Scatter plot showing tonal samples (red) have high diacritic loss even when CER is moderate.
 
-[PLACEHOLDER: Figure 3 - Bootstrap Confidence Intervals]
+![boostrap confidence interval](/assets/images/fig3_bootstrap_ci.png)
 Forest plot showing 95% CIs for each category, with 50% threshold line.
 
 ## Example: Tonal Minimal Pairs
@@ -254,9 +254,9 @@ pip install -r requirements.txt
 jupyter notebook analysis.ipynb
 ```
 
-Or run in Google Colab: [PLACEHOLDER: Colab badge]
+Or run in Google Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb)
 
-The notebook takes about 5 minutes to run on Colab with a T4 GPU. You'll see the analysis output:
+The notebook takes about 5-10 minutes to run on Colab with a T4 GPU. You'll see the analysis output:
 
 ```
 Loading metadata...
