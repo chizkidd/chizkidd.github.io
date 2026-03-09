@@ -149,27 +149,27 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha\, \delta_t \nabla \hat{q}(S_t, A
 - It turns out that the average of the discounted return is proportional to the average reward.
 - The ordering of all policies in the average discounted return setting would be exactly the same as in the average-reward setting.
 - This idea of the **futility of discounting in continuing problems** can be proven by the **symmetry argument.** 
-  - Let's choose an objective that saves discounting by summing discounted values over the distribution with which states occur under the policy:
+  - Let's choose an objective that saves discounting by summing discounted values over the distribution with which states occur under the policy (where $v^\gamma_\pi \equiv$ discounted value function):
 
-$$
-\begin{align*}
-J(\pi) &= \sum_s \mu_\pi(s)\, V^\gamma_\pi(s) \quad \text{where } V^\gamma_\pi \equiv \text{discounted value function} \\
-&= \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s', r} p(s', r \vert s, a)\!\left[r + \gamma V^\gamma_\pi(s')\right] \\
-&= r(\pi) + \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\, \gamma V^\gamma_\pi(s') \\
-&= \delta(\pi) + \gamma \sum_{s'} V^\gamma_\pi(s') \sum_s \mu_\pi(s) \sum_a \pi(a \vert s)\, p(s' \vert s, a) \\
-&= r(\pi) + \gamma \sum_{s'} V^\gamma_\pi(s')\, \mu_\pi(s') \\
-&= r(\pi) + \gamma J(\pi) \\
-&= r(\pi) + \gamma\!\left(r(\pi) + \gamma J(\pi)\right) \\
-&= r(\pi) + \gamma r(\pi) + \gamma^2 J(\pi) \\
-&= r(\pi) + \gamma r(\pi) + \gamma^2 r(\pi) + \gamma^3 r(\pi) + \gamma^4 r(\pi) + \ldots \\
-&= r(\pi)\!\left[1 + \gamma + \gamma^2 + \gamma^3 + \ldots\right]
-\end{align*}
-$$
+    $$
+        \begin{align*}
+            J(\pi) &= \sum_s \mu_\pi(s)\, v^\gamma_\pi(s) \\
+                &= \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\!\left[r + \gamma v^\gamma_\pi(s')\right] \\
+                    &= r(\pi) + \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\, \gamma v^\gamma_\pi(s') \\
+                        &= r(\pi) + \gamma \sum_{s'} v^\gamma_\pi(s') \sum_s \mu_\pi(s) \sum_a \pi(a \vert s)\, p(s' \vert s, a) \\
+                            &= r(\pi) + \gamma \sum_{s'} v^\gamma_\pi(s')\, \mu_\pi(s') \\
+                                &= r(\pi) + \gamma J(\pi) \\
+                                    &= r(\pi) + \gamma\!\left(r(\pi) + \gamma J(\pi)\right) \\
+                                        &= r(\pi) + \gamma r(\pi) + \gamma^2 J(\pi) \\
+                                            &= r(\pi) + \gamma r(\pi) + \gamma^2 r(\pi) + \gamma^3 r(\pi) + \gamma^4 r(\pi) + \ldots \\
+                                                &= r(\pi)\!\left[1 + \gamma + \gamma^2 + \gamma^3 + \ldots\right]
+                                                    \end{align*}
+                                                        $$
 
-$$\boxed{J(\pi) = \left(\frac{1}{1-\gamma}\right) r(\pi)}$$
+    $$\boxed{J(\pi) = \left(\frac{1}{1-\gamma}\right) r(\pi)}$$
 
-- The proposed discounted objective orders policies identically to the undiscounted (average reward) objective.
-- The discount rate $\gamma$ does not influence the ordering.
+  - _The proposed discounted objective orders policies identically to the undiscounted (average reward) objective._
+  - _The discount rate $\gamma$ does not influence the ordering._
 
 - The root cause of the difficulties with the discounted control setting is that with function approximation we have lost the policy improvement theorem.
 - Now if we change the policy to improve the discounted value of one state, we are no longer guaranteed to have improved the overall policy.
@@ -181,12 +181,12 @@ $$\boxed{J(\pi) = \left(\frac{1}{1-\gamma}\right) r(\pi)}$$
 - We need an $n$-step version of the TD error in order to generalize to $n$-step bootstrapping.
 - Let's generalize the $n$-step return to its differential form, with function approximation:
 
-$$G_{t:t+n} \doteq R_{t+1} - \bar{R}_{t+n-1} + \ldots + R_{t+n} - \bar{R}_{t+n-1} + \hat{q}(S_{t+n}, A_{t+n}, \mathbf{w}_{t+n-1})$$
+$$\boxed{G_{t:t+n} \doteq R_{t+1} - \bar{R}_{t+n-1} + \ldots + R_{t+n} - \bar{R}_{t+n-1} + \hat{q}(S_{t+n}, A_{t+n}, \mathbf{w}_{t+n-1})}$$
 
 $$
 \begin{aligned}
-\text{where} \quad \bar{R} &\equiv \text{an estimate of } r(\pi),\ n \geq 1\ \&\ t+n < T \\
-G_{t:t+n} &\doteq G_t \text{ if } t+n \geq T
+\text{where} \quad \bar{R} &\equiv \text{an estimate of } r(\pi),\quad n \geq 1\ \&\ t+n < T \\
+G_{t:t+n} &\doteq G_t \quad \text{ if } t+n \geq T
 \end{aligned}
 $$
 
@@ -203,7 +203,7 @@ $$\delta_t \doteq G_{t:t+n} - \hat{q}(S_t, A_t, \mathbf{w})$$
 - The discounted formulation cannot be carried over to control in the presence of approximations.
 - Most policies cannot be represented by a value function in the approximate case.
 - The scalar average reward $r(\pi)$ provides an effective way of ranking the remaining arbitrary policies.
-- The average reward formulation involves new differential versions of value functions, Bellman equations, and TD errors, but all of these parallel the old ones and the conceptual changes are small.
+- The average reward formulation involves new **differential** versions of value functions, Bellman equations, and TD errors, but all of these parallel the old ones and the conceptual changes are small.
 - The average reward setting has a new parallel set of differential algorithms.
 
 ---
