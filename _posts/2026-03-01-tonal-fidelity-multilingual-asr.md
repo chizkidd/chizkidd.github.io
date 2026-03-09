@@ -167,13 +167,13 @@ Even under the worst-case lower bound (57.1%), tonal diacritic loss remains seve
 
 ### Visualizations
 
-![loss by category](/assets/images/fig1_loss_by_category.png)
+![loss by category](/assets/images/2026/omniASR/fig1_loss_by_category.png)
 Bar chart showing 61.2% raw count loss for tonal category (red), with negative values indicating diacritic hallucination (script interference).
 
-![char error rate vs diacritic loss](/assets/images/fig2_cer_vs_diacritic_loss.png)
+![char error rate vs diacritic loss](/assets/images/2026/omniASR/fig2_cer_vs_diacritic_loss.png)
 Scatter plot showing tonal samples (red) have high diacritic loss even when CER is moderate.
 
-![boostrap confidence interval](/assets/images/fig3_bootstrap_ci.png)
+![boostrap confidence interval](/assets/images/2026/omniASR/fig3_bootstrap_ci.png)
 Forest plot showing 95% CIs for each category, with 50% threshold line.
 
 ## Example: Tonal Minimal Pairs

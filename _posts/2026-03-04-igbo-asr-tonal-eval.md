@@ -56,15 +56,15 @@ This is evidence of **orthographic bias,** not acoustic perception.
 
 I created three visualizations to make the patterns clear.
 
-![loss by category](/assets/images/fig1_loss_by_category.png)
+![loss by category](/assets/images/2026/omniASR/fig1_loss_by_category.png)
 
 **Figure 1** shows diacritic loss by category. The tonal category (in red) jumps out immediately at 61.2% raw count loss. For comparison, the domain-specific category had only 6.3% loss. But look at the cross-lingual interference category: it's at -38.9%, which means the model was adding diacritics that don't exist. It's not just dropping tones, it's hallucinating them in the wrong places.
 
-![char error rate vs diacritic loss](/assets/images/fig2_cer_vs_diacritic_loss.png)
+![char error rate vs diacritic loss](/assets/images/2026/omniASR/fig2_cer_vs_diacritic_loss.png)
 
 **Figure 2** plots character error rate against diacritic loss for each sample. What's interesting here is that the tonal samples (red dots) show high diacritic loss even when the overall character error rate is moderate (20-40%). This means tone errors aren't just a consequence of the model doing poorly in general. The model can get most of the characters right while still completely failing on tones specifically.
 
-![boostrap confidence interval](/assets/images/fig3_bootstrap_ci.png)
+![boostrap confidence interval](/assets/images/2026/omniASR/fig3_bootstrap_ci.png)
 
 **Figure 3** shows the bootstrap confidence intervals. Even with only 21 samples, the error bars don't overlap between categories. The tonal category's worst-case lower bound is 57.1%, which is still terrible. This confirms that what I'm seeing isn't just noise from a small sample size.
 

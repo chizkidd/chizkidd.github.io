@@ -140,7 +140,7 @@ $$
 - Now let's look at an entire complete system with instability (divergence).
 - Consider the episodic 7-state, 2-action MDP shown below.
 
-![Baird's Counterexample](/assets/images/ch11-11-2-bairds-counterexample.png)
+![Baird's Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-2-bairds-counterexample.png)
 
 >**Baird's Counterexample:** Episodic 7-state, 2-action MDP.
 
@@ -171,7 +171,7 @@ $$\mathbf{w}_{k+1} \doteq \mathbf{w}_k + \frac{\alpha}{\vert S \vert} \sum_s \le
 
 This extends Example 1 with a terminal state and $R = 0$:
 
-![Tsitsiklis & Van Roy's Counterexample](/assets/images/ch11-11-2-tsitsiklis-van-roy-counterexample.png)
+![Tsitsiklis & Van Roy's Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-2-tsitsiklis-van-roy-counterexample.png)
 
 >**Tsitsiklis & Van Roy's Counterexample:** Extension of Example 1 with probability $\varepsilon$ of transitioning to the terminal state (shaded).
 
@@ -224,6 +224,10 @@ $$
 - How do we represent $v_\pi$ in the $d$-dimensional space?
   - We need to perform a projection operation.
   - TD methods present other solutions.
+
+![Linear value-func. approx. geometry](/assets/images/2026/rl-sutton-barto/ch11-11-4-linear-value-func-approx-geometry.png)
+
+>**The Geometry of Linear Value-Function Approximation:**  Shown is the 3D space of all value functions over three states, while shown as a plane is the subspace of all value functions representable by a linear function approximator with parameter $\mathbf{w} = (w_1, w_2)^T$. The true value function $v_\pi$ is in the larger space and can be projected down (into the subspace, using a projection operator $\Pi$) to its best approximation in the value error ($\text{VE}$) sense. The best approximators in the Bellman error ($\text{BE}$), projected Bellman error ($\text{PBE}$), and temporal difference error ($\text{TDE}$) senses are all potentially different and are shown in the lower right.
 
 ### Projection Operation
 
@@ -362,7 +366,7 @@ $$
 
 ### Example 1
 
-![VE learnability Counterexample](/assets/images/ch11-11-6-example1.png)
+![VE learnability Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-6-example1.png)
 
 >**Value Error (VE) Learnability Counterexample:** Deterministic MRP pair with an endless stream of $0$s and $2$s
 
@@ -387,7 +391,7 @@ $$
 
 ### Example 2
 
-![BE learnability Counterexample](/assets/images/ch11-11-6-example2.png)
+![BE learnability Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-6-example2.png)
 
 >**Bellman Error (VE) Learnability Counterexample:** Complex Deterministic MRP pair with same distribution but different minimizing parameter vector
 
@@ -396,7 +400,7 @@ $$
 - Other bootstrapping objectives, like $\overline{\text{PBE}}$ and $\overline{\text{TDE}}$, are learnable from data and yield optimal solutions different from each other and that of $\overline{\text{BE}}$.
 - $\overline{\text{BE}}$ is limited to model-based settings, therefore $\overline{\text{PBE}}$ is preferred.
 
-![MDPs-data distribution-objectives causal relationships](/assets/images/ch11-11-6-causal-relationships-mdps-datadistr-errors.png)
+![MDPs-data distribution-objectives causal relationships](/assets/images/2026/rl-sutton-barto/ch11-11-6-causal-relationships-mdps-datadistr-errors.png)
 
 >**Casual Relationships among the data distribution, MDPs & various objectives:** Monte-Carlo & Bootstrapping objectives
 

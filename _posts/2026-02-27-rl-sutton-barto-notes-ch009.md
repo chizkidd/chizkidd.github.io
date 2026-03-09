@@ -375,7 +375,7 @@ $$
 
 - Mapping circles to the features of a state space for 2-dimension.
 
-![coarse coding](/assets/images/ch09-9-5-3-coarse-coding.png)
+![coarse coding](/assets/images/2026/rl-sutton-barto/ch09-9-5-3-coarse-coding.png)
 
 >**Coarse coding:** Generalization from state $s$ to state $s'$ depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them.
 
@@ -412,7 +412,7 @@ $$
 - **Hashing** pseudorandomly collapses a large tiling into a much smaller set of tiles (each consisting of noncontiguous, disjoint regions), drastically reducing memory requirements with little performance loss.
   - This sidesteps the curse of dimensionality since memory need only match the task's real demands rather than grow exponentially with dimensions.
 
-![hashing](/assets/images/ch09-9-5-4-hashing-border.png)
+![hashing](/assets/images/2026/rl-sutton-barto/ch09-9-5-4-hashing-border.png)
 
 >**Hashing:** 4 subtiles collapse into 1 tile in the above diagram
 
@@ -426,7 +426,7 @@ $$\boxed{x_i(s) \doteq \exp\!\left(-\frac{\lVert s - c_i \rVert^2}{2\sigma_i^2}\
 
 - let's see a 1-D example with a Euclidean distance metric
 
-![1D RBF](/assets/images/ch09-9-5-5-1dim-rbf.png)
+![1D RBF](/assets/images/2026/rl-sutton-barto/ch09-9-5-5-1dim-rbf.png)
 
 >**1-D RBF**: One-dimensional radial basis function
 
@@ -466,7 +466,7 @@ $$
 - ANNs are widely used for nonlinear function approximation.
 - An ANN is a network of interconnected units that have some of the properties of neurons, the main components of nervous systems.
 
-![Generic ANN](/assets/images/ch09-9-7-ann.png)
+![Generic ANN](/assets/images/2026/rl-sutton-barto/ch09-9-7-ann.png)
 
 >**ANN**: A generic feedforward ANN with 4 input units, 2 output units, and 2 hidden layers.
 

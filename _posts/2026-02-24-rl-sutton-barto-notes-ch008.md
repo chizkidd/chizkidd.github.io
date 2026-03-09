@@ -88,7 +88,7 @@ Loop forever:
 
 ## 8.2 Dyna: Integrated Planning, Acting, and Learning
 
-![Dyna](/assets/images/ch08-8-2-title-border.png)
+![Dyna](/assets/images/2026/rl-sutton-barto/ch08-8-2-title-border.png)
 
 > **Dyna-Q interactions and General Dyna architecture**
 
@@ -220,7 +220,7 @@ Loop forever:
 - We've also discussed sampling methods like Monte Carlo (MC), temporal-difference (TD), and $n$-step bootstrapping to estimate value functions in the absence of a model.
 - Given a fixed computational budget, are expected or sample updates more efficient for planning?
 
-![One-Step Update backup diagrams](/assets/images/ch08-8-5-one-step.png)
+![One-Step Update backup diagrams](/assets/images/2026/rl-sutton-barto/ch08-8-5-one-step.png)
 
 > **Backup diagrams for one-step updates**: showing 7 out of 8 possible cases for one-step updates (sample and expected) for state-value and action-value functions and their optimal versions too.
 
@@ -388,7 +388,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
   - RTDP can find optimal policies for these tasks with approximately 50% of the computation required by traditional sweep-based value iteration (i.e. dynamic programming).
   - These kinds of problems are usually expressed in cost minimization not reward maximization.
 
-![RTDP](/assets/images/ch08-8-7-RTDP.png)
+![RTDP](/assets/images/2026/rl-sutton-barto/ch08-8-7-RTDP.png)
 
 > **State space diagram**: Start states on the left, irrelevant states (unreachable from any start state under any optimal policy) in the outer region, and relevant states (reachable from some start state under some optimal policy) in the inner region.
 
@@ -427,7 +427,7 @@ $$\boxed{V(S_t) \leftarrow \max_{a \in A}\left(R^a_{S_t} + \gamma \sum_{s'} P^a_
 - This kind of planning is effective because it focuses only on pertinent next states and actions, and focuses resource on obtaining the next best one-step action.
 - Heuristic search is an extension of greedy policy beyond one-step to multi-step lookahead to obtain better action selections.
 
-![heuristic-search](/assets/images/ch08-8-9-Heuristic-Search.png)
+![heuristic-search](/assets/images/2026/rl-sutton-barto/ch08-8-9-Heuristic-Search.png)
 
 > **Heuristic Search diagram (selective depth-first search)**: a large tree rooted at the current state, with branches for each action and subtrees for each successor. The tree policy traverses the tree greedily, evaluating and backing up values from the leaf nodes toward the root.
 
@@ -523,7 +523,7 @@ $$\boxed{\text{UCT}(s,a) = \underbrace{\frac{W(s,a)}{N(s,a)}}_{\text{exploitatio
 - Propagate simulation result up the path and update all nodes/edges on the path.
 
 
-![MCTS](/assets/images/ch08-8-11-MCTS.png)
+![MCTS](/assets/images/2026/rl-sutton-barto/ch08-8-11-MCTS.png)
 
 > **MCTS diagram**: 4 stages shown left to right: Selection (tree policy traverses with blue arrows to a leaf), Expansion (leaf expanded), Simulation (rollout policy runs from expanded node to terminal $\Delta$), Backup (return propagated back up with blue arrows).
 
@@ -635,7 +635,7 @@ $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \tex
 >$$\text{HORIZONTAL (L to R): sample backups} \xrightarrow{\text{width of update}} \text{full/expected backups}$$
 >$$\text{VERTICAL (Top to Bottom): shallow backups} \xrightarrow{\text{depth/length of update}} \text{deep backups}$$
 
-![Unified  View of RL depicting a slice through the space of RL methods](/assets/images/ch08-8-13-summary-unified-rl.png)
+![Unified  View of RL depicting a slice through the space of RL methods](/assets/images2026/rl-sutton-barto/ch08-8-13-summary-unified-rl.png)
 
 > **Unified View of RL** depicting a slice through the space of RL methods
 
