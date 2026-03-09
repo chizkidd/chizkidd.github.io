@@ -395,7 +395,7 @@ $$
 
 ![BE learnability Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-6-example2.png)
 
->**Bellman Error (VE) Learnability Counterexample:** Complex Deterministic MRP pair with same distribution but different minimizing parameter vector
+>**Bellman Error (BE) Learnability Counterexample:** Complex Deterministic MRP pair with same distribution but different minimizing parameter vector
 
 - The example above serves as a counterexample to the learnability of the Bellman error.
 - The 2 MRPs generate the same data distribution but have different minimizing parameter vectors, proving that the optimal parameter vector is not a function of the data and thus cannot be learned from it.
