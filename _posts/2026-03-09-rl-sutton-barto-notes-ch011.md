@@ -97,13 +97,17 @@ $$\text{where } \delta_t \text{ is the Expected Sarsa TD error defined earlier i
 ## 11.2 Examples of Off-Policy Divergence
 
 - Now let's discuss the 2nd off-policy function approximation challenge.
-- We'll look at some counterexamples where the semi-gradient algorithm diverges.
+- We'll look at some instructive counterexamples where the semi-gradient algorithm diverges.
 
 ### Example 1
 
 Consider part of a larger MDP with 2 states whose estimated values are $w$ and $2w$:
 
 $$\underset{w}{\bigcirc} \longrightarrow \underset{2w}{\bigcirc}$$
+
+![Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-2-example1.png)
+
+>**Simple Counterexample:** 2-state part of an MDP.
 
 - $w$ updates will diverge to infinity, since the transition will always look good (higher next-state estimated value than current state estimated value).
 - The TD error on a transition between the 2 states is:
