@@ -147,7 +147,8 @@ $$
 >**Baird's Counterexample:** Episodic 7-state, 2-action MDP.
 
 - **Assumptions/knowns:**
-  - $b(\text{dashed}\,\vert\,\cdot) = 6/7$, $\quad b(\text{solid}\,\vert\,\cdot) = 1/7$
+  - $b(\text{dashed}\,\vert\,\cdot) = 6/7$
+  - $b(\text{solid}\,\vert\,\cdot) = 1/7$
   - $\pi(a\,\vert\,\cdot) = \pi(\text{solid}\,\vert\,\cdot) = 1$
   - $R = 0$ (on all transitions)
   - $\gamma = 0.99$
@@ -181,8 +182,8 @@ This extends Example 1 with a terminal state and $R = 0$:
 
 $$
 \begin{align*}
-w_{k+1} &= \arg\min_{w \in \mathbb{R}} \sum_{s \in S} \left(\hat{v}(s, w) - \mathbb{E}_\pi\!\left[R_{t+1} + \gamma \hat{v}(S_{t+1}, w_k) \mid S_t = s\right]\right)^2 \\
-&= \arg\min_{w \in \mathbb{R}} \left(w - \gamma \cdot 2w_k\right)^2 + \left(2w - (1 - \varepsilon)\gamma \cdot 2w_k\right)^2 \\
+w_{k+1} &= \arg\min_{w \in \mathbb{R}} \sum_{s \in S} \left(\hat{v}(s, w) - \mathbb{E}_\pi\!\left[R_{t+1} + \gamma \hat{v}(S_{t+1}, w_k) \mid S_t = s\right]\right)^2 \\[6pt]
+&= \arg\min_{w \in \mathbb{R}} \left(w - \gamma \cdot 2w_k\right)^2 + \left(2w - (1 - \varepsilon)\gamma \cdot 2w_k\right)^2 \\[6pt]
 &= \left(\frac{6 - 4\varepsilon}{5}\right) \gamma w_k
 \end{align*}
 $$
