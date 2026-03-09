@@ -152,21 +152,21 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha\, \delta_t \nabla \hat{q}(S_t, A
   - Let's choose an objective that saves discounting by summing discounted values over the distribution with which states occur under the policy (where $v^\gamma_\pi \equiv$ discounted value function):
 
     $$
-        \begin{align*}
-            J(\pi) &= \sum_s \mu_\pi(s)\, v^\gamma_\pi(s) \\
-                &= \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\!\left[r + \gamma v^\gamma_\pi(s')\right] \\
-                    &= r(\pi) + \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\, \gamma v^\gamma_\pi(s') \\
-                        &= r(\pi) + \gamma \sum_{s'} v^\gamma_\pi(s') \sum_s \mu_\pi(s) \sum_a \pi(a \vert s)\, p(s' \vert s, a) \\
-                            &= r(\pi) + \gamma \sum_{s'} v^\gamma_\pi(s')\, \mu_\pi(s') \\
-                                &= r(\pi) + \gamma J(\pi) \\
-                                    &= r(\pi) + \gamma\!\left(r(\pi) + \gamma J(\pi)\right) \\
-                                        &= r(\pi) + \gamma r(\pi) + \gamma^2 J(\pi) \\
-                                            &= r(\pi) + \gamma r(\pi) + \gamma^2 r(\pi) + \gamma^3 r(\pi) + \gamma^4 r(\pi) + \ldots \\
-                                                &= r(\pi)\!\left[1 + \gamma + \gamma^2 + \gamma^3 + \ldots\right]
-                                                    \end{align*}
-                                                        $$
+    \begin{align*}
+    J(\pi) &= \sum_s \mu_\pi(s)\, v^\gamma_\pi(s) \\
+    &= \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\!\left[r + \gamma v^\gamma_\pi(s')\right] \\
+    &= r(\pi) + \sum_s \mu_\pi(s) \sum_a \pi(a \vert s) \sum_{s'} \sum_r p(s', r \vert s, a)\, \gamma v^\gamma_\pi(s') \\
+    &= r(\pi) + \gamma \sum_{s'} v^\gamma_\pi(s') \sum_s \mu_\pi(s) \sum_a \pi(a \vert s)\, p(s' \vert s, a) \\
+    &= r(\pi) + \gamma \sum_{s'} v^\gamma_\pi(s')\, \mu_\pi(s') \\
+    &= r(\pi) + \gamma J(\pi) \\
+    &= r(\pi) + \gamma\!\left(r(\pi) + \gamma J(\pi)\right) \\
+    &= r(\pi) + \gamma r(\pi) + \gamma^2 J(\pi) \\
+    &= r(\pi) + \gamma r(\pi) + \gamma^2 r(\pi) + \gamma^3 r(\pi) + \gamma^4 r(\pi) + \ldots \\
+    &= r(\pi)\!\left[1 + \gamma + \gamma^2 + \gamma^3 + \ldots\right]
+    \end{align*}
+    $$
 
-    $$\boxed{J(\pi) = \left(\frac{1}{1-\gamma}\right) r(\pi)}$$
+    $$\hspace{-6cm} \boxed{J(\pi) = \left(\frac{1}{1-\gamma}\right) r(\pi)}$$
 
   - _The proposed discounted objective orders policies identically to the undiscounted (average reward) objective._
   - _The discount rate $\gamma$ does not influence the ordering._
