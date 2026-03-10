@@ -275,15 +275,15 @@ $$\boxed{Q(s,a) \leftarrow Q(s,a) + \alpha\left[R + \gamma \max_{a'} Q(S', a') -
 
   - For large $b$, error drops exponentially fast early for sample updates, allowing broad updates across many $(s,a)$ pairs in the same time as one expected update:
 
-$$\text{error} = \sqrt{\frac{b-1}{bt}}$$
+    $$\text{error} = \sqrt{\frac{b-1}{bt}}$$
 
-  - <u>For large $b$:</u> $\text{error} \approx \sqrt{\frac{1}{t}}$, $\therefore \lim_{t \to \infty} \sqrt{\frac{1}{t}} \to 0$.
+  - For large $b$: $\quad \text{error} \approx \sqrt{\frac{1}{t}}$, $\therefore \lim_{t \to \infty} \sqrt{\frac{1}{t}} \to 0$.
 
-$$b=1,\ \text{error} = 0 \text{ for } t \geq 1$$
-
-$$b=2,\ \text{error} = \frac{1}{\sqrt{2t}} \implies \text{error}(t=1) \approx 0.707,\ \text{error}(t=2) = 0.5$$
-
-$$b=100,\ \text{error} \approx \frac{1}{\sqrt{t}} \implies \text{error}(t=1) \approx 0.995,\ \text{error}(t=10) \approx 0.316,\ \text{error}(t=100) \approx 0.1$$
+    $$\begin{aligned}
+    b=1:& \quad \text{error} = 0 \quad \text{for } t \geq 1 \\[6pt]
+    b=2:& \quad \text{error} = \frac{1}{\sqrt{2t}} \implies \text{error}(t=1) \approx 0.707,\ \text{error}(t=2) = 0.5 \\[6pt]
+    b=100:& \quad \text{error} \approx \frac{1}{\sqrt{t}} \implies \text{error}(t=1) \approx 0.995,\ \text{error}(t=10) \approx 0.316,\ \text{error}(t=100) \approx 0.1
+    \end{aligned}$$
 
 - Pros of sample updates:
   - **Breadth vs depth**: cover more state space per unit computation.
@@ -491,7 +491,7 @@ $$\text{total cost} = O\left(|A(s)| \cdot n \cdot L\right)$$
 
 ### 1. Selection
 - Starting at the root node, a tree policy based on the action values attached to the edges of the tree traverses the tree to select a leaf node.
-- Traverse tree using tree policy (typically **UCT**):
+- Traverse tree using tree policy (typically Upper Confidence bounds for Trees, **UCT**):
 
 $$\boxed{\text{UCT}(s,a) = \underbrace{\frac{W(s,a)}{N(s,a)}}_{\text{exploitation}} + c\underbrace{\sqrt{\frac{\ln(N(s))}{N(s,a)}}}_{\text{exploration}} = Q(s,a) + c\sqrt{\frac{\ln(N(s))}{N(s,a)}}}$$
 
@@ -581,7 +581,7 @@ while node ≠ null:
   - Selection: $O(d)$, 
   - Expansion: $O(1)$, 
   - Simulation: $O(L)$, 
-  - Backup; $O(d)$ 
+  - Backup: $O(d)$ 
 
 $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \text{ simulations}$$
 
@@ -595,8 +595,16 @@ $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \tex
 
 ### Pros & Cons of MCTS
 
-- **Pros**: anytime algorithm, asymmetric tree growth, no domain heuristic required, handles high branching factors.
-- **Cons**: high computational cost, may miss deep forced sequences, random rollouts that are weak in tactical domains, finite simulations miss long-term consequences.
+- **Pros**: 
+    - anytime algorithm, 
+    - asymmetric tree growth, 
+    - no domain heuristic required, 
+    - handles high branching factors.
+- **Cons**: 
+    - high computational cost, 
+    - may miss deep forced sequences, 
+    - random rollouts that are weak in tactical domains, 
+    - finite simulations miss long-term consequences.
 
 ---
 
@@ -635,7 +643,7 @@ $$\Rightarrow \text{total: } O\!\left(n \cdot (d + L)\right) \text{ for } n \tex
 >$$\text{HORIZONTAL (L to R): sample backups} \xrightarrow{\text{width of update}} \text{full/expected backups}$$
 >$$\text{VERTICAL (Top to Bottom): shallow backups} \xrightarrow{\text{depth/length of update}} \text{deep backups}$$
 
-![Unified  View of RL depicting a slice through the space of RL methods](/assets/images2026/rl-sutton-barto/ch08-8-13-summary-unified-rl.png)
+![Unified  View of RL depicting a slice through the space of RL methods](/assets/images/2026/rl-sutton-barto/ch08-8-13-summary-unified-rl.png)
 
 > **Unified View of RL** depicting a slice through the space of RL methods
 
