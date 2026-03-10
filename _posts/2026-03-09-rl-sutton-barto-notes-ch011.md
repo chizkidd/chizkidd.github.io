@@ -344,15 +344,15 @@ $$
 - Consider the minimization of the Bellman error (if the exact values are learned, the Bellman error is zero everywhere).
 - This yields the **residual gradient algorithm**:
 
-$$
-\begin{align*}
-\mathbf{w}_{t+1} &= \mathbf{w}_t - \tfrac{1}{2}\alpha \nabla\!\left(\mathbb{E}_\pi\!\left[\delta_t\right]^2\right) \\
-&= \mathbf{w}_t - \tfrac{1}{2}\alpha \nabla\!\left(\mathbb{E}_b\!\left[\rho_t\, \delta_t\right]^2\right) \\
-&= \mathbf{w}_t - \alpha\, \mathbb{E}_b\!\left[\rho_t\, \delta_t\right] \nabla \mathbb{E}_b\!\left[\rho_t\, \delta_t\right] \\
-&= \mathbf{w}_t - \alpha\, \mathbb{E}_b\!\left[\rho_t\!\left(R_{t+1} + \gamma \hat{v}(S_{t+1}, \mathbf{w}) - \hat{v}(S_t, \mathbf{w})\right)\right] \mathbb{E}_b\!\left[\rho_t \nabla \delta_t\right] \\
-&= \mathbf{w}_t + \alpha\!\left[\mathbb{E}_b\!\left[\rho_t\!\left(R_{t+1} + \gamma \hat{v}(S_{t+1}, \mathbf{w})\right)\right] - \hat{v}(S_t, \mathbf{w})\right]\!\left[\nabla \hat{v}(S_t, \mathbf{w}) - \gamma\, \mathbb{E}_b\!\left[\rho_t \nabla \hat{v}(S_{t+1}, \mathbf{w})\right]\right]
-\end{align*}
-$$
+    $$
+    \begin{align*}
+    \mathbf{w}_{t+1} &= \mathbf{w}_t - \tfrac{1}{2}\alpha \nabla\!\left(\mathbb{E}_\pi\!\left[\delta_t\right]^2\right) \\
+    &= \mathbf{w}_t - \tfrac{1}{2}\alpha \nabla\!\left(\mathbb{E}_b\!\left[\rho_t\, \delta_t\right]^2\right) \\
+    &= \mathbf{w}_t - \alpha\, \mathbb{E}_b\!\left[\rho_t\, \delta_t\right] \nabla \mathbb{E}_b\!\left[\rho_t\, \delta_t\right] \\
+    &= \mathbf{w}_t - \alpha\, \mathbb{E}_b\!\left[\rho_t\!\left(R_{t+1} + \gamma \hat{v}(S_{t+1}, \mathbf{w}) - \hat{v}(S_t, \mathbf{w})\right)\right] \mathbb{E}_b\!\left[\rho_t \nabla \delta_t\right] \\
+    &= \mathbf{w}_t + \alpha\!\left[\mathbb{E}_b\!\left[\rho_t\!\left(R_{t+1} + \gamma \hat{v}(S_{t+1}, \mathbf{w})\right)\right] - \hat{v}(S_t, \mathbf{w})\right]\!\left[\nabla \hat{v}(S_t, \mathbf{w}) - \gamma\, \mathbb{E}_b\!\left[\rho_t \nabla \hat{v}(S_{t+1}, \mathbf{w})\right]\right]
+    \end{align*}
+    $$
 
 - Two ways to make the residual-gradient algorithm work:
   - In the case of deterministic environments.
