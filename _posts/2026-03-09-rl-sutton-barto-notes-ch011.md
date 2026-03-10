@@ -230,7 +230,12 @@ $$
 
 ![Linear value-func. approx. geometry](/assets/images/2026/rl-sutton-barto/ch11-11-4-linear-value-func-approx-geometry.png)
 
->**The Geometry of Linear Value-Function Approximation:**  Shown is the 3D space of all value functions over three states, while shown as a plane is the subspace of all value functions representable by a linear function approximator with parameter $\mathbf{w} = (w_1, w_2)^T$. The true value function $v_\pi$ is in the larger space and can be projected down (into the subspace, using a projection operator $\Pi$) to its best approximation in the value error ($\text{VE}$) sense. The best approximators in the Bellman error ($\text{BE}$), projected Bellman error ($\text{PBE}$), and temporal difference error ($\text{TDE}$) senses are all potentially different and are shown in the lower right.
+<!-- >**The Geometry of Linear Value-Function Approximation:**  Shown is the 3D space of all value functions over three states, while shown as a plane is the subspace of all value functions representable by a linear function approximator with parameter $\mathbf{w} = (w_1, w_2)^T$. The true value function $v_\pi$ is in the larger space and can be projected down (into the subspace, using a projection operator $\Pi$) to its best approximation in the value error ($\text{VE}$) sense. The best approximators in the Bellman error ($\text{BE}$), projected Bellman error ($\text{PBE}$), and temporal difference error ($\text{TDE}$) senses are all potentially different and are shown in the lower right. -->
+
+{% capture c %}
+Shown is the 3D space of all value functions over three states, while shown as a plane is the subspace of all value functions representable by a linear function approximator with parameter $\mathbf{w} = (w_1, w_2)^T$. The true value function $v_\pi$ is in the larger space and can be projected down (into the subspace, using a projection operator $\Pi$) to its best approximation in the value error ($\text{VE}$) sense. The best approximators in the Bellman error ($\text{BE}$), projected Bellman error ($\text{PBE}$), and temporal difference error ($\text{TDE}$) senses are all potentially different and are shown in the lower right.
+{% endcapture %}
+{% include callout.html type="note" title="The Geometry of Linear Value-Function Approximation" content=c %}
 
 ### Projection Operation
 
@@ -406,6 +411,12 @@ $$
 ![MDPs-data distribution-objectives causal relationships](/assets/images/2026/rl-sutton-barto/ch11-11-6-causal-relationships-mdps-datadistr-errors.png)
 
 >**Casual Relationships among the data distribution, MDPs & various objectives:** Monte-Carlo & Bootstrapping objectives
+
+{% capture c %}
+**Left, Monte Carlo objectives:** Two different MDPs can produce the same data distribution yet also produce different $\overline{\text{VE}}$s, proving that the $\overline{\text{VE}}$ objective cannot be determined from data and is not learnable. However, all such $\overline{\text{VE}}$s must have the same optimal parameter vector, $\mathbf{w}^{*}$! Moreover, this same $\mathbf{w}^{*}$ can be determined from another objective, the $\overline{\text{RE}}$, which is uniquely determined from the data distribution. Thus $\mathbf{w}^{*}$ and the $\overline{\text{RE}}$ are learnable even though the $\overline{\text{VE}}$s are not. <br>
+**Right, Bootstrapping objectives:** Two different MDPs can produce the same data distribution yet also produce different $\overline{\text{BE}}$s _and_ have different minimizing parameter vectors; these are not learnable from the data distribution. The $\overline{\text{PBE}}$ and $\overline{\text{TDE}}$ objectives and their (different) minima can be directly determined from data and thus are learnable.
+{% endcapture %}
+{% include callout.html type="note" title="Casual Relationships among the data distribution, MDPs & various objectives" content=c %}
 
 ---
 

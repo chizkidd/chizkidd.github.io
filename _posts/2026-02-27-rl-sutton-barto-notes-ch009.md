@@ -102,10 +102,6 @@ s' &= \text{preceding state}
 \end{aligned}
 $$
 
-<blockquote>
-<p><strong><em>Balance Equation:</em></strong> the probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.</p>
-</blockquote>
-
 {% capture c %}
 The probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.
 {% endcapture %}
@@ -128,9 +124,10 @@ h(s) &= \text{probability that an episode begins in each state } s \\
 \end{aligned}
 $$
 
-<blockquote>
-<p><strong><em>Visitation Equation:</em></strong> the expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.</p>
-</blockquote>
+{% capture c %}
+The expected number of visits to state $s$ equals the probability of starting in state $s$ plus the expected number of visits to all preceding states $s'$ that transition into $s$ under policy $\pi$.
+{% endcapture %}
+{% include callout.html type="note" title="Visitation Equation" content=c %}
 
 <ul>
 <li>This system of equations can be solved for the expected number of visits $\eta(s)$.</li>
@@ -382,7 +379,12 @@ $$
 
 ![coarse coding](/assets/images/2026/rl-sutton-barto/ch09-9-5-3-coarse-coding.png)
 
->**Coarse coding:** Generalization from state $s$ to state $s'$ depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them.
+<!-- >**Coarse coding:** Generalization from state $s$ to state $s'$ depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them. -->
+
+{% capture c %}
+Generalization from state $s$ to state $s'$ depends on the number of their features whose receptive fields (in this case, circles) overlap. These states have one feature in common, so there will be slight generalization between them.
+{% endcapture %}
+{% include callout.html type="note" title="Coarse Coding" content=c %}
 
 - In the diagram above, if the state is inside a circle, then the corresponding feature has the value of 1 and is said to be **present**; otherwise the feature is 0 and is said to be **absent**.
 - This kind of 1-0 valued feature is called a **binary feature**.
@@ -419,7 +421,12 @@ $$
 
 ![hashing](/assets/images/2026/rl-sutton-barto/ch09-9-5-4-hashing-border.png)
 
->**Hashing:** 4 subtiles collapse into 1 tile in the above diagram
+<!-- >**Hashing:** 4 subtiles collapse into 1 tile in the above diagram -->
+
+{% capture c %}
+4 subtiles collapse into 1 tile in the above diagram.
+{% endcapture %}
+{% include callout.html type="note" title="Hashing" content=c %}
 
 ### 9.5.5 Radial Basis Functions (RBF)
 
@@ -433,7 +440,13 @@ $$\boxed{x_i(s) \doteq \exp\!\left(-\frac{\lVert s - c_i \rVert^2}{2\sigma_i^2}\
 
 ![1D RBF](/assets/images/2026/rl-sutton-barto/ch09-9-5-5-1dim-rbf.png)
 
->**1-D RBF**: One-dimensional radial basis function
+<!-- >**1-D RBF**: One-dimensional radial basis function -->
+
+{% capture c %}
+A one-dimensional example with a Euclidean distance metric.
+{% endcapture %}
+{% include callout.html type="note" title="1-D RBF" content=c %}
+
 
 - RBFs are more advantageous to binary features: they produce approximate functions that vary smoothly and are differentiable.
 - An **RBF network** is a linear function approximator using RBFs for its features.
@@ -473,7 +486,12 @@ $$
 
 ![Generic ANN](/assets/images/2026/rl-sutton-barto/ch09-9-7-ann.png)
 
->**ANN**: A generic feedforward ANN with 4 input units, 2 output units, and 2 hidden layers.
+<!-- >**ANN**: A generic feedforward ANN with 4 input units, 2 output units, and 2 hidden layers. -->
+
+{% capture c %}
+A generic feedforward Artifical Neural Network with 4 input units, 2 output units, and 2 hidden layers.
+{% endcapture %}
+{% include callout.html type="note" title="ANN" content=c %}
 
 - The units (circles in the figure above) compute a weighted sum of their input signals, and then apply a nonlinear function, called the **activation function**, to the result.
 - Some activation functions include:
