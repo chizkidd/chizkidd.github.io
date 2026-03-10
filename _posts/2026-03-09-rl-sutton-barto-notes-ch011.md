@@ -103,7 +103,7 @@ $$\text{where } \delta_t \text{ is the Expected Sarsa TD error defined earlier i
 
 Consider part of a larger MDP with 2 states whose estimated values are $w$ and $2w$:
 
-![Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-2-example1.png)
+![Counterexample](/assets/images/2026/rl-sutton-barto/ch11-11-2-example1-DOWNSPACED.png)
 
 >**Simple Counterexample:** 2-state part of an MDP.
 
