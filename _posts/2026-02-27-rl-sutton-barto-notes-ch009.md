@@ -106,6 +106,11 @@ $$
 <p><strong><em>Balance Equation:</em></strong> the probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.</p>
 </blockquote>
 
+{% capture c %}
+The probability of being in state $s$ equals the sum over all ways of arriving in $s$ from any previous state $s'$ under policy $\pi$.
+{% endcapture %}
+{% include callout.html type="note" title="Balance Equation" content=c %}
+
 </li>
 
 <li>
