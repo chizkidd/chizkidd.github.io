@@ -57,6 +57,13 @@ $$G_{t:t+n} \doteq R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \g
 - A valid update can be done not just towards any $n$-step return, but also towards any average of $n$-step returns.
   - E.g. average the 2-step and 4-step return: $\frac{1}{2} G_{t:t+2} + \frac{1}{2} G_{t:t+4}$
 
+![compound update of 2-step and 4-step](/assets/images/2026/rl-sutton-barto/ch12-12-1-the-2-and-4-step-returns.png)
+
+{% capture c %}
+The compound update mixing half of a two-step return and half of a four-step return.
+{% endcapture %}
+{% include callout.html type="note" title="Backup Diagram for Compound Update" content=c %}
+
 - Any set of $n$-step returns can be averaged, even an infinite set, as long as the weights on the component returns are positive and sum to $1$.
 - What if instead of using one $n$-step return, we use a weighted average of all $n$-step returns? This leads to averaging which produces a substantial new range of algorithms.E.g.,
   1. Averaging one-step and infinite-step returns to interrelate TD and MC methods.
@@ -64,6 +71,14 @@ $$G_{t:t+n} \doteq R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \g
 
 - An update that averages simpler component updates is called a **compound update** or the **$\lambda$-return**.
 - The TD($\lambda$) algorithm is one way of averaging $n$-step updates, each weighted proportionally by $\lambda^{n-1}$ (where $\lambda \in [0,1]$) and normalized by a factor of $(1-\lambda)$ to ensure that the weights sum to $1$.
+
+![TD(lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-1-td-lambda.png)
+
+{% capture c %}
+If $\lambda = 0$, then the overall update reduces to its first component, the **TD(0)** update, whereas if $\lambda = 1$, then the overall update reduces its last component, the **MC** update.
+{% endcapture %}
+{% include callout.html type="note" title="Backup Diagram for TD($\lambda$)" content=c %}
+
 - Essentially, $\lambda$-return, $G_t^\lambda$, combines all $n$-step returns $G_{t:t+n}$ in a weighted average manner, $(1-\lambda)\lambda^{n-1}$, and is defined in its state-based form by:
 
 $$\boxed{G_t^\lambda \doteq (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_{t:t+n}}$$
@@ -95,6 +110,13 @@ $$\boxed{G_t^\lambda \doteq (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_{t:t
   \end{aligned}
   $$
 
+![TD(lambda) weighting](/assets/images/2026/rl-sutton-barto/ch12-12-1-td-lambda-weighting-function.png)
+
+{% capture c %}
+Weighting given in the $\lambda$-return to each of the $n$-step returns.
+{% endcapture %}
+{% include callout.html type="note" title="TD($\lambda$) Weighting" content=c %}
+
 - Our first learning algorithm based on the $\lambda$-return is the **off-line $\lambda$-return algorithm**, which waits until the end of an episode to make updates. Its semi-gradient, $\lambda$-return, target update for $t = 0, 1, 2, \ldots, T-1$ is:
 
 $$\boxed{\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G_t^\lambda - \hat{v}(S_t, \mathbf{w}_t)\right] \nabla \hat{v}(S_t, \mathbf{w}_t)}$$
@@ -107,6 +129,14 @@ $$\boxed{\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G_t^\lambda - \ha
   - Update value function towards the $\lambda$-return.
   - Look forward in time to all the future rewards to compute $G_t^\lambda$.
   - Like MC, can only be computed from complete return.
+
+![Forward view](/assets/images/2026/rl-sutton-barto/ch12-12-1-forward-view-td-lambda.png)
+
+{% capture c %}
+We decide how to update each state by looking forward to future rewards and states.
+{% endcapture %}
+{% include callout.html type="note" title="Forward View" content=c %}
+
 
 ---
 
@@ -144,6 +174,24 @@ $$\boxed{\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha\, \delta_t\, \mathbf{z}_t
 ### Backward View
 
 - Forward view provides theory but backward view provides mechanism (practical) where we update online, every step, from incomplete sequences.
+- Keep an eligibility trace for every state $s$.
+- Update value $V(s)$ for every state $s$ in proportion to TD-error $\delta_t$ and eligibility trace $\mathbf{z}_t$:
+
+$$
+\begin{aligned}
+\delta_t &= R_{t+1} + \gamma V(S_{t+1}) - V(S_t) \\
+V(s) &\leftarrow V(s) + \alpha\, \delta_t\, \mathbf{z}_t
+\end{aligned}
+$$
+
+![Backward TD(lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-2-backward-view-td-lambda.png)
+
+{% capture c %}
+In the backward or mechanistic view of TD($\lambda$), each update depends on the 
+current TD error combined with the current eligibility traces of past events.
+{% endcapture %}
+{% include callout.html type="note" title="Backward View of TD($\lambda$)" content=c %}
+
 - Let's look at the effect of $\lambda$ to understand the backward view of TD($\lambda$):
 
 $$
@@ -213,6 +261,13 @@ $$
 \text{where } \delta_i' &\equiv R_{t+1} + \gamma \hat{v}(S_{t+1}, \mathbf{w}_{t-1}) - \hat{v}(S_t, \mathbf{w}_{t-1})
 \end{aligned}
 $$
+
+![TTD(lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-3-truncated-td-lambda.png)
+
+{% capture c %}
+The truncated $\lambda$-return gives rise to a family of $n$-step $\lambda$-return algorithms called **TTD($\lambda$)**.
+{% endcapture %}
+{% include callout.html type="note" title="Backup Diagram for Truncated TD($\lambda$)" content=c %}
 
 ---
 
@@ -431,6 +486,16 @@ $$
   - **1st update:** one full-step lookahead
   - **2nd update:** two-step lookahead
   - **Final update:** complete return.
+
+![Sarsa(lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-7-sarsa-lambda.png)
+
+{% capture c %}
+The first update looks ahead one full step, to the next state–action pair, the second looks
+ahead two steps, to the second state–action pair, and so on. A final update is based on
+the complete return.
+{% endcapture %}
+{% include callout.html type="note" title="Backup Diagram for Sarsa($\lambda$)" content=c %}
+
 - The weighting of each $n$-step update in the $\lambda$-return is same as in TD($\lambda$) and $\lambda$-return.
 - The forward view TD for action values, Sarsa($\lambda$), has the same update rule as TD($\lambda$):
 
@@ -643,6 +708,14 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 - Watkins's Q($\lambda$) is the original method for extending Q-learning to eligibility traces.
 - It involves decaying the ET in the usual way as long as a greedy action was taken, then cuts the traces to 0 after the 1st non-greedy action.
 
+![Watkins's Q(lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-10-watkins-q-lambda.png)
+
+{% capture c %}
+The series of component updates ends
+either with the end of the episode or with the first nongreedy action, whichever comes first.
+{% endcapture %}
+{% include callout.html type="note" title="Backup Diagram for Watkins's Q($\lambda$)" content=c %}
+
 ### Tree-Backup($\lambda$)
 
 - Let's look at the eligibility trace version of Tree Backup, which is called **Tree-Backup($\lambda$)** or **TB($\lambda$)**.
@@ -671,6 +744,15 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 - As always, using same steps as in the previous section, we get a special eligibility trace update involving the target-policy probabilities of the selected actions:
 
   $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \pi(A_t \vert S_t)\, \mathbf{z}_{t-1} + \nabla \hat{q}(S_t, A_t, \mathbf{w}_t)}$$
+
+
+![Tree Backup (lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-10-tree-backup-q-lambda.png)
+
+{% capture c %}
+the tree-backup updates of each length are weighted in the
+usual way dependent on the bootstrapping parameter $\lambda$
+{% endcapture %}
+{% include callout.html type="note" title="Backup Diagram for Tree Backup($\lambda$)" content=c %}
 
 - The ET above combined with the usual semi-gradient TD($\lambda$) parameter-update rule defines the TB($\lambda$) algorithm.
 - Like all semi-gradient algorithms, TB($\lambda$) is not guaranteed to be stable when used with off-policy data and a powerful function approximator **(the deadly triad).**
