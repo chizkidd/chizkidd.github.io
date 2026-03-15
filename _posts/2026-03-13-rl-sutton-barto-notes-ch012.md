@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Sutton & Barto, Ch. 12: Eligibility Traces (Personal Notes)"
-excerpt: Notes on the lambda-return and its variants, - TD, n-step truncated, online, true online, Sarsa, Watkins's Q, Tree-Backup - dutch traces in MC learning, variable bootstrapping and discounting, off-policy traces with control variates, stable off-policy methods with traces, and implementation issues.
+excerpt: Notes on the lambda-return and its variants - TD, n-step truncated, online, true online, Sarsa, Watkins's Q, Tree-Backup - dutch traces in MC learning, variable bootstrapping and discounting, off-policy traces with control variates, stable off-policy methods with traces, and implementation issues.
 date: 2026-03-13
 mathjax: true
 ---
