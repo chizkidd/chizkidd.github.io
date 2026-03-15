@@ -15,7 +15,7 @@ mathjax: true
   - First, we have a short-term memory vector, the **eligibility trace** $\mathbf{z}_t \in \mathbb{R}^d$, that parallels the long-term weight vector $\mathbf{w}_t \in \mathbb{R}^d$.
   - Then when a component of $\mathbf{w}_t$ participates in producing an estimated value, the corresponding component of $\mathbf{z}_t$ is bumped up and then begins to fade away.
   - Learning occurs in that component of $\mathbf{w}_t$ if a non-zero TD error occurs before the trace falls back to zero (fades away).
-  - The trace-decay parameter $\lambda \in [0,1]$ determines the rate at which the trace falls.
+  - The trace-decay parameter $\lambda \in [0,1)$ determines the rate at which the trace falls.
 
 - Advantages of ET over $n$-step methods:
   - Requires only a single trace vector $\mathbf{z}_t$ rather than storing the last $n$ feature vectors.
@@ -48,7 +48,7 @@ mathjax: true
 
 ---
 
-## 12.1 The $\lambda$-return
+## 12.1 The $\lambda$-return <a name="121-the--return"></a>
 
 - Recall in Chapter 7 we defined an $n$-step return as the sum of the first $n$ rewards plus the estimated value of the state reached in $n$ steps, each appropriately discounted:
 
@@ -110,7 +110,7 @@ $$\boxed{\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G_t^\lambda - \ha
 
 ---
 
-## 12.2 TD($\lambda$)
+## 12.2 TD($\lambda$) <a name="122-td"></a>
 
 - TD($\lambda$) was the first algorithm that showed a formal relationship between a forward view and backward view using eligibility traces.
 - TD($\lambda$) improves over the off-line $\lambda$-return algorithm in 3 ways:
@@ -120,7 +120,7 @@ $$\boxed{\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G_t^\lambda - \ha
 
 - Let's focus on the **semi-gradient version of TD($\lambda$)** with function approximation:
   - The **eligibility trace $\mathbf{z}_t$** has the same number of components as $\mathbf{w}_t$.
-  - $\mathbf{z}$ is initialized to $\mathbf{0}$, incremented on each time step by the value gradient, and then fades away by $\gamma\lambda$:
+  - $\mathbf{z}$ is initialized to $\mathbf{0}$, incremented on each time step by the value gradient, and then fades away by $\gamma\lambda$
 
   $$
   \begin{align*}
@@ -152,7 +152,7 @@ $$
 & \mathbf{w}_{t+1} = \mathbf{w}_t + \alpha\, \delta_t \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{TD(0)} \\
 \text{if } 0 < \lambda < 1: \quad & \text{earlier states are given less credit for the TD error} \\
 \text{if } \lambda = 1: \quad & \mathbf{z}_t = \gamma \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{credit for earlier states falls by } \gamma \text{ per step} \\
-\text{if } \lambda = 1 \text{ \& } \gamma = 1: \quad & \mathbf{z}_t = \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{MC-like behavior (no time decay for ET)} \\
+\text{if } \lambda = 1, \gamma = 1: \quad & \mathbf{z}_t = \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{MC-like behavior (no time decay for ET)} \\
 \text{if } \lambda = 1: \quad & \text{we get TD(1)} 
 \end{align*}
 $$
@@ -183,7 +183,7 @@ $$
 
 ---
 
-## 12.3 $n$-step Truncated $\lambda$-return Methods 
+## 12.3 $n$-step Truncated $\lambda$-return Methods <a name="123--step-truncated--return-methods"></a>
 
 - The off-line $\lambda$-return is of limited use because the $\lambda$-return is not known until the episode ends.
 - The off-line $\lambda$-return approximation is to truncate the sequence after a **fixed** number of steps.
@@ -206,7 +206,7 @@ $$\boxed{\mathbf{w}_{t+n} \doteq \mathbf{w}_{t+n-1} + \alpha \!\left[G_{t:t+n}^\
 
 - Efficient implementation of TTD($\lambda$) relies on the $k$-step $\lambda$-return:
 
-$$G_{t:t+k}^\lambda = \hat{v}(S_t, \mathbf{w}_{t-1}) + \sum_{i=t}^{t+k-1} (\delta\lambda)^{i-t} \delta_i'$$
+$$\boxed{G_{t:t+k}^\lambda = \hat{v}(S_t, \mathbf{w}_{t-1}) + \sum_{i=t}^{t+k-1} (\delta\lambda)^{i-t} \delta_i'}$$
 
 $$
 \begin{aligned}
@@ -216,7 +216,7 @@ $$
 
 ---
 
-## 12.4 Redoing Updates: Online $\lambda$-return Algorithm
+## 12.4 Redoing Updates: Online $\lambda$-return Algorithm <a name="124-redoing-updates-online--return-algorithm"></a>
 
 - How do we choose the truncation parameter $n$ in TTD($\lambda$)?
 - It involves a tradeoff:
@@ -257,7 +257,7 @@ $$\mathbf{w}_t \doteq \mathbf{w}_t^t$$
 
 ---
 
-## 12.5 True Online TD($\lambda$)
+## 12.5 True Online TD($\lambda$) <a name="125-true-online-td"></a>
 
 - The original ideal online $\lambda$-return algorithm shown in Section 12.4 is very complex so we use online TD($\lambda$) to approximate it.
 - We'll use eligibility trace to invert the forward view, online $\lambda$-return to an efficient backward view algorithm. This is called the **True Online TD($\lambda$)**.
@@ -380,7 +380,7 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G - \mathbf{w}_t^T \math
   &= \mathbf{F}_t\, \mathbf{z}_{t-1} + \mathbf{x}_t \\
   &= \!\left(\mathbf{I} - \alpha \mathbf{x}_t \mathbf{x}_t^T\right) \mathbf{z}_{t-1} + \mathbf{x}_t \\
   &= \mathbf{z}_{t-1} - \alpha\!\left(\mathbf{z}_{t-1}^T \mathbf{x}_t\right) \mathbf{x}_t + \mathbf{x}_t \\
-  &= \mathbf{z}_{t-1} + \!\left(1 - \alpha\, \mathbf{z}_{t-1}^T \mathbf{x}_t\right) \mathbf{x}_t
+  &\boxed{= \mathbf{z}_{t-1} + \!\left(1 - \alpha\, \mathbf{z}_{t-1}^T \mathbf{x}_t\right) \mathbf{x}_t}
   \end{align*}
   $$
 
@@ -390,9 +390,10 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G - \mathbf{w}_t^T \math
 
   $$
   \begin{align*}
-  \mathbf{a}_t &= \mathbf{F}_t \mathbf{F}_{t-1} \cdots \mathbf{F}_0\, \mathbf{w}_0 \\
+  \mathbf{a}_t &= \mathbf{F}_t \mathbf{F}_{t-1} \cdots \mathbf{F}_0\, \mathbf{w}_0, \quad 1 \leq t < T \\
   &= \mathbf{F}_t\, \mathbf{a}_{t-1} \\
-  &= \mathbf{a}_{t-1} - \alpha \mathbf{x}_t \mathbf{x}_t^T \mathbf{a}_{t-1}, \quad 1 \leq t < T
+  &= \mathbf{a}_{t-1} - \alpha \mathbf{x}_t \mathbf{x}_t^T \mathbf{a}_{t-1} \\
+  &\boxed{= \mathbf{a}_{t-1} \!\left(1 - \alpha \mathbf{x}_t \mathbf{x}_t^T \right)}
   \end{align*}
   $$
 
@@ -407,7 +408,7 @@ $$\boxed{\mathbf{w}_T = \mathbf{a}_{T-1} + \alpha G\, \mathbf{z}_{T-1}}$$
 
 ---
 
-## 12.7 Sarsa($\lambda$)
+## 12.7 Sarsa($\lambda$) <a name="127-sarsa"></a>
 
 - Now let's extend eligibility traces to action-value methods.
 - First, let's recall the action-value form of the **$n$-step** return:
@@ -457,7 +458,7 @@ $$
 
 ---
 
-## 12.8 Variable $\lambda$ and $\gamma$
+## 12.8 Variable $\lambda$ and $\gamma$ <a name="128-variable--and"></a>
 
 - To get the most general forms of the final TD algorithms, it is vital to generalize the degree of bootstrapping and discounting beyond constant parameters to functions dependent on the state and action:
 
@@ -614,7 +615,7 @@ $$
 $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nabla \hat{q}(S_t, A_t, \mathbf{w}_t)}$$
 
 - This ET combined with the action-based, expected TD error $\delta_t^a$ and the usual semi-gradient TD($\lambda$) parameter-update rule **(Section [12.2](#122-td))** forms an elegant, efficient **Expected Sarsa($\lambda$)** algorithm that can be applied to either on-policy or off-policy data:
-  - <u>**On-policy case:**</u> The algorithm becomes the Sarsa($\lambda$) algorithm given constant $\lambda$ and $\gamma$, and the usual state-action TD error:
+  - **<u>On-policy case</u>:** The algorithm becomes the Sarsa($\lambda$) algorithm given constant $\lambda$ and $\gamma$, and the usual state-action TD error:
 
   $$
   \begin{aligned}
@@ -625,7 +626,7 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 
 - At $\lambda = 1$, these algorithms become closely related to corresponding Monte Carlo algorithms.
 - No episode-by-episode equivalence of updates exist, only of their expectations, even under the most favorable conditions.
-  - Methods have been proposed recently **(Sutton, Mahmood, Precup & van Hasselt, 2014)** that do achieve an exact equivalence.
+  - Methods have been proposed recently **[Sutton, Mahmood, Precup & van Hasselt, 2014]** that do achieve an exact equivalence.
   - These methods require an additional vector of **"provisional weights"** that keep track of executed updates but may need to be retracted/emphasized depending on future actions taken.
   - The state and state-action versions of these methods are called **PTD($\lambda$) and PQ($\lambda$)** respectively, where the 'P' stands for Provisional.
 - If $\lambda < 1$, then all these off-policy algorithms involve bootstrapping and **the deadly triad** applies, meaning that they can be guaranteed stable only for the tabular case, state aggregation and other limited forms of function approximation.
@@ -635,7 +636,7 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 
 ---
 
-## 12.10 Watkins's Q($\lambda$) to Tree-Backup($\lambda$)
+## 12.10 Watkins's Q($\lambda$) to Tree-Backup($\lambda$) <a name="1210-watkinss-q-to-tree-backup"></a>
 
 ### Watkins's Q($\lambda$)
 
@@ -684,7 +685,7 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 
 ### GTD($\lambda$)
 
-- Analogous to TDC, and aims to learn a parameter $\mathbf{w}_t$ such that $\hat{v}(s, \mathbf{w}) \doteq \mathbf{w}_t^T \mathbf{x}(s) \approx v_\pi(s)$ even from data that is due to following another policy $b$. Its update is:
+- Analogous to TDC, and aims to learn a parameter $\mathbf{w}_{t}$ such that $\hat{v}(s, \mathbf{w}) \doteq \mathbf{w}_{t}^T \mathbf{x}(s) \approx {v}_{\pi}(s)$ even from data that is due to following another policy $b$. Its update is:
 
   $$
   \begin{aligned}
@@ -704,7 +705,7 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 ### GQ($\lambda$)
 
 - Gradient-TD algorithm for action values with eligibility traces.
-- GQ($\lambda$) aims to learn $\mathbf{w}_t$ s.t. $\hat{q}(s, a, \mathbf{w}_t) \doteq \mathbf{w}_t^T \mathbf{x}(s,a) \approx q_\pi(s,a)$ from off-policy data.
+- GQ($\lambda$) aims to learn $\mathbf{w}_{t}$ such that $\hat{q}(s, a, \mathbf{w}_{t}) \doteq \mathbf{w}_{t}^T \mathbf{x}(s,a) \approx {q}_{\pi}(s,a)$ from off-policy data.
 - If the target policy is $\varepsilon$-greedy, or otherwise biased towards the greedy policy for $\hat{q}$, then GQ($\lambda$) can be used as a control algorithm.
 - GQ($\lambda$) update is:
 
@@ -745,7 +746,13 @@ $$b(A_t \vert S_t) = \pi(A_t \vert S_t), \quad \rho_t = 1 \implies \text{HTD}(\l
 - We get
   - a 2nd set of weights, $\mathbf{v}_t$.
   - a 2nd set of eligibility traces, $\mathbf{z}_t^b$, **conventional accumulating traces** for the behavior policy.
-  - $\mathbf{z}_t^b = \mathbf{z}_t$ if all $\rho_t = 1$, then $\left(\mathbf{z}_t - \mathbf{z}_t^b\right)^T = \mathbf{0}$, so $\mathbf{w}_{t+1} = \mathbf{w}_t + \alpha\, \delta_t^s\, \mathbf{z}_t$ which is **TD($\lambda$).**
+
+  $$
+  \begin{aligned}
+  \mathbf{z}_t^b = \mathbf{z}_t \text{ if all } \rho_t = 1 &\implies \left(\mathbf{z}_t - \mathbf{z}_t^b\right)^T = \mathbf{0} \\
+  &\implies \mathbf{w}_{t+1} = \mathbf{w}_t + \alpha\, \delta_t^s\, \mathbf{z}_t \quad \text{(TD(}\lambda\text{))}
+  \end{aligned}
+  $$
 
 ### Emphatic TD($\lambda$)
 
