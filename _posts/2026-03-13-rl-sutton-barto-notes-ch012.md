@@ -124,14 +124,14 @@ $$\boxed{\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G_t^\lambda - \ha
   - The **eligibility trace $\mathbf{z}_t$** has the same number of components as $\mathbf{w}_t$.
   - $\mathbf{z}$ is initialized to $\mathbf{0}$, incremented on each time step by the value gradient, and then fades away by $\gamma\lambda$:
 
-    $$
-    \begin{align*}
-    \mathbf{z}_{-1} &\doteq \mathbf{0} \\
-    \mathbf{z}_t &\doteq \gamma\lambda \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t), \quad 0 \leq t \leq T
-    \end{align*}
-    $$
+  $$
+  \begin{align*}
+  \mathbf{z}_{-1} &\doteq \mathbf{0} \\
+  \mathbf{z}_t &\doteq \gamma\lambda \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t), \quad 0 \leq t \leq T
+  \end{align*}
+  $$
 
-    $$\text{where } \lambda \equiv \text{trace decay parameter and }  \gamma \equiv \text{discount rate}$$
+  $$\text{where } \lambda \equiv \text{trace decay parameter and }  \gamma \equiv \text{discount rate}$$
 
 - The eligibility trace keeps track of which $\mathbf{w}_t$ components have contributed, positively or negatively, to recent state valuations.
 - This is the **recency heuristic** used for **credit assignment,** where more credit is assigned to the most recent states. **Recent** is defined in terms of $\gamma\lambda$.
@@ -572,7 +572,7 @@ $$
 &= \gamma_k \lambda_k \rho_k \underbrace{\sum_{t=0}^{k-1} \rho_t \nabla \hat{v}(S_t, \mathbf{w}_t) \prod_{i=t+1}^{k-1} \gamma_i \lambda_i \rho_i}_{\mathbf{z}_{k-1}} + \rho_k \nabla \hat{v}(S_k, \mathbf{w}_k)
 \end{align*}
 $$
-{% end raw %}
+{% endraw %}
 
 $$\boxed{\mathbf{z}_k = \rho_k \!\left[\gamma_k \lambda_k\, \mathbf{z}_{k-1} + \nabla \hat{v}(S_k, \mathbf{w}_k)\right]}$$
 
