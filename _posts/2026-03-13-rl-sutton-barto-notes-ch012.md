@@ -685,7 +685,7 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 
 ### GTD($\lambda$)
 
-- Analogous to TDC, and aims to learn a parameter $\mathbf{w}_{t}$ such that $\hat{v}(s, \mathbf{w}) \doteq \mathbf{w}_{t}^T \mathbf{x}(s) \approx v_{\pi}(s)$ even from data that is due to following another policy $b$. Its update is:
+- Analogous to TDC, and aims to learn a parameter $\mathbf{w}\_{t}$ such that $\hat{v}(s, \mathbf{w}) \doteq \mathbf{w}\_{t}^T \mathbf{x}(s) \approx v\_{\pi}(s)$ even from data that is due to following another policy $b$. Its update is:
 
   $$
   \begin{aligned}
@@ -705,7 +705,7 @@ $$\boxed{\mathbf{z}_t \doteq \gamma_t \lambda_t \rho_t\, \mathbf{z}_{t-1} + \nab
 ### GQ($\lambda$)
 
 - Gradient-TD algorithm for action values with eligibility traces.
-- GQ($\lambda$) aims to learn $\mathbf{w}_{t}$ such that $\hat{q}(s, a, \mathbf{w}_{t}) \doteq \mathbf{w}_{t}^T \mathbf{x}(s,a) \approx q_{\pi}(s,a)$ from off-policy data.
+- GQ($\lambda$) aims to learn $\mathbf{w}\_{t}$ such that $\hat{q}(s, a, \mathbf{w}\_{t}) \doteq \mathbf{w}\_{t}^T \mathbf{x}(s,a) \approx q\_{\pi}(s,a)$ from off-policy data.
 - If the target policy is $\varepsilon$-greedy, or otherwise biased towards the greedy policy for $\hat{q}$, then GQ($\lambda$) can be used as a control algorithm.
 - GQ($\lambda$) update is:
 
