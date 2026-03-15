@@ -78,17 +78,15 @@ $$\boxed{G_t^\lambda \doteq (1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_{t:t
   - The weight fades by $\lambda$ with each additional step.
   - After a terminal state has been reached, all subsequent $n$-step returns are equal to the conventional return $G_t$.
   - So essentially, we can decompose $G_t^\lambda$ based on the TD($\lambda$) weighting function diagram into the main sum and post-termination terms:
-
+  
+  {% raw %}
   $$
   \begin{array}{l}
   G_t^\lambda = (1-\lambda) \sum\nolimits_{n=1}^{T-t-1} \lambda^{n-1} G_{t:t+n} + \lambda^{T-t-1} G_t \\
   \hspace{3em} \underbrace{\hspace{11em}}_{\text{pre-termination}} \kern{0.5em}\underbrace{\hspace{4em}}_{\text{post-termination}}
   \end{array}
   $$
-
-  $$
-  G_t^\lambda = \underbrace{(1-\lambda) \sum\nolimits_{n=1}^{T-t-1} \lambda^{n-1} G_{t:t+n}}_{\text{pre-termination}} + \underbrace{\lambda^{T-t-1} G_t}_{\text{post-termination}}
-  $$
+  {% endraw %}
 
   - So now we can see the impact of $\lambda$ more clearly:
 
@@ -350,6 +348,7 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G - \mathbf{w}_t^T \math
 
   Now recursing:
 
+  {% raw %}
   $$
   \begin{align*}
   \mathbf{w}_T &= \mathbf{F}_{T-1}\, \mathbf{w}_{T-1} + \alpha G \mathbf{x}_{T-1} \\
@@ -362,6 +361,7 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G - \mathbf{w}_t^T \math
   &= \mathbf{a}_{T-1} + \alpha G\, \mathbf{z}_{T-1}
   \end{align*}
   $$
+  {% endraw %}
 
   $$
   \begin{aligned}
@@ -564,6 +564,7 @@ $$
 - If the entire expression from the 2nd sum on could be written and updated incrementally as an eligibility trace, then the sum of the forward-view update over time would be in the form of the sum of a backward-view TD update.
   - That is, if this expression was the trace at time $k$, then we could update it from its value at time $k-1$ by:
 
+{% raw %}
 $$
 \begin{align*}
 \mathbf{z}_k &= \sum_{t=0}^{k} \rho_t \nabla \hat{v}(S_t, \mathbf{w}_t) \prod_{i=t+1}^{k} \gamma_i \lambda_i \rho_i \\
@@ -571,6 +572,7 @@ $$
 &= \gamma_k \lambda_k \rho_k \underbrace{\sum_{t=0}^{k-1} \rho_t \nabla \hat{v}(S_t, \mathbf{w}_t) \prod_{i=t+1}^{k-1} \gamma_i \lambda_i \rho_i}_{\mathbf{z}_{k-1}} + \rho_k \nabla \hat{v}(S_k, \mathbf{w}_k)
 \end{align*}
 $$
+{% end raw %}
 
 $$\boxed{\mathbf{z}_k = \rho_k \!\left[\gamma_k \lambda_k\, \mathbf{z}_{k-1} + \nabla \hat{v}(S_k, \mathbf{w}_k)\right]}$$
 
