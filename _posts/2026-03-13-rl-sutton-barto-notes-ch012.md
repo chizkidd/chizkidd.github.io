@@ -749,7 +749,7 @@ either with the end of the episode or with the first nongreedy action, whichever
 ![Tree Backup (lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-10-tree-backup-q-lambda.png)
 
 {% capture c %}
-the tree-backup updates of each length are weighted in the
+The tree-backup updates of each length are weighted in the
 usual way dependent on the bootstrapping parameter $\lambda$
 {% endcapture %}
 {% include callout.html type="note" title="Backup Diagram for Tree Backup($\lambda$)" content=c %}
