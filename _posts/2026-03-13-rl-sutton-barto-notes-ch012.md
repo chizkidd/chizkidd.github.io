@@ -75,7 +75,7 @@ The compound update mixing half of a two-step return and half of a four-step ret
 ![TD(lambda)](/assets/images/2026/rl-sutton-barto/ch12-12-1-td-lambda.png)
 
 {% capture c %}
-If $\lambda = 0$, then the overall update reduces to its first component, the **TD(0)** update, whereas if $\lambda = 1$, then the overall update reduces its last component, the **MC** update.
+If $\lambda = 0$, then the overall update reduces to its first component, the **TD(0)** update, whereas if $\lambda = 1$, then the overall update reduces to its last component, the **MC** update.
 {% endcapture %}
 {% include callout.html type="note" title="Backup Diagram for TD($\lambda$)" content=c %}
 
@@ -150,7 +150,7 @@ We decide how to update each state by looking forward to future rewards and stat
 
 - Let's focus on the **semi-gradient version of TD($\lambda$)** with function approximation:
   - The **eligibility trace $\mathbf{z}_t$** has the same number of components as $\mathbf{w}_t$.
-  - $\mathbf{z}$ is initialized to $\mathbf{0}$, incremented on each time step by the value gradient, and then fades away by $\gamma\lambda$
+  - $\mathbf{z}$ is initialized to $\mathbf{0}$, incremented on each time step by the value gradient, and then fades away by $\gamma\lambda$:
 
   $$
   \begin{align*}
@@ -197,11 +197,11 @@ current TD error combined with the current eligibility traces of past events.
 $$
 \begin{align*}
 \text{if } \lambda = 0: \quad & \mathbf{z}_t = \nabla \hat{v}(S_t, \mathbf{w}_t) \\
-& \mathbf{w}_{t+1} = \mathbf{w}_t + \alpha\, \delta_t \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{TD(0)} \\
-\text{if } 0 < \lambda < 1: \quad & \text{earlier states are given less credit for the TD error} \\
-\text{if } \lambda = 1: \quad & \mathbf{z}_t = \gamma \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{credit for earlier states falls by } \gamma \text{ per step} \\
-\text{if } \lambda = 1, \gamma = 1: \quad & \mathbf{z}_t = \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{MC-like behavior (no time decay for ET)} \\
-\text{if } \lambda = 1: \quad & \text{we get TD(1)} 
+& \mathbf{w}_{t+1} = \mathbf{w}_t + \alpha\, \delta_t \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{TD(0)} \\[6pt]
+\text{if } 0 < \lambda < 1: \quad & \text{earlier states are given less credit for the TD error} \\[6pt]
+\text{if } \lambda = 1: \quad & \mathbf{z}_t = \gamma \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{credit for earlier states falls by } \gamma \text{ per step} \\[6pt]
+\text{if } \lambda = 1,\ \gamma = 1: \quad & \mathbf{z}_t = \mathbf{z}_{t-1} + \nabla \hat{v}(S_t, \mathbf{w}_t) \quad \longrightarrow \quad \text{MC-like behavior (no time decay for ET)} \\[6pt]
+\text{if } \lambda = 1: \quad & \text{we get TD(1)}
 \end{align*}
 $$
 
@@ -222,7 +222,7 @@ $$\overline{\text{VE}}(\mathbf{w}_\infty) \leq \frac{1 - \gamma\lambda}{1 - \gam
 
 $$
 \begin{align*}
-\text{as } \lambda \to 1: \quad & \overline{\text{VE}}(\mathbf{w}_\infty) \to \min_\mathbf{w} \overline{\text{VE}}(\mathbf{w}) \\
+\text{as } \lambda \to 1: \quad & \overline{\text{VE}}(\mathbf{w}_\infty) \to \min_\mathbf{w} \overline{\text{VE}}(\mathbf{w}) \\[6pt]
 \text{as } \lambda \to 0: \quad & \overline{\text{VE}}(\mathbf{w}_\infty) \to \frac{1}{1-\gamma} \min_\mathbf{w} \overline{\text{VE}}(\mathbf{w}) = \overline{\text{VE}}(\mathbf{w}_\text{TD}) \quad \text{(TD(0))}
 \end{align*}
 $$
@@ -448,7 +448,7 @@ $$\mathbf{w}_{t+1} \doteq \mathbf{w}_t + \alpha \!\left[G - \mathbf{w}_t^T \math
   \mathbf{a}_t &= \mathbf{F}_t \mathbf{F}_{t-1} \cdots \mathbf{F}_0\, \mathbf{w}_0, \quad 1 \leq t < T \\
   &= \mathbf{F}_t\, \mathbf{a}_{t-1} \\
   &= \mathbf{a}_{t-1} - \alpha \mathbf{x}_t \mathbf{x}_t^T \mathbf{a}_{t-1} \\
-  &\boxed{= \mathbf{a}_{t-1} \!\left(1 - \alpha \mathbf{x}_t \mathbf{x}_t^T \right)}
+  &\boxed{= \mathbf{a}_{t-1}\!\left(\mathbf{I} - \alpha \mathbf{x}_t \mathbf{x}_t^T\right)}
   \end{align*}
   $$
 
@@ -811,7 +811,7 @@ usual way dependent on the bootstrapping parameter $\lambda$
 ### HTD($\lambda$)
 
 - Hybrid TD($\lambda$) state-value algorithm combines aspects of GTD($\lambda$) and TD($\lambda$).
-- HTD($\lambda$) is a strict generalization of TD($\lambda$) to off-policy when behavior and target policy are the same
+- HTD($\lambda$) is a strict generalization of TD($\lambda$) to the off-policy setting, meaning it reduces exactly to TD($\lambda$) when the behavior and target policies coincide; a property GTD($\lambda$) does not share:
 
   $$b(A_t \vert S_t) = \pi(A_t \vert S_t), \quad \rho_t = 1 \implies \text{HTD}(\lambda) = \text{TD}(\lambda)$$
 
@@ -866,9 +866,8 @@ usual way dependent on the bootstrapping parameter $\lambda$
   \end{aligned}
   $$
 
-- In the on-policy case ($\rho_t = 1$ for all $t$), Emphatic TD($\lambda$) is similar to conventional TD($\lambda$), but still significantly different
-  - Emphatic TD($\lambda$) is guaranteed to converge for all state-dependent $\lambda$ functions; 
-  - TD($\lambda$) is not (TD($\lambda$) is guaranteed only for constant $\lambda$). 
+- In the on-policy case ($\rho_t = 1$ for all $t$), Emphatic TD($\lambda$) is similar to conventional TD($\lambda$), but still significantly different:
+  - Emphatic TD($\lambda$) is guaranteed to converge for all state-dependent $\lambda$ functions; TD($\lambda$) is not (TD($\lambda$) is guaranteed only for constant $\lambda$). 
   - See Yu's counterexample **[Ghassian, Rafiee & Sutton, 2016].**
 
 ---
@@ -876,7 +875,7 @@ usual way dependent on the bootstrapping parameter $\lambda$
 ## 12.12 Implementation Issues
 
 - **Naive implementation seems expensive:** Updating eligibility traces for every state at every time step appears computationally costly on serial computers.
-- **Practical optimization:** Most ET are nearly 0, only recently visited states have significant traces therefore implementations can track and update only recently visited states with significant traces.
+- **Practical optimization:** Most ET are nearly 0; only recently visited states have significant traces, so implementations can track and update only these few states.
 - **Computational cost:** With this optimization, tabular methods with traces are only a few times more expensive than one-step methods.
 - **Function approximation reduces overhead:** When using neural networks, ET typically only double memory and computation per step (much less overhead than in tabular case).
 - **Tabular is the worst case:** The tabular setting represents the highest computational complexity for ET relative to simpler methods.
