@@ -27,7 +27,7 @@ mathjax: true
 
 ---
 
-[Moonshot AI](https://x.com/Kimi_Moonshot), creator of Kimi, pioneered the improvements to Muon (MuonClip) which I dive into in detail in this post. But they have an article on X with more academic details on why they chose Muon titled _"Why We Chose Muon: Our Chain of Thought"_ by [Jianlin Su](https://x.com/Jianlin_S), the first author of [RoPE](https://arxiv.org/abs/2104.09864) (Rotary Position Embedding).
+[Moonshot AI](https://x.com/Kimi_Moonshot), creator of Kimi, pioneered the improvements to Muon (MuonClip) which I dive into in detail in this post. But they have an article on X with more academic details on why they chose Muon titled _"Why We Chose Muon: Our Chain of Thought"_ [^5] by [Jianlin Su](https://x.com/Jianlin_S), the first author of [RoPE](https://arxiv.org/abs/2104.09864) (Rotary Position Embedding).
 
 <blockquote class="twitter-tweet"><p lang="zxx" dir="ltr"><a href="https://t.co/dxZnLxvPae">https://t.co/dxZnLxvPae</a></p>&mdash; Kimi.ai (@Kimi_Moonshot) <a href="https://twitter.com/Kimi_Moonshot/status/1897929976948965870?ref_src=twsrc%5Etfw">March 7, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -41,17 +41,19 @@ This blog post is directly from my personal handwritten notes on studying Muon &
 ---
 
 ## Adam Optimizer
-Let's start by looking at Adam optimizer, the most common optimizer for training neural networks, which I cover in [this article guide](https://chizkidd.github.io/2026/01/22/neural-net-optimizers/#8-muon-momentum-orthogonalized-by-newton-schulz) on common deep learning optimizers. **Adam** stands for **Ada**ptive **M**oment Estimation. The forward pass looks like:
+Let's start by looking at Adam optimizer, the most common optimizer for training neural networks, which I cover in [this article guide](https://chizkidd.github.io/2026/01/22/neural-net-optimizers/#8-muon-momentum-orthogonalized-by-newton-schulz) on common deep learning optimizers. **Adam** stands for **Ada**ptive **M**oment Estimation. 
+
+It combines momentum and adaptive learning rates so the model not only remembers the direction it has been moving in, but also adjusts how big each step should be for every parameter. More specifcally, it combines momentum (first moment) and RMSProp (second moment) with bias corrections to handle noisy gradients and early training instability. [^7] The forward pass looks like:
 
 ![model learning](/assets/images/2026/muon/model-learning.png)
 
-$$x \longrightarrow \boxed{\Theta} \longrightarrow \hat{y} \longrightarrow \boxed{\text{Loss},\ L} \longrightarrow y_{gt}$$
+<!-- $$x \longrightarrow \boxed{\Theta} \longrightarrow \hat{y} \longrightarrow \boxed{\text{Loss},\ L} \longrightarrow y_{gt}$$
 
-$${\text{input}} \quad {\text{model}} \quad {\text{prediction}} \hspace{2em} \quad  {\text{ground truth}}$$
-
----
+$${\text{input}} \quad {\text{model}} \quad {\text{prediction}} \hspace{2em} \quad  {\text{ground truth}}$$ -->
 
 ### Gradient Descent
+
+Gradient descent updates the model parameters by stepping in the direction that reduces the loss, using the gradient as a guide for how to adjust each parameter. The momentum and velocity terms refine this process by smoothing past gradients and scaling updates adaptively, which helps stabilize training and converge faster, especially in noisy or complex loss landscapes.
 
 $$
 \begin{aligned}
@@ -72,16 +74,12 @@ V_i &\equiv \text{velocity: gradient squared (2nd moment)} \\
 \end{aligned}
 $$
 
----
-
 ### Cons of Adam
 
 - Memory intensive.
 - Independent update of each value in a single long parameter vector without considering any internal structure (vector-based optimizer behavior) of the model parameters.
 
 **Question:** Can we explicitly account for the underlying matrix structure of the model parameters?
-
----
 
 ### The Linear Layer & Matrix Momentum
 
@@ -121,8 +119,6 @@ $$
 
     $$\hat{M}_i \leftarrow \beta \hat{M}_i + \frac{\partial L}{\partial \hat{\Theta}_i}$$
 
----
-
 ### The Problem with Vector-Based Optimizers
 
 - With vector-based optimizers like Adam, the momentum for a linear layer (a 2D matrix) tends to become **almost low rank** in practice.
@@ -136,8 +132,6 @@ $$
 - **Orthogonalize** the momentum matrix. This is where **Muon** comes in.
 - It amplifies the effect of **rare** directions -- the directions that typically receive small or infrequent updates.
 - Even though these rare directions seem minor, they are often essential for effective learning and can help capture more nuance patterns in the data.
-
----
 
 ### Orthogonalization via SVD
 
@@ -165,20 +159,19 @@ $$
 
     $$p(X) = aX + b(XX^T)X$$
 
----
 
 ### Odd Polynomial Matrix
 
-    $$
-    \begin{align*}
-    p(M) &= a(M) + b(MM^T)M \\
-    &= \left(aI + b(MM^T)\right)M \\
-    &= \left(aI + b(USV^T VS U^T)\right)USV^T \\
-    &= \left(aI + b(US^2 U^T)\right)USV^T \\
-    &= aUSV^T + bUS^2 U^T USV^T \\
-    p(M) &= aUSV^T + bUS^3V^T
-    \end{align*}
-    $$
+$$
+\begin{align*}
+p(M) &= a(M) + b(MM^T)M \\
+&= \left(aI + b(MM^T)\right)M \\
+&= \left(aI + b(USV^T VS U^T)\right)USV^T \\
+&= \left(aI + b(US^2 U^T)\right)USV^T \\
+&= aUSV^T + bUS^2 U^T USV^T \\
+p(M) &= aUSV^T + bUS^3V^T \\
+\end{align*}
+$$
 
 - This applies to any odd polynomial, so in general:
 
@@ -198,15 +191,15 @@ $$
 
 - Applying this repeatedly via **Newton-Schulz iteration**:
 
-    $$
-    \begin{aligned}
-    y_1 &= p(x) \\
-    y_2 &= p(p(x)) \\
-    y_3 &= p(p(p(x))) \\
-    y_4 &= p(p(p(p(x)))) \\
-    y_5 &= p(p(p(p(p(x)))))
-    \end{aligned}
-    $$
+$$
+\begin{aligned}
+y_1 &= p(x) \\
+y_2 &= p(p(x)) \\
+y_3 &= p(p(p(x))) \\
+y_4 &= p(p(p(p(x)))) \\
+y_5 &= p(p(p(p(p(x))))) \\
+\end{aligned}
+$$
 
 - Each $y_k$ represents one more composition:  $y_1 \to y_5$ are multiple iterations aimed at converging the singular values toward 1.
 
@@ -236,15 +229,13 @@ $$
 
 ## Muon
 
-Muon is designed specifically for 2D weight matrices in neural network hidden layers (Linear layers). Unlike traditional optimizers that treat each parameter independently, Muon leverages the geometric structure of weight matrices by orthogonalizing gradients using the Newton-Schulz iteration.
+Muon is designed specifically for 2D weight matrices in neural network hidden layers (Linear layers) [^1]. Unlike traditional optimizers that treat each parameter independently, Muon leverages the geometric structure of weight matrices by orthogonalizing gradients using the Newton-Schulz iteration.
 
 The optimizer formulates weight updates as a constrained optimization problem in the RMS-to-RMS operator norm space:
 
  $$\text{Ortho}(M) = \arg\min_{O} \left\{\| O - M \|_F\right\} \quad \text{subject to } OO^T = I \text{ or } O^TO = I$$
 
 Where $M$ is the gradient matrix. The solution involves projecting the gradient onto the set of orthogonal matrices, which aims to standardize all singular values to 1 while preserving gradient directions.
-
----
 
 ### Pseudo-Algorithm for Muon
 
@@ -273,15 +264,12 @@ for t = 1, 2, ..., do:
     \end{aligned}
     $$
 
----
-
 ### Muon + Weight Decay + RMS Alignment
 
 - The learning rate also gets adjusted by taking into account the **size of the 2D matrix**. This is referred to as the **RMS (Root Mean Squared) Alignment.**
+- The scaling factor used to scale the Muon update for each matrix to ensure per-matrix update RMS alignment of around 1 of matrices of different shapes is $\sqrt(\max(A, B))$ for a full-rank weight matrix of shape $[A,\ B]$. [^2]
 - These 2 improvements (weight decay & adjusted learning rate) help to stabilize the training of large models.
 - Weight decay is used to address the diminished performance gains of Muon over AdamW when scaling up to train a larger model.
-
----
 
 ### The Exploding Attention Logit Crisis
 
@@ -291,7 +279,7 @@ for t = 1, 2, ..., do:
     ![Self-attention architecture diagram](/assets/images/2026/muon/self-attention.png)
 
 {% capture c %}
-Self-attention: $O = \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
+$O = \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
 {% endcapture %}
 {% include callout.html type="note" title="Self-Attention" content=c %}
 
@@ -342,9 +330,6 @@ if S_max > τ:
     W^K ← √γ W^K
 ```
 
-
----
-
 ### QK-Clip for Multi-Head Attention
 
 - In practice, self-attention consists of multiple heads ($n_{\text{heads}} = h$).
@@ -353,7 +338,7 @@ if S_max > τ:
     ![Multi-head attention architecture diagram](/assets/images/2026/muon/MHA.png)
 
 {% capture c %}
-Multi-head attention: $O = \text{MultiheadAttention}(Q, K, V)$ with $h$ independent attention heads, each with their own $Q_n, K_n, V_n$.
+$O = \text{MultiheadAttention}(Q, K, V)$ = 
 {% endcapture %}
 {% include callout.html type="note" title="Multi-Head Attention" content=c %}
 
@@ -411,7 +396,7 @@ In MLA, it is important to carefully decide how to rescale these 4 matrices: $W^
 
 **Issue:** Applying the same per-head scaling for both RoPE components leads to the shared $W^{KR}$ being rescaled multiple times, which is undesirable.
 
-**Fix:** Rescale only the head-specific rotary query $W^{QR}$ by their respective $\gamma^h$, while leaving the shared rotary key matrix $W^{KR}$ unchanged. This technique is called **MuonClip**.
+**Fix:** Rescale only the head-specific rotary query $W^{QR}$ by their respective $\gamma^h$, while leaving the shared rotary key matrix $W^{KR}$ unchanged. This technique is called **MuonClip**. MuonClip improves upon Muon with the QK-Clip technique to handle training instability while benefiting from Muon's advanced token efficiency. [^3]
 
 **MuonClip Algorithm:**
 
@@ -442,7 +427,7 @@ $$
 
 ## References
 
-[^1]: Keller Jordan. [Muon: An optimizer for hidden layers in neural networks](https://kellerjordan.github.io/posts/muon/). https://kellerjordan.github.io/. 2024.
+[^1]: Keller Jordan. [Muon: An optimizer for hidden layers in neural networks](https://kellerjordan.github.io/posts/muon/). kellerjordan.github.io. 2024.
 
 [^2]: [Muon is Scalable for LLM Training](https://arxiv.org/pdf/2502.16982). arXiv. 2025.
 
@@ -451,6 +436,10 @@ $$
 [^4]: jbhuang0604. [This Simple Optimizer Is Revolutionizing How We Train AI [Muon] (YouTube Video)](https://youtu.be/bO5nvE289ec). YouTube.
 
 [^5]: Kimi (Moonshot AI). [Why We Chose Muon: Our Chain of Thought](https://x.com/Kimi_Moonshot/status/1897929976948965870). X (Twitter). 2025.
+
+[^6]: Jeremy Bernstein. [Deriving Muon](https://jeremybernste.in/writing/deriving-muon). jeremybernste.in. 2025.
+
+[^7]: Chizoba Obasi. [A Complete Guide to Neural Network Optimizers](https://chizkidd.github.io/2026/01/22/neural-net-optimizers/). chizkidd.github.io. 2026.
 
 ---
 
