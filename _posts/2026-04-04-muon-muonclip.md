@@ -77,7 +77,8 @@ $$
 ### Cons of Adam
 
 - Memory intensive.
-- Independent update of each value in a single long parameter vector without considering any internal structure (vector-based optimizer behavior) of the model parameters.
+- Challenging hyper-parameter tuning.
+- Independent update of each value in a single, long, parameter vector without considering any internal structure (vector-based optimizer behavior) of the model parameters.[^4]
 
 **Question:** Can we explicitly account for the underlying matrix structure of the model parameters?
 
@@ -126,7 +127,7 @@ $$
 
 **Question:** How can we tackle this update direction imbalance and what makes a good optimizer?
 
-From fundamental first principles, a good optimizer possesses two characteristics: **stability** and **speed.** The goal of each update of a good optimizer is to minimize model variance and maximize loss reduction contribution.[^5]
+From fundamental first principles, a good optimizer possesses two characteristics: **stability** and **speed.** The goal of each update of a good optimizer is to minimize model variance and maximize loss reduction contribution,[^5] which correspond to stability and speed respectively.
 
 ---
 
@@ -191,7 +192,7 @@ $$
 
     $$y = 1.5x - 0.5x^3$$
 
-    ![Newton-Schulz5-1](/assets/images/2026/muon/newton-schultz5.png)
+    ![Newton-Schulz5-1](/assets/images/2026/muon/newton-schulz5.png)
 
 - Applying this repeatedly via **Newton-Schulz iteration**:
 
@@ -209,13 +210,13 @@ $$
 
 ---
 
-## Newton-Schulz 5 Iteration
+## Newton-Schulz-5 Iteration
 
 - After 5 iterations, almost all input values end up very close to 1.
 - We can change $(a, b, c)$ to see the effect on convergence of $y$ to 1.
 - $(a, b, c) = (2,\ -1.5,\ 0.5)$ speeds up the convergence to 1.
 
-    ![Netwon-Schultz5-2](/assets/images/2026/muon/newton-schulz5-converged.png)
+    ![Netwon-Schulz5-2](/assets/images/2026/muon/newton-schulz5-converged.png)
 
 - Empirically, we don't need the singular values to converge to exactly 1.
 - Let's set an upper & lower bound, e.g. $(0.7,\ 1.3)$, which is basically $[1 - \varepsilon, 1 + \varepsilon]$.
@@ -229,6 +230,24 @@ $$
 
 - With GPUs, no need to use SVD since GPUs can efficiently compute matrix multiplication.
 
+```python
+def newtonschulz5(G, steps=5, eps=1e-7):
+    assert G.ndim == 2
+    a, b, c = (3.4445, -4.7750, 2.0315)
+    X = G.bfloat16()
+    X /= (X.norm() + eps)
+    if G.size(0) > G.size(1):
+        X = X.T
+    for _ in range(steps):
+        A = X @ X.T
+        B = b * A + c * A @ A
+        X = a * X + B @ X
+    if G.size(0) > G.size(1):
+        X = X.T
+    return X
+
+# Retrieved from https://kellerjordan.github.io/posts/muon/
+```
 ---
 
 ## Muon
@@ -270,9 +289,10 @@ for t = 1, 2, ..., do:
 
 ### Muon + Weight Decay + RMS Alignment
 
-- The learning rate also gets adjusted by taking into account the **size of the 2D matrix**. This is referred to as the **RMS (Root Mean Squared) Alignment.**
+- The learning rate also gets adjusted by taking into account the **size of the 2D matrix**. This is the underlying principle behind the **RMS (Root Mean Squared) Alignment.**
 - The scaling factor used to scale the Muon update for each matrix to ensure per-matrix update RMS alignment of around 1 of matrices of different shapes is $\sqrt(\max(A, B))$ for a full-rank weight matrix of shape $[A,\ B]$.[^2]
-- These 2 improvements (weight decay & adjusted learning rate) help to stabilize the training of large models.
+- The $0.2$ factor is used to match Muon's update RMS to that of AdamW. From empirical observations, AdamW’s update RMS is usually around $0.2$ to $0.4$.[^2], [^5]
+- These 2 improvements (weight decay & adjusted learning rate via RMS alignment) help to stabilize the training of large models.
 - Weight decay is used to address the diminished performance gains of Muon over AdamW when scaling up to train a larger model.
 
 ### The Exploding Attention Logit Crisis
@@ -439,7 +459,7 @@ $$
 
 [^3]: [Kimi K2: Open Agentic Intelligence](https://arxiv.org/pdf/2507.20534). arXiv. 2025.
 
-[^4]: jbhuang0604. [This Simple Optimizer Is Revolutionizing How We Train AI [Muon] (YouTube Video)](https://youtu.be/bO5nvE289ec). YouTube.
+[^4]: Jia-Bin Huang [This Simple Optimizer Is Revolutionizing How We Train AI [Muon] (YouTube Video)](https://youtu.be/bO5nvE289ec). YouTube.
 
 [^5]: Kimi (Moonshot AI). [Why We Chose Muon: Our Chain of Thought](https://x.com/Kimi_Moonshot/status/1897929976948965870). X (Twitter). 2025.
 
