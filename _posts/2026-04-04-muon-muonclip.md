@@ -27,7 +27,7 @@ mathjax: true
 
 ---
 
-[Moonshot AI](https://x.com/Kimi_Moonshot), creator of Kimi, pioneered the improvements to Muon (MuonClip) which I dive into in detail in this post. But they have an article on X with more academic details on why they chose Muon titled _"Why We Chose Muon: Our Chain of Thought"_ [^5] by [Jianlin Su](https://x.com/Jianlin_S), the first author of [RoPE](https://arxiv.org/abs/2104.09864) (Rotary Position Embedding).
+[Moonshot AI](https://x.com/Kimi_Moonshot), creator of Kimi, pioneered the improvements to Muon (MuonClip) which I dive into in detail in this post. But they have an article on X with more academic details on why they chose Muon titled _"Why We Chose Muon: Our Chain of Thought"_[^5] by [Jianlin Su](https://x.com/Jianlin_S), the first author of [RoPE](https://arxiv.org/abs/2104.09864) (Rotary Position Embedding).
 
 <blockquote class="twitter-tweet"><p lang="zxx" dir="ltr"><a href="https://t.co/dxZnLxvPae">https://t.co/dxZnLxvPae</a></p>&mdash; Kimi.ai (@Kimi_Moonshot) <a href="https://twitter.com/Kimi_Moonshot/status/1897929976948965870?ref_src=twsrc%5Etfw">March 7, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -43,7 +43,7 @@ This blog post is directly from my personal handwritten notes on studying Muon &
 ## Adam Optimizer
 Let's start by looking at Adam optimizer, the most common optimizer for training neural networks, which I cover in [this article guide](https://chizkidd.github.io/2026/01/22/neural-net-optimizers/#8-muon-momentum-orthogonalized-by-newton-schulz) on common deep learning optimizers. **Adam** stands for **Ada**ptive **M**oment Estimation. 
 
-It combines momentum and adaptive learning rates so the model not only remembers the direction it has been moving in, but also adjusts how big each step should be for every parameter. More specifcally, it combines momentum (first moment) and RMSProp (second moment) with bias corrections to handle noisy gradients and early training instability. [^7] The forward pass looks like:
+It combines momentum and adaptive learning rates so the model not only remembers the direction it has been moving in, but also adjusts how big each step should be for every parameter. More specifcally, it combines momentum (first moment) and RMSProp (second moment) with bias corrections to handle noisy gradients and early training instability.[^7] The forward pass looks like:
 
 ![model learning](/assets/images/2026/muon/model-learning.png)
 
@@ -123,6 +123,10 @@ $$
 
 - With vector-based optimizers like Adam, the momentum for a linear layer (a 2D matrix) tends to become **almost low rank** in practice.
 - Essentially, only a small number of dominant directions really drive the update, while the many remaining other directions contribute very little.
+
+**Question:** How can we tackle this update direction imbalance and what makes a good optimizer?
+
+From fundamental first principles, a good optimizer possesses two characteristics: **stability** and **speed.** The goal of each update of a good optimizer is to minimize model variance and maximize loss reduction contribution.[^5]
 
 ---
 
@@ -229,7 +233,7 @@ $$
 
 ## Muon
 
-Muon is designed specifically for 2D weight matrices in neural network hidden layers (Linear layers) [^1]. Unlike traditional optimizers that treat each parameter independently, Muon leverages the geometric structure of weight matrices by orthogonalizing gradients using the Newton-Schulz iteration.
+Muon is designed specifically for 2D weight matrices in neural network hidden layers.[^1] Unlike traditional optimizers that treat each parameter independently, Muon leverages the geometric structure of weight matrices by orthogonalizing gradients using the Newton-Schulz iteration. Muon is specifically designed for linear neural network layers, which aligns with ongoing research that argues that different layer types require different optimizers due to their varying geometry.[^6]
 
 The optimizer formulates weight updates as a constrained optimization problem in the RMS-to-RMS operator norm space:
 
@@ -267,7 +271,7 @@ for t = 1, 2, ..., do:
 ### Muon + Weight Decay + RMS Alignment
 
 - The learning rate also gets adjusted by taking into account the **size of the 2D matrix**. This is referred to as the **RMS (Root Mean Squared) Alignment.**
-- The scaling factor used to scale the Muon update for each matrix to ensure per-matrix update RMS alignment of around 1 of matrices of different shapes is $\sqrt(\max(A, B))$ for a full-rank weight matrix of shape $[A,\ B]$. [^2]
+- The scaling factor used to scale the Muon update for each matrix to ensure per-matrix update RMS alignment of around 1 of matrices of different shapes is $\sqrt(\max(A, B))$ for a full-rank weight matrix of shape $[A,\ B]$.[^2]
 - These 2 improvements (weight decay & adjusted learning rate) help to stabilize the training of large models.
 - Weight decay is used to address the diminished performance gains of Muon over AdamW when scaling up to train a larger model.
 
@@ -279,7 +283,7 @@ for t = 1, 2, ..., do:
     ![Self-attention architecture diagram](/assets/images/2026/muon/self-attention.png)
 
 {% capture c %}
-$O = \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
+$O = \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
 {% endcapture %}
 {% include callout.html type="note" title="Self-Attention" content=c %}
 
@@ -338,7 +342,8 @@ if S_max > τ:
     ![Multi-head attention architecture diagram](/assets/images/2026/muon/MHA.png)
 
 {% capture c %}
-$O = \text{MultiheadAttention}(Q, K, V)$ = 
+$O = \text{MultiheadAttention}(Q, K, V) = \text{Concat}(h_0, h_1, .., h_H) W_o$<br>
+$\text{where } h_i = \text{head}_i \{ and} H = \text{ number of heads}$
 {% endcapture %}
 {% include callout.html type="note" title="Multi-Head Attention" content=c %}
 
@@ -367,11 +372,6 @@ if S^h_max > τ:
 
     ![MLA architecture diagram](/assets/images/2026/muon/mla-diagram.png)
 
-{% capture c %}
-MLA compresses $Q, K, V$ representations into a low-rank latent space via down-projection matrices $W^Q_\downarrow$ and $W^{KV}_\downarrow$, then maps back up via up-projection matrices. A decoupled RoPE technique adds rotary queries $W^{QR}$ and a shared rotary key $W^{KR}$.
-{% endcapture %}
-{% include callout.html type="note" title="Multihead Latent Attention (MLA)" content=c %}
-
 - MLA compresses $Q, K, V$ representations into a low-rank space to reduce the size of the KV cache using a **down-projection matrix** which produces latent representations:
 
     $$C^Q = XW^Q_\downarrow \qquad C^{KV} = XW^{KV}_\downarrow$$
@@ -382,6 +382,11 @@ MLA compresses $Q, K, V$ representations into a low-rank latent space via down-p
 - For MLA, the Query, Key & Values are regrouped for each head:
   - The **Query** is constructed by concatenating the compressed query $Q^C$ with the rotated query $Q^R$.
   - The **Key** is constructed similarly by concatenating the compressed key $K^C$ with the rotated key $K^R$.
+
+{% capture c %}
+MLA compresses $Q, K, V$ representations into a low-rank latent space via down-projection matrices $W^Q_\downarrow$ and $W^{KV}_\downarrow$, then maps back up via up-projection matrices. A decoupled RoPE technique adds rotary queries $W^{QR}$ and a shared rotary key $W^{KR}$.
+{% endcapture %}
+{% include callout.html type="note" title="Multihead Latent Attention (MLA)" content=c %}
 
 ---
 
@@ -396,7 +401,7 @@ In MLA, it is important to carefully decide how to rescale these 4 matrices: $W^
 
 **Issue:** Applying the same per-head scaling for both RoPE components leads to the shared $W^{KR}$ being rescaled multiple times, which is undesirable.
 
-**Fix:** Rescale only the head-specific rotary query $W^{QR}$ by their respective $\gamma^h$, while leaving the shared rotary key matrix $W^{KR}$ unchanged. This technique is called **MuonClip**. MuonClip improves upon Muon with the QK-Clip technique to handle training instability while benefiting from Muon's advanced token efficiency. [^3]
+**Fix:** Rescale only the head-specific rotary query $W^{QR}$ by their respective $\gamma^h$, while leaving the shared rotary key matrix $W^{KR}$ unchanged. This technique is called **MuonClip**. MuonClip improves upon Muon with the QK-Clip technique to handle training instability while benefiting from Muon's advanced token efficiency.[^3]
 
 **MuonClip Algorithm:**
 
