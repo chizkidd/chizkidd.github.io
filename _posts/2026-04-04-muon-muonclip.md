@@ -283,7 +283,8 @@ for t = 1, 2, ..., do:
     ![Self-attention architecture diagram](/assets/images/2026/muon/self-attention.png)
 
 {% capture c %}
-$O = \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
+$O = \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, <br>
+where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
 {% endcapture %}
 {% include callout.html type="note" title="Self-Attention" content=c %}
 
@@ -343,7 +344,7 @@ if S_max > τ:
 
 {% capture c %}
 $O = \text{MultiheadAttention}(Q, K, V) = \text{Concat}(h_0, h_1, .., h_H) W_o$<br>
-$\text{where } h_i = \text{head}_i \{ and} H = \text{ number of heads}$
+$\quad \text{where } h_i = \text{head}_i \text{ and } H = \text{ number of heads}$
 {% endcapture %}
 {% include callout.html type="note" title="Multi-Head Attention" content=c %}
 
@@ -370,7 +371,7 @@ if S^h_max > τ:
 
     $$O = \text{Multihead Latent Attention}(Q, K, V)$$
 
-    ![MLA architecture diagram](/assets/images/2026/muon/mla-diagram.png)
+    ![MLA architecture diagram](/assets/images/2026/muon/MLA.png)
 
 - MLA compresses $Q, K, V$ representations into a low-rank space to reduce the size of the KV cache using a **down-projection matrix** which produces latent representations:
 
