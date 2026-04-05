@@ -15,7 +15,7 @@ mathjax: true
 ## Table of Contents
 - [Adam Optimizer](#adam-optimizer)
 - [Matrix Orthogonalization](#matrix-orthogonalization)
-- [Newton-Schulz 5](#newton-schulz-5-iteration)
+- [Newton-Schulz 5 Iteration](#newton-schulz-5-iteration)
 - [Muon](#muon)
 - [QK-Clip](#qk-clip)
 - [Multihead Latent Attention (MLA)](#multihead-latent-attention-mla)
@@ -291,9 +291,9 @@ for t = 1, 2, ..., do:
 
 - Weight decay is used to address the diminished performance gains of Muon over AdamW when scaling up to train a larger model.
 - The learning rate also gets adjusted by taking into account the **size of the 2D matrix**. This is the underlying principle behind the **RMS (Root Mean Squared) Alignment.**
-    - The scaling factor used to scale the Muon update for each matrix to ensure per-matrix update RMS alignment of around 1 of matrices of different shapes is $\sqrt(\max(A, B))$ for a full-rank weight matrix of shape $[A,\ B]$.[^2]
+    - The scaling factor used to scale the Muon update for each matrix to ensure per-matrix parameter update RMS alignment of around 1 of matrices of different shapes is $\sqrt(\max(A, B))$ for a full-rank weight matrix of shape $[A,\ B]$.[^2]
     - The $0.2$ factor is used to match Muon's update RMS to that of AdamW. From empirical observations, AdamW’s update RMS is usually around $0.2$ to $0.4$.[^2], [^5]
-- These 2 improvements (weight decay & adjusted learning rate via RMS alignment) help to stabilize the training of large models.
+- These 2 improvements (weight decay & adjusting the per-parameter update scale) help to stabilize the training of large models.
 
 
 ### The Exploding Attention Logit Crisis
