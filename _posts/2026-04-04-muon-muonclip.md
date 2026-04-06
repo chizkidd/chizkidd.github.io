@@ -127,7 +127,7 @@ $$
 
 **Question:** How can we tackle this update direction imbalance and what makes a good optimizer?
 
-From fundamental first principles, a good optimizer possesses two characteristics: **stability** and **speed.** The goal of each update of a good optimizer is to minimize model variance and maximize loss reduction contribution,[^5] which correspond to stability and speed respectively.
+From fundamental first principles, a good optimizer possesses two characteristics: **stability** and **speed.** The goal of each update of a good optimizer is to minimize model variance and maximize loss reduction contribution, which correspond to stability and speed respectively.[^5]
 
 ---
 
@@ -304,11 +304,11 @@ for t = 1, 2, ..., do:
     ![Self-attention architecture diagram](/assets/images/2026/muon/self-attention.png)
 
 {% capture c %}
-$O = \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$, <br>
-where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
+$O = \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
 {% endcapture %}
 {% include callout.html type="note" title="Self-Attention" content=c %}
 
+- In self attention above, $Q = XW^Q$, $K = XW^K$, and $V = XW^V$.
 - The **attention logits** $S$:
 
     $$
@@ -323,7 +323,7 @@ where $Q = XW^Q$, $K = XW^K$, $V = XW^V$.
 
 - To prevent the attention logits from becoming excessively large, we must control the scale of $W^Q$ and $W^K$:
 
-    $$S = X\underbrace{\left(W^Q W^{K^T}\right)}_{\text{need to control the scale of this part}}X^T$$
+    $$S = X\underbrace{\left(W^Q W^{K^T}\right)}_{\text{scale control}}X^T$$
 
 ---
 
@@ -364,8 +364,7 @@ if S_max > τ:
     ![Multi-head attention architecture diagram](/assets/images/2026/muon/MHA.png)
 
 {% capture c %}
-$O = \text{MultiheadAttention}(Q, K, V) = \text{Concat}(h_0, h_1, .., h_H) W_o$<br>
-$\quad \text{where } h_i = \text{head}_i \text{ and } H = \text{ number of heads}$
+$O = \text{MultiheadAttention}(Q, K, V) = \text{Concat}(head_0, head_1, .., head_h) W_o$
 {% endcapture %}
 {% include callout.html type="note" title="Multi-Head Attention" content=c %}
 
@@ -390,7 +389,7 @@ if S^h_max > τ:
 
 - For multihead Latent Attention (MLA) by DeepSeek, things get tricky.
 
-    $$O = \text{Multihead Latent Attention}(Q, K, V)$$
+    <!-- $$O = \text{Multihead Latent Attention}(Q, K, V)$$ -->
 
     ![MLA architecture diagram](/assets/images/2026/muon/MLA.png)
 
@@ -476,7 +475,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026muonmuonclipnotes,
-  title   = "Muon Optimizer & MuonClip (Personal Notes)",
+  title   = "Muon & MuonClip Optimizers",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
