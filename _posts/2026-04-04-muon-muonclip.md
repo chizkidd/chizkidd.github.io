@@ -22,8 +22,8 @@ mathjax: true
 - [MuonClip](#muonclip)
 
 ## Appendix
-- [References](#references)
 - [Citation](#citation)
+- [References](#references)
 
 ---
 
@@ -448,6 +448,22 @@ W^{KR} &\leftarrow W^{KR} \quad \text{(unchanged)}
 \end{aligned}
 $$
 
+---
+
+## Citation
+
+If you found this blog post helpful, please consider citing it:
+
+```bibtex
+@article{obasi2026muonmuonclipnotes,
+  title   = "Muon & MuonClip Optimizers",
+  author  = "Obasi, Chizoba",
+  journal = "chizkidd.github.io",
+  year    = "2026",
+  month   = "Apr",
+  url     = "https://chizkidd.github.io/2026/04/04/muon-muonclip/"
+}
+```
 
 ---
 
@@ -466,22 +482,5 @@ $$
 [^6]: Jeremy Bernstein. [Deriving Muon](https://jeremybernste.in/writing/deriving-muon). jeremybernste.in. 2025.
 
 [^7]: Chizoba Obasi. [A Complete Guide to Neural Network Optimizers](https://chizkidd.github.io/2026/01/22/neural-net-optimizers/). chizkidd.github.io. 2026.
-
----
-
-## Citation
-
-If you found this blog post helpful, please consider citing it:
-
-```bibtex
-@article{obasi2026muonmuonclipnotes,
-  title   = "Muon & MuonClip Optimizers",
-  author  = "Obasi, Chizoba",
-  journal = "chizkidd.github.io",
-  year    = "2026",
-  month   = "Apr",
-  url     = "https://chizkidd.github.io/2026/04/04/muon-muonclip/"
-}
-```
 
 ---
