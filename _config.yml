@@ -31,6 +31,7 @@ kramdown:
   input: GFM
   auto_ids: true
   syntax_highlighter: rouge
+  # footnote_backlink: "&#8617;"
 
 # Excerpt settings
 excerpt_length: 50
