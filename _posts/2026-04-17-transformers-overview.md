@@ -86,7 +86,7 @@ $$\text{Input} \to \text{token} + \text{POS embed} \to \text{Norm} \to \text{MHA
 
 ### MLP only
 - MLP stands for Multilayer Perceptron
-- No contextual information -- each token is processed independently.
+- No contextual information; each token is processed independently.
 
 ### Concatenation of nearby token embeddings before MLP
 - Need a sufficiently large window to cover the entire input sequence.
@@ -216,8 +216,8 @@ $$
 If you found this blog post helpful, please consider citing it:
 
 ```bibtex
-@article{obasi2026transformersnotes,
-  title   = "Transformers (Personal Notes)",
+@article{obasi2026transformers,
+  title   = "Transformers",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
