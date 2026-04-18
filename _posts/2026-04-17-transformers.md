@@ -222,7 +222,7 @@ If you found this blog post helpful, please consider citing it:
   journal = "chizkidd.github.io",
   year    = "2026",
   month   = "Apr",
-  url     = "https://chizkidd.github.io/2026/04/05/transformers/"
+  url     = "https://chizkidd.github.io/2026/04/17/transformers/"
 }
 ```
 
