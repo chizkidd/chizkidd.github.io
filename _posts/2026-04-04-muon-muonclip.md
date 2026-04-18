@@ -455,7 +455,7 @@ $$
 If you found this blog post helpful, please consider citing it:
 
 ```bibtex
-@article{obasi2026muonmuonclipnotes,
+@article{obasi2026muonmuonclip,
   title   = "Muon & MuonClip Optimizers",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
