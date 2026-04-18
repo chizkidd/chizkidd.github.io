@@ -1,8 +1,8 @@
 ---
 layout: post
 comments: true
-title: "Quick Overview of Transformers"
-excerpt: Notes on the Transformer architecture covering sequence-to-sequence models, tokenization, attention, multi-head attention, encoders, decoders, masked attention, and cross attention.
+title: "Transformers"
+excerpt: Quick overview of the Transformer architecture covering tokenization, attention, multi-head attention, encoders, decoders, masked attention, and cross attention.
 date: 2026-04-17
 mathjax: true
 ---
@@ -42,16 +42,15 @@ Two approaches to representing input text:
 - No semantic similarity or meaning of words encoded.
 
 **2. Token embedding**
-
-![token embedding](/assets/images/2026/transformers/token-embedding.png)
-
 - Encodes semantic similarity between words.
 - Embedding matrix is **learned** (Lookup Table).
 - Each token embedding is stored as a **column vector**.
 
-$$
+![token embedding](/assets/images/2026/transformers/token-embedding.png)
+
+<!-- $$
 \underbrace{\begin{bmatrix} 0.5 \\ 2.7 \\ 1.2 \\ -0.2 \end{bmatrix}}_{d} = W_E \underbrace{\begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}}_{\text{\# tokens}}
-$$
+$$ -->
 
 $$
 \begin{aligned}
