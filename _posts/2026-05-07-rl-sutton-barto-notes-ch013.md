@@ -19,6 +19,7 @@ $$\pi(a \vert s, \boldsymbol{\theta}) = \Pr\{A_t = a \vert S_t = s,\ \boldsymbol
 
 $$\boldsymbol{\theta}_{t+1} = \boldsymbol{\theta}_t + \alpha \widehat{\nabla J(\boldsymbol{\theta}_t)}$$
 
+{% raw %}
 $$
 \begin{aligned}
 \text{where} \\
@@ -26,6 +27,7 @@ $$
 &\phantom{{}\equiv{}} \text{the gradient of the performance measure } J \text{ w.r.t. } \boldsymbol{\theta}_t
 \end{aligned}
 $$
+{% endraw %}
 
 - This general methodology applies to **policy gradient methods**.
 - Methods that learn approximations to both policy & value functions are often called **Actor-Critic methods**:
@@ -96,6 +98,7 @@ $$
 
 $$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a q_\pi(s,a)\, \nabla\pi(a \vert s, \boldsymbol{\theta})}$$
 
+{% raw %}
 $$
 \begin{aligned}
 \text{where} \\
@@ -105,6 +108,7 @@ $$
 &\phantom{{}\equiv{}} \text{in the continuing case it is 1)}
 \end{aligned}
 $$
+{% endraw %}
 
 ### Proof of the Policy Gradient Theorem (Episodic Case)
 
@@ -343,6 +347,7 @@ J(\boldsymbol{\theta}) \doteq r(\pi) &\doteq \lim_{h \to \infty} \frac{1}{h} \su
 \end{align*}
 $$
 
+{% raw %}
 $$
 \begin{aligned}
 \text{where} \\
@@ -350,6 +355,7 @@ $$
 &\phantom{{}\doteq{}} \text{assumed to exist and be independent of } S_0 \text{ [ergodicity assumption]}
 \end{aligned}
 $$
+{% endraw %}
 
 $$\sum_s \mu(s) \sum_a \pi(a \vert s, \boldsymbol{\theta})\, p(s' \vert s,a) = \mu(s') \quad \text{for all } s' \in S \quad \text{(ergodicity)}$$
 
