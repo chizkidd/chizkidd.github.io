@@ -365,8 +365,6 @@ $$
 
 $$\sum_s \mu(s) \sum_a \pi(a \vert s, \boldsymbol{\theta})\, p(s' \vert s,a) = \mu(s') \quad \text{for all } s' \in S \quad \text{(ergodicity)}$$
 
-- In the continuing case, we define values $v_{\pi}(s) \doteq \mathbb{E}_{\pi}[G_t \vert S_t = s]$ and $q_{\pi}(s,a) \doteq \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]$ w.r.t. the **differential return**:
-
 - In the continuing case, we define values $v\_{\pi}(s) \doteq \mathbb{E}\_{\pi}[G_t \vert S\_t = s]$ and $q\_{\pi}(s,a) \doteq \mathbb{E}\_{\pi}[G_t \vert S\_t = s, A\_t = a]$ w.r.t. the **differential return**:
 
 $$G_t \doteq R_{t+1} - r(\pi) + R_{t+2} - r(\pi) + R_{t+3} - r(\pi) + \ldots$$
@@ -438,7 +436,7 @@ $$
 ![Probability Density Function](/assets/images/2026/rl-sutton-barto/ch13-13-7-prob-density-function.png)
 
 {% capture c %}
-The probability density functions for several different means and standard deviations are shown.
+The probability density functions for several different means and standard deviations are shown above.
 {% endcapture %}
 {% include callout.html type="note" title="Probability Density Function (PDF)" content=c %}
 
@@ -457,7 +455,7 @@ $$
 \end{aligned}
 $$
 
-- The approximators need a representation form, so we split the policy's parameter vector into 2 parts, $\boldsymbol{\theta} = [\boldsymbol{\theta}_{\mu}, \boldsymbol{\theta}_{\sigma}]^T$, one for mean approximation and the other for standard deviation approximation.
+- The approximators need a representation form, so we split the policy's parameter vector into 2 parts, $\boldsymbol{\theta} = [\boldsymbol{\theta}\_{\mu}, \boldsymbol{\theta}\_{\sigma}]^T$, one for mean approximation and the other for standard deviation approximation.
 - The mean can be approximated as a linear function while the standard deviation can be approximated as the exponential of a linear function:
 
 $$
