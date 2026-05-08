@@ -110,6 +110,47 @@ $$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a q_\pi(s,a)\,
   $$
   {% endraw %}
 
+{% capture proof_episodic %}
+Let's prove the policy gradient theorem from first principles using elementary calculus.
+
+**Note:** To keep the notation simple, we leave it implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and all gradients $\nabla[...]$ are also implicit w.r.t. $\boldsymbol{\theta}$.
+
+$$
+\begin{align*}
+\nabla v_\pi(s) &= \nabla \!\left[\sum_a \pi(a \vert s)\, q_\pi(s,a)\right], \quad \text{for all } s \in \mathcal{S} \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla q_\pi(s,a)\right] \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla \sum_{s',r} p(s',r \vert s,a)\!\left(r + v_\pi(s')\right)\right] \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s')\right] \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a) \sum_{a'} \!\left[\nabla\pi(a' \vert s')\, q_\pi(s',a') + \pi(a' \vert s') \sum_{s''} p(s'' \vert s',a')\, \nabla v_\pi(s'')\right]\right]
+\end{align*}
+$$
+
+Unrolling this recursion:
+
+$$\boxed{\nabla v_\pi(s) = \sum_{x \in \mathcal{S}} \sum_{k=0}^{\infty} \Pr(s \to x, k, \pi) \sum_a \nabla\pi(a \vert x)\, q_\pi(x,a)}$$
+
+$$
+\begin{aligned}
+\Pr(s \to x, k, \pi) &\equiv \text{probability of transitioning from state } s \text{ to state } x \text{ in } k \text{ steps under policy } \pi
+\end{aligned}
+$$
+
+Then:
+
+$$
+\begin{align*}
+\nabla J(\boldsymbol{\theta}) &= \nabla v_\pi(s_0) \\
+&= \sum_s \!\left(\sum_{k=0}^{\infty} \Pr(s_0 \to s, k, \pi)\right) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \\
+&= \sum_s \eta(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \\
+&= \sum_{s'} \eta(s') \sum_s \frac{\eta(s)}{\sum_{s'} \eta(s')} \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \\
+&= \sum_{s'} \eta(s') \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a)
+\end{align*}
+$$
+
+$$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a)}$$
+{% endcapture %}
+{% include callout.html type="note" title="Proof: Policy Gradient Theorem (Episodic Case)" content=proof_episodic %}
+
 ### Proof of the Policy Gradient Theorem (Episodic Case)
 
 Let's prove the policy gradient theorem from first principles using elementary calculus.
