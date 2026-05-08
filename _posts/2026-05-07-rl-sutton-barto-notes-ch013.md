@@ -367,6 +367,8 @@ $$\sum_s \mu(s) \sum_a \pi(a \vert s, \boldsymbol{\theta})\, p(s' \vert s,a) = \
 
 - In the continuing case, we define values $v_{\pi}(s) \doteq \mathbb{E}_{\pi}[G_t \vert S_t = s]$ and $q_{\pi}(s,a) \doteq \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]$ w.r.t. the **differential return**:
 
+- In the continuing case, we define values $v\_{\pi}(s) \doteq \mathbb{E}\_{\pi}[G_t \vert S\_t = s]$ and $q\_{\pi}(s,a) \doteq \mathbb{E}\_{\pi}[G_t \vert S\_t = s, A\_t = a]$ w.r.t. the **differential return**:
+
 $$G_t \doteq R_{t+1} - r(\pi) + R_{t+2} - r(\pi) + R_{t+3} - r(\pi) + \ldots$$
 
 ### Proof of the Policy Gradient Theorem (Continuing Case)
