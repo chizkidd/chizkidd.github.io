@@ -369,6 +369,31 @@ $$\sum_s \mu(s) \sum_a \pi(a \vert s, \boldsymbol{\theta})\, p(s' \vert s,a) = \
 
 $$G_t \doteq R_{t+1} - r(\pi) + R_{t+2} - r(\pi) + R_{t+3} - r(\pi) + \ldots$$
 
+{% capture proof_continuing %}
+Leave the notation implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and that the gradients $\nabla[...]$ are w.r.t. $\boldsymbol{\theta}$. In the continuing case $J(\boldsymbol{\theta}) = r(\pi)$, and $v\_\pi$ & $q\_\pi$ denote values w.r.t. the **differential return**.
+
+$$
+\begin{align*}
+\nabla v_\pi(s) &= \nabla \!\left[\sum_a \pi(a \vert s)\, q_\pi(s,a)\right], \quad \text{for all } s \in \mathcal{S} \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla q_\pi(s,a)\right] \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla \sum_{s',r} p(s',r \vert s,a)\!\left(r - r(\boldsymbol{\theta}) + v_\pi(s')\right)\right] \\
+&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\!\left[-\nabla r(\boldsymbol{\theta}) + \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s')\right]\right]
+\end{align*}
+$$
+
+$$\nabla r(\boldsymbol{\theta}) = \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s')\right] - \nabla v_\pi(s)$$
+
+Since $\nabla J(\boldsymbol{\theta})$ does not depend on $s$, we sum over all $s \in \mathcal{S}$ weighted by $\mu(s)$ (because $\sum\_s \mu(s) = 1$):
+
+$$
+\begin{align*}
+\nabla J(\boldsymbol{\theta}) &= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \underbrace{\sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)}_{\mu(s')} \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \qquad \qquad \text{Q.E.D}
+\end{align*}
+$$
+{% endcapture %}
+{% include callout.html type="note" title="Proof: Policy Gradient Theorem (Continuing Case)" content=proof_continuing %}
+
 ### Proof of the Policy Gradient Theorem (Continuing Case)
 
 Leave the notation implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and that the gradients $\nabla[...]$ are w.r.t. $\boldsymbol{\theta}$. In the continuing case $J(\boldsymbol{\theta}) = r(\pi)$, and $v_\pi$ & $q_\pi$ denote values w.r.t. the **differential return**.
@@ -393,7 +418,7 @@ $$
 \end{align*}
 $$
 
-### Actor-Critic with Eligibility Traces (Continuing), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
+#### Actor-Critic with Eligibility Traces (Continuing), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
 
 $$
 \boxed{
