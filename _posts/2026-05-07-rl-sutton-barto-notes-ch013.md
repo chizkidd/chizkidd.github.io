@@ -383,7 +383,7 @@ Since $\nabla J(\boldsymbol{\theta})$ does not depend on $s$, we sum over all $s
 $$
 \begin{align*}
 \nabla J(\boldsymbol{\theta}) &= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \underbrace{\sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)}_{\mu(s')} \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
-&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \quad \square
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \qquad \qquad \text{Q.E.D}
 \end{align*}
 $$
 
@@ -430,7 +430,7 @@ $$
 ![Probability Density Function](/assets/images/2026/rl-sutton-barto/ch13-13-7-prob-density-function.png)
 
 {% capture c %}
-The probability density functions for several di↵erent means and standard deviations are shown.
+The probability density functions for several different means and standard deviations are shown.
 {% endcapture %}
 {% include callout.html type="note" title="Probability Density Function (PDF)" content=c %}
 
@@ -449,7 +449,7 @@ $$
 \end{aligned}
 $$
 
-- The approximators need a representation form, so we split the policy's parameter vector into 2 parts, $\boldsymbol{\theta} = [\boldsymbol{\theta}_\mu, \boldsymbol{\theta}_\sigma]^T$, one for mean approximation and the other for standard deviation approximation.
+- The approximators need a representation form, so we split the policy's parameter vector into 2 parts, $\boldsymbol{\theta} = [\boldsymbol{\theta}_{\mu}, \boldsymbol{\theta}_{\sigma}]^T$, one for mean approximation and the other for standard deviation approximation.
 - The mean can be approximated as a linear function while the standard deviation can be approximated as the exponential of a linear function:
 
 $$
