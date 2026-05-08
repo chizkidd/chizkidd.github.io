@@ -7,7 +7,7 @@ date: 2026-05-07
 mathjax: true
 ---
 
-- Almost all the algorithms/methods covered so far have been **action-value methods** (except gradient-bandit algorithms, Section 2.8).
+- Almost all the algorithms/methods covered so far have been **action-value methods** (except gradient-bandit algorithms, [Section 2.8](https://chizkidd.github.io/RL-Sutton-Barto-notes/chapters/ch02-multi-armed-bandits.html#sec-ch02-2-8)).
 - Action-value methods learn the values of actions and then derive the policy thereafter to select actions based on their estimated action values.
 - Here, we explicitly learn a **parametrized policy** that can select actions without consulting a value function.
 - A value function is not required for action selection, but still could be used to learn the policy parameters $\boldsymbol{\theta}$.
@@ -182,7 +182,7 @@ $$\boxed{\boldsymbol{\theta}_{t+1} \doteq \boldsymbol{\theta}_t + \alpha G_t \fr
 - This update is intuitively coherent:
   - The gradient term represents the direction in parameter space that most increases the probability of repeating/taking again the same action $A_t$ in the future.
   - The update moves the parameter the most in the directions that favour actions that yield the highest return.
-  - The update ensures a balancing out (lower impact) of frequently selected actions with lower returns.
+  - The update ensures a balancing act (lower impact) of frequently selected actions with lower returns.
 - REINFORCE has good convergence properties but may be of high variance and slow learning as a MC method.
 
 ### REINFORCE: Monte Carlo Policy Gradient Control (Episodic) for $\pi_*$
@@ -243,9 +243,9 @@ $$
 $$
 
 - This algorithm has 2 step sizes $\alpha^\theta$ and $\alpha^w$.
-- Choosing $\alpha^w$ is relatively easy; in the linear case a good rule of thumb is:
+- Choosing $\alpha^w$ is relatively easy; in the linear case a good rule of thumb is (see [Section 9.6](https://chizkidd.github.io/2026/02/27/rl-sutton-barto-notes-ch009/#96-selecting-step-size-parameters-manually)):
 
-$$\alpha^w = \frac{0.1}{\mathbb{E}\!\left[\|\nabla \hat{v}(S_t, \mathbf{w})\|_\mu^2\right]} \quad \text{(see Section 9.6)}$$
+$$\alpha^w = \frac{0.1}{\mathbb{E}\!\left[\|\nabla \hat{v}(S_t, \mathbf{w})\|_\mu^2\right]}$$
 
 - Choosing $\alpha^\theta$ is much less clear since its best value depends on the range of variation of the rewards and on the policy parametrization.
 
@@ -420,6 +420,13 @@ $$
 \sigma &\equiv \text{standard deviation of the normal distribution}
 \end{aligned}
 $$
+
+![Probability Density Function](/assets/images/2026/rl-sutton-barto/ch13-13-7-prob-density-function.png)
+
+{% capture c %}
+The probability density functions for several di↵erent means and standard deviations are shown.
+{% endcapture %}
+{% include callout.html type="note" title="Probability Density Function (PDF)" content=c %}
 
 - $p(x)$ is the **density** of the probability at $x$, and not the probability. It can be greater than 1; it is the total area under the graph that must sum to 1.
 - To get the probability of $x$ falling within a range, take the integral under $p(x)$ for that specific range of $x$ values.
