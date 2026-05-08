@@ -111,17 +111,18 @@ $$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a q_\pi(s,a)\,
   {% endraw %}
 
 {% capture proof_episodic %}
-Let's prove the policy gradient theorem from first principles using elementary calculus.
+Let's prove the policy gradient theorem from first principles using elementary calculus.<br>
 
 **Note:** To keep the notation simple, we leave it implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and all gradients $\nabla[...]$ are also implicit w.r.t. $\boldsymbol{\theta}$.
 
 $$
 \begin{align*}
 \nabla v_\pi(s) &= \nabla \!\left[\sum_a \pi(a \vert s)\, q_\pi(s,a)\right], \quad \text{for all } s \in \mathcal{S} \\
-&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla q_\pi(s,a)\right] \\
+&= \sum_a \!\Biggl[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla q_\pi(s,a)\Biggr] \\
 &= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s)\, \nabla \sum_{s',r} p(s',r \vert s,a)\!\left(r + v_\pi(s')\right)\right] \\
 &= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s')\right] \\
-&= \sum_a \!\left[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a) \sum_{a'} \!\left[\nabla\pi(a' \vert s')\, q_\pi(s',a') + \pi(a' \vert s') \sum_{s''} p(s'' \vert s',a')\, \nabla v_\pi(s'')\right]\right]
+&= \sum_a \Biggl[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a) \sum_{a'} \Biggl[\nabla\pi(a' \vert s')\, q_\pi(s',a') \\
+&\qquad\qquad + \pi(a' \vert s') \sum_{s''} p(s'' \vert s',a')\, \nabla v_\pi(s'')\Biggr]\Biggr]
 \end{align*}
 $$
 
@@ -151,6 +152,7 @@ $$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a \nabla\pi(a 
 {% endcapture %}
 {% include callout.html type="note" title="Proof: Policy Gradient Theorem (Episodic Case)" content=proof_episodic %}
 
+<!-- 
 ### Proof of the Policy Gradient Theorem (Episodic Case)
 
 Let's prove the policy gradient theorem from first principles using elementary calculus.
@@ -177,13 +179,6 @@ $$
 \end{aligned}
 $$
 
-<!-- $$
-\begin{aligned}
-\text{where} \quad \quad \quad \quad \quad &\\
-\Pr(s \to x, k, \pi) &\equiv \text{probability of transitioning from state } s \text{ to state } x \text{ in } k \text{ steps under policy } \pi
-\end{aligned}
-$$ -->
-
 Then:
 
 $$
@@ -196,7 +191,7 @@ $$
 \end{align*}
 $$
 
-$$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a)}$$
+$$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a)}$$ -->
 
 ---
 
@@ -428,14 +423,17 @@ Since $\nabla J(\boldsymbol{\theta})$ does not depend on $s$, we sum over all $s
 
 $$
 \begin{align*}
-\nabla J(\boldsymbol{\theta}) &= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \underbrace{\sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)}_{\mu(s')} \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
-&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \qquad \qquad \text{Q.E.D}
+\nabla J(\boldsymbol{\theta}) &= \sum_s \mu(s) \Bigl(\sum_a \Bigl[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s')\Bigr] - \nabla v_\pi(s)\Bigr) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \\
+&\quad + \sum_{s'} \underbrace{\sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)}_{\mu(s')} \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \mu(s')\, \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \qquad \text{Q.E.D.}
 \end{align*}
 $$
 {% endcapture %}
 {% include callout.html type="note" title="Proof: Policy Gradient Theorem (Continuing Case)" content=proof_continuing %}
 
-### Proof of the Policy Gradient Theorem (Continuing Case)
+<!-- ### Proof of the Policy Gradient Theorem (Continuing Case)
 
 Leave the notation implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and that the gradients $\nabla[...]$ are w.r.t. $\boldsymbol{\theta}$. In the continuing case $J(\boldsymbol{\theta}) = r(\pi)$, and $v_\pi$ & $q_\pi$ denote values w.r.t. the **differential return**.
 
@@ -454,10 +452,14 @@ Since $\nabla J(\boldsymbol{\theta})$ does not depend on $s$, we sum over all $s
 
 $$
 \begin{align*}
-\nabla J(\boldsymbol{\theta}) &= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \underbrace{\sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)}_{\mu(s')} \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
-&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \qquad \qquad \text{Q.E.D}
+\nabla J(\boldsymbol{\theta}) &= \sum_s \mu(s) \Bigl(\sum_a \Bigl[\nabla\pi(a \vert s)\, q_\pi(s,a) + \pi(a \vert s) \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s')\Bigr] - \nabla v_\pi(s)\Bigr) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_s \mu(s) \sum_a \pi(a \vert s) \sum_{s'} p(s' \vert s,a)\, \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)\, \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \underbrace{\sum_s \mu(s) \sum_a \pi(a \vert s)\, p(s' \vert s,a)}_{\mu(s')} \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) + \sum_{s'} \mu(s')\, \nabla v_\pi(s') - \sum_s \mu(s)\, \nabla v_\pi(s) \\
+&= \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a) \qquad \text{Q.E.D.}
 \end{align*}
-$$
+$$ -->
 
 #### Actor-Critic with Eligibility Traces (Continuing), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
 
