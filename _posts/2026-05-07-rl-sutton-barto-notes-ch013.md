@@ -30,7 +30,7 @@ $$
 {% endraw %}
 
 - This general methodology applies to **policy gradient methods**.
-- Methods that learn approximations to both policy & value functions are often called **Actor-Critic methods**:
+- Methods that learn approximations to both policy & value functions are often called **Actor-Critic methods**
   - **Actor** refers to the learned policy.
   - **Critic** refers to the learned value function (state-value function).
 
@@ -63,7 +63,7 @@ $$\nabla \pi(a \vert s, \boldsymbol{\theta}) \text{ exists and is finite for all
 $$\boxed{\pi(a \vert s, \boldsymbol{\theta}) \doteq \frac{e^{h(s,a,\boldsymbol{\theta})}}{\sum_b e^{h(s,b,\boldsymbol{\theta})}}}$$
 
 - This kind of policy parametrization is called **softmax in action preferences**.
-- The action preferences can be parametrized arbitrarily -- they can be computed by a deep artificial neural network (ANN) or could simply be **linear** in features:
+- The action preferences can be parametrized arbitrarily, they can be computed by a deep artificial neural network (ANN) or could simply be **linear** in features:
 
 $$h(s, a, \boldsymbol{\theta}) = \boldsymbol{\theta}^T \mathbf{x}(s, a)$$
 
@@ -71,7 +71,7 @@ $$h(s, a, \boldsymbol{\theta}) = \boldsymbol{\theta}^T \mathbf{x}(s, a)$$
 
 - The approx. policy can approach a **deterministic policy**, unlike $\varepsilon$-greedy action selection.
 - It enables the selection of actions with **arbitrary probabilities**, which is useful for cases that require near-optimal stochastic policy (e.g. significant function approximation).
-  - E.g. useful in environments with imperfect state information where it is optimal to act stochastically, such as when **bluffing in Poker** -- it is important to do so randomly to unnerve/confuse an opponent.
+  - E.g. useful in environments with imperfect information (e.g., card games) where it is optimal to act stochastically, such as when **bluffing in Poker**; it is important to do so randomly to unnerve/confuse an opponent.
 - The policy from policy parametrization may be a **simpler function to approximate** than the action-value function.
 - Often the most important reason for using a policy-based learning method is that it is a good way to **inject prior knowledge** about the desired form of the policy into the RL system.
 
@@ -82,12 +82,12 @@ $$h(s, a, \boldsymbol{\theta}) = \boldsymbol{\theta}^T \mathbf{x}(s, a)$$
 - Policy-gradient methods have stronger convergence guarantees compared to action-value methods due to **smooth continuity** in change of action probabilities as a function of the learned parameter (gradient ascent).
 - Let's consider the **episodic** performance measure, which is the value of the start state of the episode:
 
-$$J(\boldsymbol{\theta}) \doteq v_{\pi_\theta}(s_0)$$
+$$J(\boldsymbol{\theta}) \doteq v_{\pi_{\boldsymbol{\theta}}}(s_0)$$
 
 $$
 \begin{aligned}
 \text{where} \\
-v_{\pi_\theta} &\equiv \text{the true value function for } \pi_\theta\text{, the policy determined by } \boldsymbol{\theta} \\
+v_{\pi_{\boldsymbol{\theta}}} &\equiv \text{the true value function for } \pi_{\boldsymbol{\theta}}\text{, the policy determined by } \boldsymbol{\theta} \\
 s_0 &\equiv \text{some non-random state}
 \end{aligned}
 $$
@@ -98,23 +98,23 @@ $$
 
 $$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a q_\pi(s,a)\, \nabla\pi(a \vert s, \boldsymbol{\theta})}$$
 
-{% raw %}
-$$
-\begin{aligned}
-\text{where} \\
-\nabla J(\boldsymbol{\theta}) &\equiv \text{column vectors of partial derivatives w.r.t. the components of } \boldsymbol{\theta} \\
-\mu &\equiv \text{the on-policy distribution under the policy } \pi \\
-&\phantom{{}\equiv{}} \text{(in the episodic case, proportionality constant is the average length of an episode;} \\
-&\phantom{{}\equiv{}} \text{in the continuing case it is 1)}
-\end{aligned}
-$$
-{% endraw %}
+  {% raw %}
+  $$
+  \begin{aligned}
+  \text{where} \quad &\\
+  \nabla J(\boldsymbol{\theta}) &\equiv \text{column vectors of partial derivatives w.r.t. the components of } \boldsymbol{\theta} \\
+  \mu &\equiv \text{the on-policy distribution under the policy } \pi \\
+  &\phantom{{}\equiv{}} \text{(in the episodic case, proportionality constant is the average length of an episode;} \\
+  &\phantom{{}\equiv{}} \text{in the continuing case it is 1)}
+  \end{aligned}
+  $$
+  {% endraw %}
 
 ### Proof of the Policy Gradient Theorem (Episodic Case)
 
 Let's prove the policy gradient theorem from first principles using elementary calculus.
 
-**Note:** To keep the notation simple, we leave it implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and all gradients $\nabla[\,]$ are also implicit w.r.t. $\boldsymbol{\theta}$.
+**Note:** To keep the notation simple, we leave it implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and all gradients $\nabla[...]$ are also implicit w.r.t. $\boldsymbol{\theta}$.
 
 $$
 \begin{align*}
@@ -130,6 +130,19 @@ Unrolling this recursion:
 
 $$\boxed{\nabla v_\pi(s) = \sum_{x \in \mathcal{S}} \sum_{k=0}^{\infty} \Pr(s \to x, k, \pi) \sum_a \nabla\pi(a \vert x)\, q_\pi(x,a)}$$
 
+$$
+\begin{aligned}
+\Pr(s \to x, k, \pi) &\equiv \text{probability of transitioning from state } s \text{ to state } x \text{ in } k \text{ steps under policy } \pi
+\end{aligned}
+$$
+
+<!-- $$
+\begin{aligned}
+\text{where} \quad \quad \quad \quad \quad &\\
+\Pr(s \to x, k, \pi) &\equiv \text{probability of transitioning from state } s \text{ to state } x \text{ in } k \text{ steps under policy } \pi
+\end{aligned}
+$$ -->
+
 Then:
 
 $$
@@ -144,21 +157,14 @@ $$
 
 $$\boxed{\nabla J(\boldsymbol{\theta}) \propto \sum_s \mu(s) \sum_a \nabla\pi(a \vert s)\, q_\pi(s,a)}$$
 
-$$
-\begin{aligned}
-\text{where} \\
-\Pr(s \to x, k, \pi) &\equiv \text{probability of transitioning from state } s \text{ to state } x \text{ in } k \text{ steps under policy } \pi
-\end{aligned}
-$$
-
 ---
 
 ## 13.3 REINFORCE: Monte Carlo Policy Gradient
 
 - REINFORCE is our first policy gradient algorithm.
 - The goal/strategy is to find a way to get samples such that the expectation of the sample gradient is proportional to the actual performance gradient as a function of the parameters.
-- The sample gradients need only to be proportional to the performance gradient because any proportionality constant can be absorbed into the step size $\alpha$.
-- The policy gradient theorem gives an exact expression proportional to the gradient; so all that is needed is a way of sampling whose expectation equals or approximates this expression.
+- The sample gradients need to only be proportional to the performance gradient because any proportionality constant can be absorbed into the step size $\alpha$.
+- The policy gradient theorem gives **an exact expression proportional to the gradient**; so all that is needed is a way of sampling whose expectation equals or approximates this expression.
 
 - Recall the RHS of the policy gradient theorem is a sum over states weighted by how often the states occur under the target policy $\pi$:
 
@@ -179,7 +185,7 @@ $$
 \end{align*}
 $$
 
-- The last expression is the required expression: a quantity that can be sampled on each time step whose expectation is proportional to the gradient. This leads to the **REINFORCE update**:
+- The last expression is the required expression; a quantity that can be sampled on each time step whose expectation is proportional to the gradient. This leads to the **REINFORCE update**:
 
 $$\boxed{\boldsymbol{\theta}_{t+1} \doteq \boldsymbol{\theta}_t + \alpha G_t \frac{\nabla\pi(A_t \vert S_t, \boldsymbol{\theta}_t)}{\pi(A_t \vert S_t, \boldsymbol{\theta}_t)}}$$
 
@@ -189,7 +195,7 @@ $$\boxed{\boldsymbol{\theta}_{t+1} \doteq \boldsymbol{\theta}_t + \alpha G_t \fr
   - The update ensures a balancing act (lower impact) of frequently selected actions with lower returns.
 - REINFORCE has good convergence properties but may be of high variance and slow learning as a MC method.
 
-### REINFORCE: Monte Carlo Policy Gradient Control (Episodic) for $\pi_*$
+#### REINFORCE: Monte Carlo Policy Gradient Control (Episodic) for $\pi_*$
 
 $$
 \boxed{
@@ -198,7 +204,7 @@ $$
 &\textbf{Algorithm parameter: } \text{step size } \alpha > 0 \\
 &\textbf{Initialize } \text{policy parameter } \boldsymbol{\theta} \in \mathbb{R}^{d'} \text{ (e.g., to } \mathbf{0}\text{)} \\
 &\textbf{Loop forever } \text{(for each episode):} \\
-&\quad \text{Generate an episode } S_0, A_0, R_1, \ldots, S_{T-1}, A_{T-1}, R_T \text{ following } \pi(\cdot, \boldsymbol{\theta}) \\
+&\quad \text{Generate an episode } S_0, A_0, R_1, \ldots, S_{T-1}, A_{T-1}, R_T \text{ following } \pi(\cdot \vert \cdot, \boldsymbol{\theta}) \\
 &\quad \textbf{Loop for each step of the episode } t = 0, 1, 2, \ldots, T-1\text{:} \\
 &\qquad G \leftarrow \sum_{k=t+1}^{T} \gamma^{k-t-1} R_k \\
 &\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha\gamma^t G\, \nabla \ln \pi(A_t \vert S_t, \boldsymbol{\theta})
@@ -226,39 +232,39 @@ $$\boxed{\boldsymbol{\theta}_{t+1} \doteq \boldsymbol{\theta}_t + \alpha \!\left
 - One natural choice for the baseline is an estimate of the state value $\hat{v}(S_t, \mathbf{w})$.
 - Since REINFORCE is a Monte Carlo method for learning the policy parameter $\boldsymbol{\theta}$, it's natural to also use a Monte Carlo method to learn the state-value weights $\mathbf{w}$.
 
-### REINFORCE with Baseline (Episodic), for estimating $\pi_\theta \approx \pi_*$
+#### REINFORCE with Baseline (Episodic), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
 
 $$
 \boxed{
 \begin{aligned}
 &\textbf{Input: } \text{a differentiable policy parametrization } \pi(a \vert s, \boldsymbol{\theta}) \\
 &\textbf{Input: } \text{a differentiable state-value function parametrization } \hat{v}(s, \mathbf{w}) \\
-&\textbf{Algorithm parameters: } \text{step sizes } \alpha^\theta > 0,\ \alpha^w > 0 \\
+&\textbf{Algorithm parameters: } \text{step sizes } \alpha^{\boldsymbol{\theta}} > 0,\ \alpha^{\mathbf{w}} > 0 \\
 &\textbf{Initialize } \text{policy parameter } \boldsymbol{\theta} \in \mathbb{R}^{d'} \text{ and state-value weights } \mathbf{w} \in \mathbb{R}^d \text{ (e.g., to } \mathbf{0}\text{)} \\
 &\textbf{Loop forever } \text{(for each episode):} \\
-&\quad \text{Generate an episode } S_0, A_0, R_1, \ldots, S_{T-1}, A_{T-1}, R_T \text{ following } \pi(\cdot, \boldsymbol{\theta}) \\
+&\quad \text{Generate an episode } S_0, A_0, R_1, \ldots, S_{T-1}, A_{T-1}, R_T \text{ following } \pi(\cdot \vert \cdot, \boldsymbol{\theta}) \\
 &\quad \textbf{Loop for each step of the episode } t = 0, 1, \ldots, T-1\text{:} \\
 &\qquad G \leftarrow \sum_{k=t+1}^{T} \gamma^{k-t-1} R_k \\
 &\qquad \delta \leftarrow G - \hat{v}(S_t, \mathbf{w}) \\
-&\qquad \mathbf{w} \leftarrow \mathbf{w} + \alpha^w\, \delta\, \nabla \hat{v}(S_t, \mathbf{w}) \\
-&\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^\theta \gamma^t\, \delta\, \nabla \ln \pi(A_t \vert S_t, \boldsymbol{\theta})
+&\qquad \mathbf{w} \leftarrow \mathbf{w} + \alpha^{\mathbf{w}}\, \delta\, \nabla \hat{v}(S_t, \mathbf{w}) \\
+&\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^{\boldsymbol{\theta}} \gamma^t\, \delta\, \nabla \ln \pi(A_t \vert S_t, \boldsymbol{\theta})
 \end{aligned}
 }
 $$
 
-- This algorithm has 2 step sizes $\alpha^\theta$ and $\alpha^w$.
-- Choosing $\alpha^w$ is relatively easy; in the linear case a good rule of thumb is (see [Section 9.6](https://chizkidd.github.io/2026/02/27/rl-sutton-barto-notes-ch009/#96-selecting-step-size-parameters-manually)):
+- This algorithm has 2 step sizes $\alpha^{\boldsymbol{\theta}}$ and $\alpha^{\mathbf{w}}$.
+- Choosing $\alpha^{\mathbf{w}}$ is relatively easy; in the linear case a good rule of thumb is (see [Section 9.6](https://chizkidd.github.io/RL-Sutton-Barto-notes/chapters/ch09-on-policy-prediction-approximation.html#sec-ch09-9-6)):
 
-$$\alpha^w = \frac{0.1}{\mathbb{E}\!\left[\|\nabla \hat{v}(S_t, \mathbf{w})\|_\mu^2\right]}$$
+$$\alpha^{\mathbf{w}} = \frac{0.1}{\mathbb{E}\!\left[\|\nabla \hat{v}(S_t, \mathbf{w})\|_\mu^2\right]}$$
 
-- Choosing $\alpha^\theta$ is much less clear since its best value depends on the range of variation of the rewards and on the policy parametrization.
+- Choosing $\alpha^{\boldsymbol{\theta}}$ is much less clear since its best value depends on the range of variation of the rewards and on the policy parametrization.
 
 ---
 
 ## 13.5 Actor-Critic Methods
 
-- REINFORCE with baseline cannot be used to evaluate actions because its state-value function only estimates the value of the 1st state of each state transition (1st state to 2nd state), which serves as a baseline of what to expect for the subsequent return to be, prior to the actual transition's action.
-- Actor-critic methods, however, apply the state-value function to the **2nd state** of the transition thereby estimating its value and thus **evaluating the action**.
+- REINFORCE with baseline cannot be used to evaluate actions because its state-value function **only estimates the value of the 1st state** of each state transition (1st state to 2nd state), which serves as a baseline of what to expect for the subsequent return to be, prior to the actual transition's action.
+- **Actor-critic methods, however, apply the state-value function to the 2nd state** of the transition thereby estimating its value and thus **evaluating the action**.
 - The policy is the **actor** that maps states to actions, while the state-value function used to assess actions in this way is the **critic**.
 - The estimated value of the 2nd state, when discounted & added to the reward, yields the **one-step return**, $G_{t:t+1}$.
 
@@ -278,14 +284,14 @@ $$
 - **PROS:** simple, fully online & incremental.
 - It is analogous to TD(0), Sarsa(0) & Q-learning.
 
-### One-Step Actor-Critic (Episodic), for estimating $\pi_\theta \approx \pi_*$
+#### One-Step Actor-Critic (Episodic), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
 
 $$
 \boxed{
 \begin{aligned}
-&\textbf{Inputs: } \text{a differentiable policy } \pi(a \vert s, \boldsymbol{\theta}) \text{ \& state-value function } \hat{v}(s, \mathbf{w}) \text{ parametrization} \\
-&\textbf{Parameters: } \text{step sizes } \alpha^\theta > 0,\ \alpha^w > 0 \\
-&\textbf{Initialize } \text{policy parameter } \boldsymbol{\theta} \in \mathbb{R}^{d'} \text{ \& state-value weights } \mathbf{w} \in \mathbb{R}^d \text{ (e.g., to } \mathbf{0}\text{)} \\
+&\textbf{Inputs: } \text{a differentiable policy } \pi(a \vert s, \boldsymbol{\theta}) \text{ and state-value function } \hat{v}(s, \mathbf{w}) \text{ parametrization} \\
+&\textbf{Parameters: } \text{step sizes } \alpha^{\boldsymbol{\theta}} > 0,\ \alpha^{\mathbf{w}} > 0 \\
+&\textbf{Initialize } \text{policy parameter } \boldsymbol{\theta} \in \mathbb{R}^{d'} \text{ and state-value weights } \mathbf{w} \in \mathbb{R}^d \text{ (e.g., to } \mathbf{0}\text{)} \\
 &\textbf{Loop forever } \text{(for each episode):} \\
 &\quad \text{Initialize } S \text{ (1st state of episode)} \\
 &\quad I \leftarrow 1 \\
@@ -293,8 +299,8 @@ $$
 &\qquad A \sim \pi(\cdot \vert S, \boldsymbol{\theta}) \\
 &\qquad \text{Take action } A\text{, observe } S', R \\
 &\qquad \delta \leftarrow R + \gamma \hat{v}(S', \mathbf{w}) - \hat{v}(S, \mathbf{w}) \quad \text{(if } S' \text{ is terminal, then } \hat{v}(S', \mathbf{w}) \doteq 0\text{)} \\
-&\qquad \mathbf{w} \leftarrow \mathbf{w} + \alpha^w\, \delta\, \nabla \hat{v}(S, \mathbf{w}) \\
-&\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^\theta I\, \delta\, \nabla \ln \pi(A \vert S, \boldsymbol{\theta}) \\
+&\qquad \mathbf{w} \leftarrow \mathbf{w} + \alpha^{\mathbf{w}}\, \delta\, \nabla \hat{v}(S, \mathbf{w}) \\
+&\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^{\boldsymbol{\theta}} I\, \delta\, \nabla \ln \pi(A \vert S, \boldsymbol{\theta}) \\
 &\qquad I \leftarrow \gamma I \\
 &\qquad S \leftarrow S'
 \end{aligned}
@@ -307,26 +313,26 @@ $$
 - We replace the one-step return $G_{t:t+1}$ by $G_{t:t+n}$ or $G_t^\lambda$ respectively for either $n$-step or $\lambda$-return.
 - The backward view of the $\lambda$-return algorithm uses **eligibility traces** for the actor and the critic.
 
-### Actor-Critic with Eligibility Traces (Episodic), for estimating $\pi_\theta \approx \pi_*$
+#### Actor-Critic with Eligibility Traces (Episodic), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
 
 $$
 \boxed{
 \begin{aligned}
-&\textbf{Inputs: } \text{a differentiable policy \& state-value function parametrization: } \pi(a \vert s, \boldsymbol{\theta}),\ \hat{v}(s, \mathbf{w}) \\
-&\textbf{Parameters: } \text{trace-decay rates } \lambda^\theta \in [0,1],\ \lambda^w \in [0,1]\text{; step sizes } \alpha^\theta > 0,\ \alpha^w > 0 \\
+&\textbf{Inputs: } \text{a differentiable policy and state-value function parametrization: } \pi(a \vert s, \boldsymbol{\theta}),\ \hat{v}(s, \mathbf{w}) \\
+&\textbf{Parameters: } \text{trace-decay rates } \lambda^{\boldsymbol{\theta}} \in [0,1],\ \lambda^{\mathbf{w}} \in [0,1]\text{; step sizes } \alpha^{\boldsymbol{\theta}} > 0,\ \alpha^{\mathbf{w}} > 0 \\
 &\textbf{Initialize } \text{policy parameter } \boldsymbol{\theta} \in \mathbb{R}^{d'} \text{ and state-value weights } \mathbf{w} \in \mathbb{R}^d \text{ (e.g., to } \mathbf{0}\text{)} \\
 &\textbf{Loop forever } \text{(for each episode):} \\
 &\quad \text{Initialize } S \text{ (1st state of episode)} \\
-&\quad \mathbf{z}^\theta \leftarrow \mathbf{0} \quad \text{($d'$-component eligibility trace vector)} \\
-&\quad \mathbf{z}^w \leftarrow \mathbf{0} \quad \text{($d$-component eligibility trace vector)} \\
+&\quad \mathbf{z}^{\boldsymbol{\theta}} \leftarrow \mathbf{0} \quad \text{($d'$-component eligibility trace vector)} \\
+&\quad \mathbf{z}^{\mathbf{w}} \leftarrow \mathbf{0} \quad \text{($d$-component eligibility trace vector)} \\
 &\quad \textbf{Loop while } S \text{ is not terminal (for each time step):} \\
 &\qquad A \sim \pi(\cdot \vert S, \boldsymbol{\theta}) \\
 &\qquad \text{Take action } A\text{, observe } S', R \quad \text{(if } S' \text{ is terminal, then } \hat{v}(S', \mathbf{w}) \doteq 0\text{)} \\
 &\qquad \delta \leftarrow R + \gamma \hat{v}(S', \mathbf{w}) - \hat{v}(S, \mathbf{w}) \\
-&\qquad \mathbf{z}^w \leftarrow \gamma\lambda^w \mathbf{z}^w + \nabla \hat{v}(S, \mathbf{w}) \\
-&\qquad \mathbf{z}^\theta \leftarrow \gamma\lambda^\theta \mathbf{z}^\theta + I\, \nabla \ln \pi(A \vert S, \boldsymbol{\theta}) \\
-&\qquad \mathbf{w} \leftarrow \mathbf{w} + \alpha^w\, \delta\, \mathbf{z}^w \\
-&\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^\theta\, \delta\, \mathbf{z}^\theta \\
+&\qquad \mathbf{z}^{\mathbf{w}} \leftarrow \gamma\lambda^{\mathbf{w}} \mathbf{z}^{\mathbf{w}} + \nabla \hat{v}(S, \mathbf{w}) \\
+&\qquad \mathbf{z}^{\boldsymbol{\theta}} \leftarrow \gamma\lambda^{\boldsymbol{\theta}} \mathbf{z}^{\boldsymbol{\theta}} + I\, \nabla \ln \pi(A \vert S, \boldsymbol{\theta}) \\
+&\qquad \mathbf{w} \leftarrow \mathbf{w} + \alpha^{\mathbf{w}}\, \delta\, \mathbf{z}^{\mathbf{w}} \\
+&\qquad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^{\boldsymbol{\theta}}\, \delta\, \mathbf{z}^{\boldsymbol{\theta}} \\
 &\qquad I \leftarrow \gamma I \\
 &\qquad S \leftarrow S'
 \end{aligned}
@@ -337,7 +343,7 @@ $$
 
 ## 13.6 Policy Gradient for Continuing Problems
 
-- From Section 10.3 on continuing problems, lack of episode boundaries requires a new performance measure definition in terms of the **average rate of reward per time step**:
+- From [Section 10.3](https://chizkidd.github.io/RL-Sutton-Barto-notes/chapters/ch10-on-policy-control-approximation.html#sec-ch10-10-3) on continuing problems, lack of episode boundaries requires a new performance measure definition in terms of the **average rate of reward per time step**:
 
 $$
 \begin{align*}
@@ -352,20 +358,20 @@ $$
 \begin{aligned}
 \text{where} \\
 \mu(s) &\doteq \lim_{t \to \infty} \Pr\{S_t = s \vert A_{0:t} \sim \pi\} \equiv \text{steady state distribution under } \pi\text{,} \\
-&\phantom{{}\doteq{}} \text{assumed to exist and be independent of } S_0 \text{ [ergodicity assumption]}
+&\phantom{{}\doteq{}} \text{assumed to exist and be independent of } S_0 \textbf{ [ergodicity assumption]}
 \end{aligned}
 $$
 {% endraw %}
 
 $$\sum_s \mu(s) \sum_a \pi(a \vert s, \boldsymbol{\theta})\, p(s' \vert s,a) = \mu(s') \quad \text{for all } s' \in S \quad \text{(ergodicity)}$$
 
-- In the continuing case, we define values $v_\pi(s) \doteq \mathbb{E}_\pi[G_t \vert S_t = s]$ and $q_\pi(s,a) \doteq \mathbb{E}_\pi[G_t \vert S_t = s, A_t = a]$ w.r.t. the **differential return**:
+- In the continuing case, we define values $v_{\pi}(s) \doteq \mathbb{E}_{\pi}[G_t \vert S_t = s]$ and $q_{\pi}(s,a) \doteq \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]$ w.r.t. the **differential return**:
 
 $$G_t \doteq R_{t+1} - r(\pi) + R_{t+2} - r(\pi) + R_{t+3} - r(\pi) + \ldots$$
 
 ### Proof of the Policy Gradient Theorem (Continuing Case)
 
-Leave the notation implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and that the gradients $\nabla[\,]$ are w.r.t. $\boldsymbol{\theta}$. In the continuing case $J(\boldsymbol{\theta}) = r(\pi)$, and $v_\pi$ & $q_\pi$ denote values w.r.t. the differential return.
+Leave the notation implicit in all cases that $\pi = f(\boldsymbol{\theta})$ and that the gradients $\nabla[...]$ are w.r.t. $\boldsymbol{\theta}$. In the continuing case $J(\boldsymbol{\theta}) = r(\pi)$, and $v_\pi$ & $q_\pi$ denote values w.r.t. the **differential return**.
 
 $$
 \begin{align*}
@@ -387,24 +393,24 @@ $$
 \end{align*}
 $$
 
-### Actor-Critic with Eligibility Traces (Continuing), for estimating $\pi_\theta \approx \pi_*$
+### Actor-Critic with Eligibility Traces (Continuing), for estimating $\pi_{\boldsymbol{\theta}} \approx \pi_*$
 
 $$
 \boxed{
 \begin{aligned}
 &\textbf{Inputs: } \pi(a \vert s, \boldsymbol{\theta}),\ \hat{v}(s, \mathbf{w}) \\
-&\textbf{Parameters: } \lambda^w \in [0,1],\ \lambda^\theta \in [0,1],\ \alpha^w > 0,\ \alpha^\theta > 0,\ \alpha^{\bar{R}} > 0 \\
+&\textbf{Parameters: } \lambda^{\mathbf{w}} \in [0,1],\ \lambda^{\boldsymbol{\theta}} \in [0,1],\ \alpha^{\mathbf{w}} > 0,\ \alpha^{\boldsymbol{\theta}} > 0,\ \alpha^{\bar{R}} > 0 \\
 &\textbf{Initialize } \bar{R} \in \mathbb{R} \text{ (e.g., to 0)},\ \mathbf{w} \in \mathbb{R}^d\ \&\ \boldsymbol{\theta} \in \mathbb{R}^{d'} \text{ (e.g., to } \mathbf{0}\text{)},\ S \in \mathcal{S} \text{ (e.g., to } s_0\text{)} \\
-&\mathbf{z}^w \leftarrow \mathbf{0};\ \mathbf{z}^\theta \leftarrow \mathbf{0} \\
+&\mathbf{z}^{\mathbf{w}} \leftarrow \mathbf{0};\ \mathbf{z}^{\boldsymbol{\theta}} \leftarrow \mathbf{0} \\
 &\textbf{Loop forever } \text{(for each time step):} \\
 &\quad A \sim \pi(\cdot \vert S, \boldsymbol{\theta}) \\
 &\quad \text{Take action } A\text{, observe } S', R \\
 &\quad \delta \leftarrow R - \bar{R} + \hat{v}(S', \mathbf{w}) - \hat{v}(S, \mathbf{w}) \\
 &\quad \bar{R} \leftarrow \bar{R} + \alpha^{\bar{R}}\, \delta \\
-&\quad \mathbf{z}^w \leftarrow \lambda^w \mathbf{z}^w + \nabla \hat{v}(S, \mathbf{w}) \\
-&\quad \mathbf{z}^\theta \leftarrow \lambda^\theta \mathbf{z}^\theta + \nabla \ln \pi(A \vert S, \boldsymbol{\theta}) \\
-&\quad \mathbf{w} \leftarrow \mathbf{w} + \alpha^w\, \delta\, \mathbf{z}^w \\
-&\quad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^\theta\, \delta\, \mathbf{z}^\theta \\
+&\quad \mathbf{z}^{\mathbf{w}} \leftarrow \lambda^{\mathbf{w}} \mathbf{z}^{\mathbf{w}} + \nabla \hat{v}(S, \mathbf{w}) \\
+&\quad \mathbf{z}^{\boldsymbol{\theta}} \leftarrow \lambda^{\boldsymbol{\theta}} \mathbf{z}^{\boldsymbol{\theta}} + \nabla \ln \pi(A \vert S, \boldsymbol{\theta}) \\
+&\quad \mathbf{w} \leftarrow \mathbf{w} + \alpha^{\mathbf{w}}\, \delta\, \mathbf{z}^{\mathbf{w}} \\
+&\quad \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + \alpha^{\boldsymbol{\theta}}\, \delta\, \mathbf{z}^{\boldsymbol{\theta}} \\
 &\quad S \leftarrow S'
 \end{aligned}
 }
