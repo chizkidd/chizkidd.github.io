@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Transformers"
+title: "Transformer Architecture Explained: Self-Attention, Encoders, and Decoders"
 excerpt: Quick overview of the Transformer architecture covering tokenization, attention, multi-head attention, encoders, decoders, masked attention, and cross attention.
 date: 2026-04-17
 mathjax: true

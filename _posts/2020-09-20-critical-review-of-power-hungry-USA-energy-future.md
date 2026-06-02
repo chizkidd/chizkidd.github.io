@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "The Energy Dilemma I (Pre-COVID-19): Why N2N Isn't the Magic Bullet for America's Energy Future"
+title: "Why Natural Gas to Nuclear (N2N) Can't Solve America's Energy Problem: A Critical Review"
 excerpt:  | 
     A pre-COVID-19 critical review of Robert Bryce's "<u>Power Hungry: The Myths of 'Green' Energy and the Real Fuels of the Future.</u>"
 date: 2020-09-20

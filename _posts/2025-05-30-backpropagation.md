@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Understanding Backpropagation in Deep Learning"
+title: "Backpropagation from Scratch: Chain Rule, Math, and Python Code"
 excerpt: A highly technical yet understandable exploration of backpropagation, detailing its mechanics, mathematical foundations, and practical applications, making it accessible to those with a basic understanding of calculus and machine learning.
 date: 2025-05-30
 mathjax: true

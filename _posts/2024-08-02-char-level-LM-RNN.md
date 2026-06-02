@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Implementing a Recurrent Neural Network (RNN) From Scratch in Python: Character-Level Language Model Case Study"
+title: "Building an RNN from Scratch in Python: Character-Level Language Model with BPTT"
 excerpt: In this blog post, we'll dive deep into the implementation of a character-level language model using a vanilla Recurrent Neural Network (RNN). This type of model can learn to generate text one character at a time, capturing the patterns and structure of the language it's trained on. We'll walk through the code, explain the key concepts, and provide insights into how this model works.
 date: 2024-08-02
 mathjax: true
