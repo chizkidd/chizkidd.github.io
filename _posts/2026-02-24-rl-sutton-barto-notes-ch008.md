@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Sutton & Barto, Ch. 08: Planning & Learning with Tabular Methods (Personal Notes)"
+title: "Model-Based RL Explained: Dyna-Q, MCTS, and Prioritized Sweeping (S&B Ch. 8)"
 excerpt: Notes on model-based RL, Dyna-Q, prioritized sweeping, trajectory sampling, RTDP, heuristic search, rollout algorithms, and Monte Carlo Tree Search.
 date: 2026-02-24
 mathjax: true

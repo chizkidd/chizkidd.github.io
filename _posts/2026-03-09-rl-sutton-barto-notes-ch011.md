@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Sutton & Barto, Ch. 11: Off-Policy Methods with Approximation (Personal Notes)"
+title: "The Deadly Triad in RL: Off-Policy Learning with Function Approximation (S&B Ch. 11)"
 excerpt: Notes on semi-gradient off-policy methods, examples of divergence, the deadly triad, linear value-function geometry, gradient descent in the Bellman error, learnability, Gradient-TD methods, Emphatic-TD, and reducing variance.
 date: 2026-03-09
 mathjax: true

@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Essential Machine Learning Equations: A Reference Guide"
+title: "Machine Learning Equations Cheat Sheet: From Entropy to Attention"
 excerpt: A reference guide to fundamental machine learning equations with correct implementations and clear explanations of how they connect to each other.
 date: 2025-05-30
 mathjax: true

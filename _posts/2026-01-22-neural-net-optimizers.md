@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "A Complete Guide to Neural Network Optimizers"
+title: "Neural Network Optimizers Compared: SGD, Adam, AdamW, and Muon"
 excerpt: From SGD to Muon, explore how each optimizer builds on its predecessors to solve gradient descent challenges in deep learning.
 date: 2026-01-22
 mathjax: true

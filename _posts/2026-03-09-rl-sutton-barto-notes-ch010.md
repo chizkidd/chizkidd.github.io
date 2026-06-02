@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Sutton & Barto, Ch. 10: On-Policy Control with Approximation (Personal Notes)"
+title: "Semi-Gradient Sarsa and the Average Reward Setting in RL (S&B Ch. 10)"
 excerpt: Notes on episodic semi-gradient control, n-step Sarsa, average reward for continuing tasks, deprecating the discounted setting, and differential semi-gradient n-step Sarsa.
 date: 2026-03-09
 mathjax: true

@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Sutton & Barto, Ch. 13: Policy Gradient Methods (Personal Notes)"
+title: "Policy Gradient Methods: REINFORCE, Actor-Critic, and the Policy Gradient Theorem (S&B Ch. 13)"
 excerpt: Notes on policy approximation and its advantages, the policy gradient theorem and its proof, REINFORCE (Monte Carlo policy gradient), REINFORCE with baseline, actor-critic methods, policy gradient for continuing problems, and policy parametrization for continuous actions.
 date: 2026-05-07
 mathjax: true

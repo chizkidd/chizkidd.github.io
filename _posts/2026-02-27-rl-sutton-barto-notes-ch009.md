@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Sutton & Barto, Ch. 09: On-Policy Prediction with Approximation (Personal Notes)"
+title: "Value Function Approximation in RL: Tile Coding, Fourier Basis, and SGD (S&B Ch. 9)"
 excerpt: Notes on value-function approximation, the prediction objective (VE), stochastic gradient descent, linear methods, feature construction, ANNs, LSTD, memory-based and kernel-based approximation, and interest & emphasis.
 date: 2026-02-27
 mathjax: true

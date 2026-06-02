@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Architectural and Mathematical Foundations of Machine Learning: A Rigorous Synthesis of Theory, Geometry, and Implementation"
+title: "Machine Learning Math: From Linear Algebra to Attention — A Rigorous Deep Dive"
 excerpt: A rigorous exploration of machine learning mathematics, from information theory and linear algebra to optimization dynamics and generative models, with correct implementations and theoretical connections.
 date: 2026-02-09
 mathjax: true

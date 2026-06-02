@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Tonal Fidelity in Multilingual ASR: A Diagnostic Evaluation"
+title: "Evaluating Tone Preservation in ASR: How Meta's omniASR Handles Igbo Diacritics"
 excerpt: Controlled evaluation of omniASR-CTC-1B on Igbo language using 21 systematically designed samples. Diacritic Error Rate (DER) quantifies tone-specific failures. Bootstrap resampling (10,000 iterations) yields 75.5% loss (95% CI [57.1%, 89.7%]). Monotone control reveals orthographic bias. Includes full methodology, code, and reproducibility guide.
 date: 2026-03-01
 mathjax: true

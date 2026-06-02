@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Muon & MuonClip Optimizers"
+title: "Muon Optimizer Explained: Newton-Schulz Orthogonalization Beyond Adam"
 excerpt: From Muon optimizer to MuonClip covering Adam's limitations, momentum 2D matrix, SVD-based orthogonalization, odd polynomial approximation, Newton-Schulz 5 iteration, the exploding attention logit crisis, and QK-Clip for MHA & MLA.
 date: 2026-04-04
 mathjax: true
