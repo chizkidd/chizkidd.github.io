@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "How Attention Became Efficient & Scalable: KV Caching, MQA, GQA, MLA, and DSA"
-excerpt: Notes covering the evolution of attention mechanisms from vanilla self-attention through KV caching, MQA, GQA, MLA, sliding window attention, and Deepseek Sparse Attention.
+excerpt: Notes covering the evolution of attention mechanisms from vanilla self-attention through MHA, KV caching, MQA, GQA, MLA, sliding window attention, and Deepseek Sparse Attention.
 date: 2026-08-05
 mathjax: true
 ---
@@ -268,7 +268,7 @@ $$
 
     <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="SWA & DSA" width="450">
 
-    <small class="text-muted d-block text-center">**Figure:** Sliding Window Attention (Window = 2) [^2].</small>
+    <small class="text-muted d-block text-center">**Figure:** Sliding Window Attention (Window = 2) [^2].</small><br>
 
 - Regular (causal) self-attention mask: each token attends to all preceding tokens.
 - Sliding Window Attention mask (window = 2): each token attends only to itself and the previous token.
@@ -307,7 +307,7 @@ $$
 - A simpler & even more effective approach is to use the **Hadamard transform** $H$, which yields deterministically computed output vectors that exhibit uniform mixing across all coordinates.
 - The Hadamard transform effectively spreads out large spikes across all coordinates, allowing the quantizer to retain more information.
 - The Hadamard transform can be implemented efficiently with highly optimized GPU kernels.
-- For implementation, a **Fast Walsh-Hadamard Transform (FWHT)** is used instead of a dense Hadamard matrix, $H_D$.
+- For implementation, a **Fast Walsh-Hadamard Transform (FWHT)** is used instead of a dense Hadamard matrix, $H_D$ [^1].
 
 $$
 H_D = \begin{bmatrix} 1 & 1 & 1 & 1 \\ 1 & -1 & 1 & -1 \\ 1 & 1 & -1 & -1 \\ 1 & -1 & -1 & 1 \end{bmatrix}\frac{1}{\sqrt{4}} \quad \text{for a 4-head DSA}
