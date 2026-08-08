@@ -268,12 +268,12 @@ $$
 
 <figure style="text-align: center;">
   <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="SWA & DSA" width="450">
-  <figcaption><small class="text-muted d-block">**Figure:** Sliding Window Attention (Window = 3) [^2].</small></figcaption>
+  <figcaption><small class="text-muted d-block">Causal Self Attention and Sliding Window Attention (Window = 3). (Source: Sebastian Raschka).</small></figcaption>
 </figure>
 
 
 - Regular (causal) self-attention mask: each token attends to all preceding tokens.
-- Sliding Window Attention mask (window = 2): each token attends only to itself and the previous token.
+- Sliding Window Attention mask (window = 2): each token attends only to itself and the previous two tokens.
 
 ---
 
@@ -281,7 +281,7 @@ $$
 
 - Deepseek proposed a **lightning indexer** to address the slower token-per-second throughput of MLA.
 - The key concept of the lightning indexer is to quickly assess the relevance of each token and select only the most relevant ones for attention computation.
-- The selected tokens are not determined by a fixed-width local window like in SWA, but by **an indexer-plus-selector setup** (top-k selector), where a lightning indexer computes index relevance scores, and a token selector keeps only a smaller set of high-scoring past positions.
+- The selected tokens are not determined by a fixed-width local window like in SWA, but by **an indexer-plus-selector setup** (top-k selector), where a lightning indexer computes index relevance scores, and a token selector keeps only a smaller set of high-scoring past positions [^2].
 
 $$
 I^{t,s} = \sum_{j=1}^{n_h} w_j^t \, \text{ReLU}(q_j^t \cdot k_j^s) \equiv \text{Index score}
