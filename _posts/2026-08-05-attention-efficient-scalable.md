@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "How Attention Became Efficient & Scalable: KV Caching, MQA, GQA, MLA, and DSA"
+title: "How Attention Became Efficient & Scalable: KV Caching, MQA, GQA, MLA, and Sparse Attention."
 excerpt: Notes covering the evolution of attention mechanisms from vanilla self-attention through MHA, KV caching, MQA, GQA, MLA, sliding window attention, and Deepseek Sparse Attention.
 date: 2026-08-05
 mathjax: true
@@ -266,9 +266,11 @@ $$
 - SWA reduces the memory & compute cost of long-context inference (slower tok/s throughput) by limiting how many previous tokens each position can attend to.
 - Because attention is restricted to a local token neighborhood, this mechanism is often referred to as **local attention.**
 
-    <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="SWA & DSA" width="450">
+<figure style="text-align: center;">
+  <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="SWA & DSA" width="450">
+  <figcaption><small class="text-muted d-block">**Figure:** Sliding Window Attention (Window = 3) [^2].</small></figcaption>
+</figure>
 
-    <small class="text-muted d-block text-center">**Figure:** Sliding Window Attention (Window = 2) [^2].</small><br>
 
 - Regular (causal) self-attention mask: each token attends to all preceding tokens.
 - Sliding Window Attention mask (window = 2): each token attends only to itself and the previous token.
