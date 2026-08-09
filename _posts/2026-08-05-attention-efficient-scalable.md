@@ -138,10 +138,22 @@ $$
 - Instead of the total reduction of number of heads to 1 for the key and value matrices as in MQA, GQA reduces the number of heads for the key and value matrices to a smaller value, $n_g$.
 - GQA maintains the same overall pattern of attention as MHA, but collapses the number of key-value heads by sharing them across multiple query heads.
 
->**MHA**: each of head₁, head₂, head₃, head₄ has its own Q, K, V.
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <h3 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #1a1a1a;">
+    Multi-head attention (MHA) vs Grouped query attention (GQA)
+  </h3>
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://substackcdn.com/image/fetch/$s_!h6wM!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F6f39923c-8357-487d-9e69-40ee18a902e8_2523x1248.png" alt="Multi-Head Attention and Group Query Attention" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 1: Multi-Head Attention vs Group Query Attention. 
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="[url]" style="color: #666666; text-decoration: underline;">Sebastian Raschka</a>)</span>
+    </figcaption>
+  </figure>
+</div>
 
->**GQA**: head₁ and head₂ share one K/V pair; head₃ and head₄ share another K/V pair.
 
+>**MHA**: each of head₁, head₂, head₃, head₄ has its own Q, K, V.<br>
+>**GQA**: head₁ and head₂ share one K/V pair; head₃ and head₄ share another K/V pair.<br>
 >**MQA**: head₁, head₂, head₃, head₄ all share a single K/V pair.
 
 - GQA strikes a balance between the memory efficiency of MQA and the expressive power of MHA.
@@ -163,10 +175,16 @@ $$
 
 - MLA reduces memory usage & slightly improves model performance compared to others using MHA.
 
-
     <!-- $$O = \text{Multihead Latent Attention}(Q, K, V)$$ -->
 
-    ![MLA architecture diagram](/assets/images/2026/muon/MLA.png)
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <figure style="margin: 0; padding: 0;">
+    <img src="/assets/images/2026/muon/MLA.png" alt="Multihead Latent Attention" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 2: Multihead Latent Attention
+    </figcaption>
+  </figure>
+</div>
 
 - MLA compresses $Q, K, V$ representations into a low-rank space to reduce the size of the KV cache using a **down-projection matrix** which produces latent representations:
 
@@ -266,11 +284,24 @@ $$
 - SWA reduces the memory & compute cost of long-context inference (slower tok/s throughput) by limiting how many previous tokens each position can attend to.
 - Because attention is restricted to a local token neighborhood, this mechanism is often referred to as **local attention.**
 
-<figure style="text-align: center;">
-  <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="SWA & DSA" width="450">
-  <figcaption><small class="text-muted d-block">Causal Self Attention and Sliding Window Attention (Window = 3). (Source: Sebastian Raschka).</small></figcaption>
-</figure>
 
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <!-- Main Title Style -->
+  <h3 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #1a1a1a;">
+    Regular (causal) self-attention mask vs Sliding window attention
+  </h3>
+
+  <!-- Figure and Image Container -->
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="Causal Self Attention and Sliding Window Attention" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    
+    <!-- Captions with Light-Muted Source Styling -->
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 3: Causal Self Attention vs Sliding Window Attention (Window = 3). 
+      <span style="color: #999999; font-size: 0.8rem;">(Original source: <a href="[url]" style="color: #666666; text-decoration: underline;">Sebastian Raschka</a>)</span>
+    </figcaption>
+  </figure>
+</div>
 
 - Regular (causal) self-attention mask: each token attends to all preceding tokens.
 - Sliding Window Attention mask (window = 2): each token attends only to itself and the previous two tokens.
