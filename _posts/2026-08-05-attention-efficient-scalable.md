@@ -296,7 +296,7 @@ $$
     
     <!-- Captions with Light-Muted Source Styling -->
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
-      Figure: Causal Self Attention vs Sliding Window Attention (Window = 3). 
+      Figure 3: Causal Self Attention vs Sliding Window Attention (Window = 3). 
       <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://magazine.sebastianraschka.com/p/visual-attention-variants?r=2u5avh&utm_medium=ios&triedRedirect=true" style="color: #666666; text-decoration: underline;">Sebastian Raschka</a>)</span>
     </figcaption>
   </figure>
