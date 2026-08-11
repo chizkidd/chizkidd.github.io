@@ -36,6 +36,8 @@ I originally learned this material from Jia-Bin Huang's visual explanation of Mo
 - [DeepSeek V3's Bias Adjustment Trick](#deepseek-v3s-bias-adjustment-trick)
 - [Auxiliary-Loss-Free Load Balancing](#auxiliary-loss-free-load-balancing)
 - [Router Stability & the Router Z-Loss](#router-stability--the-router-z-loss)
+  - [Safe Softmax](#safe-softmax)
+  - [Router Z-Loss](#router-z-loss)
 - [Putting It All Together](#putting-it-all-together)
 - [The Bigger Picture](#the-bigger-picture)
 
@@ -569,7 +571,7 @@ This measures actual expert usage. These two quantities ($L_i, I_i$) are not nec
 
 ---
 
-## **Load Balancing Loss**
+### **Load Balancing Loss**
 
 A commonly used formulation combines the fraction of tokens routed to each expert with the average routing probability assigned to that expert:
 
@@ -651,7 +653,7 @@ From experimental results, we see that a clear advantage of using load balancing
 
 ---
 
-## **Device-Level Load Balancing**
+### **Device-Level Load Balancing**
 
 In a real distributed MoE model, experts are often spread across different GPUs. This introduces another problem. Even if the **experts** are balanced globally, the **devices** might not be. For example:
 
