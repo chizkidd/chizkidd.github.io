@@ -962,14 +962,17 @@ $$
 }
 $$
 
-while introducing additional memory, communication, and systems complexity. That trade-off is the real reason MoE is powerful. One mental model I’ll keep i.e. the easiest way I’ve found to remember MoE is:
+while introducing additional memory, communication, and systems complexity. That trade-off is the real reason MoE is powerful. The easiest way I’ve found to remember MoE is shown below:
 
-- The FFN gives the model capacity.
-- The experts split that capacity into specialists.
+{% capture c %}
+- The **FFN** gives the model **capacity**.
+- The **experts** split that capacity into **specialists**.
 - The router decides which specialists a token needs.
-- Load balancing prevents the specialists from becoming unused or overloaded.
-- Router Z-loss keeps the routing mechanism numerically stable.
-- And underneath all of this, the hardware has to make the sparse computation actually efficient.
+- **Load balancing** prevents the specialists from **becoming unused or overloaded**.
+- **Router Z-loss** keeps the routing mechanism **numerically stable**.
+- And underneath all of this, the **hardware has to make the sparse computation actually efficient**.
+{% endcapture %}
+{% include callout.html type="note" title="Key Takeaway" content=c %}
 
 So the architecture is really two problems intertwined:
 
