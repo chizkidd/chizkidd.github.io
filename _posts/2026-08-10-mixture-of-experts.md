@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Mixture of Experts (MoE): How Transformers Scale Without Activating Everything."
-excerpt: Notes on Mixture of Experts (MoE), sparse expert routing, fine-grained experts, load balancing, dropless MoE, and router stability.
+excerpt: Notes on Mixture of Experts (MoE) from sparse expert routing, fine-grained and shared experts, dropless MoE, load balancing, and router stability, to the systems engineering that makes it all work.
 date: 2026-08-10
 mathjax: true
 ---
@@ -10,43 +10,64 @@ mathjax: true
 - **Mixture of Experts (MoE)** is one of the main techniques used to scale modern language models without making every token pay the full computational cost of the model.
 - The basic idea is surprisingly simple: instead of sending every token through one enormous feed-forward network, we split it into many smaller **expert networks** and only activate a few experts for each token.
 - These notes walk through the intuition behind MoE, starting from the role of the **feed-forward network (FFN)** inside a Transformer, then moving through routing, top-$k$ selection, fine-grained experts, shared experts, expert capacity, dropless MoE, load balancing, and router stability.
-- The focus is not just on what MoE does, but **why each piece exists** and what problem it is trying to solve.
+- The focus is not just on *what* MoE does, but **why each piece exists** and what problem it is trying to solve.
 
-I originally learned this material from Jia-Bin Huang's visual explanation of MoE [^1]. I have rewritten the ideas here as notes for myself, with the equations and implementation details that I found useful when trying to understand how modern sparse MoE models actually work.
+I originally learned this material from Jia-Bin Huang's visual explanation of MoE [^1]. I have rewritten the ideas here as notes for myself, with the equations and implementation details that I found useful when trying to understand how modern sparse MoE models actually work. After working through it, the name makes a lot more sense. It really *is* a mixture of experts. The interesting part is deciding who gets called for each token, and then making sure the whole system doesn’t collapse under its own weight.
 
----
-## Table of Contents
+## **Table of Contents**
 - [Feed-Forward Networks in Transformers](#feed-forward-networks-in-transformers)
+  - [A Useful Intuition for FFN](#a-useful-intuition-for-ffn)
   - [RMSNorm](#rmsnorm)
   - [The FFN as a Knowledge Store](#the-ffn-as-a-knowledge-store)
+  - [Why make the FFN bigger?](#why-make-the-ffn-bigger)
 - [Why Mixture of Experts?](#why-mixture-of-experts)
 - [Sparse Mixture of Experts](#sparse-mixture-of-experts)
   - [The Router](#the-router)
-  - [Top-$k$ Routing](#top-k-routing)
+  - [Top-$k$ Routing](#top--routing)
 - [Fine-Grained Experts](#fine-grained-experts)
 - [Shared Experts](#shared-experts)
 - [Expert Capacity & Token Overflow](#expert-capacity--token-overflow)
 - [Dropless MoE](#dropless-moe)
 - [The Load Balancing Problem](#the-load-balancing-problem)
-  - [Noisy Top-$k$ Gating](#noisy-top-k-gating)
+  - [Noisy Top-$k$ Gating](#noisy-top--gating)
   - [Importance vs Load](#importance-vs-load)
   - [Load Balancing Loss](#load-balancing-loss)
   - [Device-Level Load Balancing](#device-level-load-balancing)
+- [DeepSeek V3's Bias Adjustment Trick](#deepseek-v3s-bias-adjustment-trick)
 - [Auxiliary-Loss-Free Load Balancing](#auxiliary-loss-free-load-balancing)
 - [Router Stability & the Router Z-Loss](#router-stability--the-router-z-loss)
 - [Putting It All Together](#putting-it-all-together)
+- [The Bigger Picture](#the-bigger-picture)
 
-## Appendix
+## **Appendix**
 - [References](#references)
 - [Citation](#citation)
 
 ---
 
-## Feed-Forward Networks in Transformers
+## **Feed-Forward Networks in Transformers**
 
-A Transformer layer typically alternates between an **attention mechanism** and a **feed-forward network (FFN)**.
+A Transformer layer typically alternates between an **attention mechanism** and a **feed-forward network (FFN)**. Attention allows each token to incorporate information from other tokens in the sequence. The FFN then processes each token independently. Attention basically answers this:
 
-Attention allows each token to incorporate information from other tokens in the sequence. The FFN then processes each token independently.
+> "Which other tokens should this token pay attention to?"
+
+The FFN is different. It operates independently on each token after attention has produced its contextual representation. A simplified Transformer block looks roughly like:
+
+$$
+\boxed{x \rightarrow \text{Attention} \rightarrow \text{FFN} \rightarrow x'}
+$$
+
+The FFN is usually a relatively large multilayer perceptron (MLP). If the input token representation has dimension $d$, the FFN typically expands it to a much larger hidden dimension $d_h$, applies a nonlinear activation, and projects it back down:
+
+$$
+x
+\rightarrow
+W_{up}x
+\rightarrow
+\sigma(\cdot)
+\rightarrow
+W_{down}a
+$$
 
 For a single token embedding $x$, a simplified FFN can be written as:
 
@@ -67,97 +88,150 @@ where:
 - $W_{\text{up}}$ projects the token into a larger hidden dimension.
 - $\sigma$ is the nonlinear activation function.
 - $W_{\text{down}}$ projects the representation back to the original model dimension.
+- $b_{\text{up}}$ and $b_{\text{down}}$ are the biases which could be zero or nonzero.
+- and the result is added back through the residual connection.
 
-Typically,
+Typically, $d_h \approx 4d$, where $d$ is the input dimension and $d_h$ is the hidden dimension of the FFN.
 
-$$
-d_h \approx 4d
-$$
 
-where $d$ is the input dimension and $d_h$ is the hidden dimension of the FFN.
+### **A Useful Intuition for FFN**
 
-### RMSNorm
+One way to think about the first projection is that each hidden dimension asks the token a different learned "question." If a row of $W_{up}$ points strongly in some semantic direction, its dot product with the token representation tells us how strongly that feature is present. The activation function then decides which features should remain active. Finally, $W_{down}$ maps those activated features back into the model dimension. This gives us a useful mental model:
 
-Before the FFN, modern Transformers commonly use a normalization layer such as **RMSNorm**.
+- **up projection = detect features**
+- **activation = select features**
+- **down projection = combine features into an output**
 
-For an input vector $x$:
+There is an important caveat here. It is tempting to say that the FFN literally stores one clean factual association per neuron, but that is too strong. The weights are distributed representations, and features can be entangled across dimensions. The "questions" and "facts" interpretation is a useful intuition, not a literal description of what every neuron is doing.
+
+### **RMSNorm**
+
+Before the FFN, modern Transformers commonly use a normalization layer such as **RMSNorm**. For an input vector $x$, given that $\gamma$ is a learnable scaling vector, the RMSNorm is:
 
 $$
 \text{RMS}(x) = \sqrt{\frac{1}{d}\sum_{i=1}^{d}x_i^2+\epsilon}
 $$
 
-and
-
 $$
 \text{RMSNorm}(x) = \gamma \odot \frac{x}{\text{RMS}(x)}
 $$
 
-where $\gamma$ is a learnable scaling vector.
-
 The important idea is that normalization keeps the magnitude of activations under control while allowing the model to learn a different scale for each dimension.
 
-### The FFN as a Knowledge Store
+### **The FFN as a Knowledge Store**
 
-The FFN is more than just a generic nonlinear transformation.
-
-One useful interpretation is that the first projection asks a collection of learned **questions** about the token representation.
-
-Each row of $W_{\text{up}}$ can be thought of as a learned direction in representation space.
+The FFN is more than just a generic nonlinear transformation. One useful interpretation is that the first projection asks a collection of learned **questions** about the token representation. Each row of $W_{\text{up}}$ can be thought of as a learned direction in representation space.
 
 $$
 z_i = x \cdot W_{\text{up},i} + b_i
 $$
 
-If $z_i$ is large, the input strongly matches the feature represented by that row.
-
-The activation function then suppresses irrelevant features.
-
-For a simple ReLU example:
+If $z_i$ is large, the input strongly matches the feature represented by that row. The activation function then suppresses irrelevant features. For a simple ReLU example:
 
 $$
 a_i = \max(0,z_i)
 $$
 
-The second projection maps the activated features back into the model dimension.
-
-This gives us an intuitive picture:
+The second projection maps the activated features back into the model dimension. This gives us an intuitive picture:
 
 > The FFN can be thought of as a large collection of learned feature detectors that activate different pieces of stored information depending on the input.
 
-This interpretation is useful for understanding why increasing the FFN hidden dimension can improve model capacity.
+This interpretation is useful for understanding why increasing the FFN hidden dimension can improve model capacity. But there is a catch.
 
-But there is a problem.
+
+### **Why make the FFN bigger?**
+
+Now suppose we want a more capable model. One obvious option is to increase $d_h$, the hidden dimension of the FFN. More hidden dimensions means more learned features and more capacity. But there is a catch. If we make the FFN four times larger, eight times larger, or even more, we also increase the amount of computation performed for **every token**. A dense model has to use the same FFN for every token. That means the computational cost grows roughly with the total size of the network. This gives us a frustrating trade-off:
+
+$$
+\boxed{
+\text{more parameters}
+\quad\Longrightarrow\quad
+\text{more capacity}
+}
+$$
+
+<!--
+```bash
+More Parameters ====> More Capacity 
+```
+-->
+
+but also:
+
+$$
+\boxed{
+\text{more parameters}
+\quad\Longrightarrow\quad
+\text{more computation per token}
+}
+$$
+
+<!--
+```bash
+More Parameters ====> More Computation per Token 
+```
+-->
 
 ---
 
-## Why Mixture of Experts?
+## **Why Mixture of Experts?**
 
-If we simply increase $d_h$, the FFN becomes larger.
-
-That gives the model more capacity, but it also increases:
+What if we could have the extra parameters without using all of them every time? That is where MoE enters. If we simply increase $d_h$, the FFN becomes larger. That gives the model more capacity, but it also increases:
 
 - training computation,
 - inference computation,
 - parameter memory,
 - communication requirements.
 
-And there is another observation:
+And there is another observation: **A token does not need every feature in the FFN.**
 
-**A token does not need every feature in the FFN.**
+For example, a token about chemistry probably does not need every feature that might be useful for programming, mathematics, or another language. So instead of making one enormous FFN that processes every token, we can divide the FFN into multiple smaller networks. Each one becomes an **expert**. The model can then choose which experts should process each token. This is the central idea behind a sparse **Mixture of Experts (MoE)**. 
 
-For example, a token about chemistry probably does not need every feature that might be useful for programming, mathematics, or another language.
+Let’s visualize it:
 
-So instead of making one enormous FFN that processes every token, we can divide the FFN into multiple smaller networks.
+```bash
 
-Each one becomes an **expert**.
+                    Token
+                      |
+                   Router
+                      |
+          +-----------+-----------+
+          |           |           |
+        Expert 1    Expert 2    Expert 3   ...
+          |           |           |
+          +-----------+-----------+
+                      |
+                   Combine
+                      |
+                    Output
+```
 
-The model can then choose which experts should process each token.
+The crucial part is that we do not run every expert. The router selects only a small number of experts for each token. If we have 64 experts but activate only 8 for a token, then the model can contain a lot more total parameters than a dense model with roughly the same amount of computation per token. A simplified MoE layer can be written as:
 
-This is the central idea behind a sparse **Mixture of Experts (MoE)**.
+$$
+\text{MoE}(x) =
+\sum_{i \in \text{TopK}(r(x))}
+p_i(x) E_i(x)
+$$
+
+where:
+
+* $x$ is the token representation
+* $E_i$ is expert $i$
+* $r(x)$ is the router output
+* $p_i(x)$ is the routing probability
+* $\text{TopK}$ selects the experts that actually process the token
+
+This is the key trick:
+
+> The model’s total parameter count can grow much faster than the number of parameters activated for each token.
+
+That is the “sparse” in sparse MoE.
 
 ---
 
-## Sparse Mixture of Experts
+## **Sparse Mixture of Experts**
 
 Suppose we have $N$ experts:
 
@@ -165,23 +239,15 @@ $$
 E_1, E_2, \dots, E_N
 $$
 
-Each expert is itself an FFN.
-
-Instead of evaluating all $N$ experts for every token, we select only the top $k$ experts.
-
-If $k \ll N$, then the model can contain many more parameters while only activating a small fraction of them for each token.
-
-This creates an important distinction:
+Each expert is itself an FFN. Instead of evaluating all $N$ experts for every token, we select only the top $k$ experts. If $k \ll N$, then the model can contain many more parameters while only activating a small fraction of them for each token. This creates an important distinction:
 
 > **Total parameters** and **active parameters** are no longer the same thing.
 
 A model can therefore have a very large parameter count without requiring every token to use the entire model.
 
-### The Router
+### **The Router**
 
-The model needs some mechanism to decide which experts should receive each token.
-
-This is the job of the **router**.
+So now we have another problem. If there are many experts, who decides which ones get used? The model needs some mechanism to decide which experts should receive each token. This is the job of the **router,** a small neural network. A simple router can just be a learned linear projection.
 
 For an input token representation $x$, the router computes a score for every expert:
 
@@ -195,30 +261,32 @@ $$
 W_g \in \mathbb{R}^{d \times N}
 $$
 
-and therefore
-
 $$
 h(x) \in \mathbb{R}^{N}
 $$
 
-Each value in $h(x)$ is the router's score, or **logit**, for one expert.
-
-We can turn these logits into probabilities using softmax:
+Each value in $h(x)$ is the router's score, or **logit**, for one expert. We can turn these logits into probabilities using softmax:
 
 $$
 p_i(x) = \frac{\exp(h_i(x))} {\sum_{j=1}^{N}\exp(h_j(x))}
 $$
 
-The resulting vector represents the router's preference over the experts.
+<!--
+$$
+p_i(x) =
+\frac{e^{h_i(x)}}
+{\sum_{j=1}^{N} e^{h_j(x)}}
+$$
+-->
 
-### Top-$k$ Routing
+The resulting vector represents the router's preference over the experts.Then we select the top $K$ experts. 
 
-We then select only the $k$ experts with the highest routing scores.
+### **Top-$k$ Routing** <a name="#top--routing"></a>
 
-Let
+We then select only the $k$ experts with the highest routing scores. Let
 
 $$
-S(x) = \operatorname{TopK}(p(x),k)
+S(x) = \text{TopK}(p(x),k)
 $$
 
 Then the MoE output can be written as:
@@ -227,12 +295,10 @@ $$
 y = \sum_{i \in S(x)} p_i(x)E_i(x)
 $$
 
-In practice, implementations may renormalize the selected routing weights, but the basic idea remains the same.
-
-The process is therefore:
+In practice, implementations may renormalize the selected routing weights, but the basic idea remains the same. The process is therefore:
 
 $$
-x
+\boxed{x
 \rightarrow
 \text{Router}
 \rightarrow
@@ -240,137 +306,168 @@ x
 \rightarrow
 \text{Weighted Combination}
 \rightarrow
-y
+y}
 $$
 
-The routing happens **at the token level**.
+<!--
+```bash
+x -> Router -> Top-k Experts -> Weighted Combination -> y
+```
+-->
 
-Different tokens in the same sequence can therefore be sent to completely different combinations of experts.
+The routing happens **at the token level**. Different tokens in the same sequence can therefore be sent to completely different combinations of experts. For example, if the router produces:
+
+```bash
+[0.05, 0.10, 0.03, 0.42, 0.07, 0.33]
+```
+
+and $K=2$, experts **4** and **6** win. The token is sent only to those experts. Their outputs are then combined using the corresponding routing weights. This means routing happens per token. Two neighboring tokens can go through completely different experts.
 
 ---
 
-## Fine-Grained Experts
+## **Fine-Grained Experts**
 
 A natural question is:
 
 > Why not just have a small number of large experts?
 
-One answer is **flexibility**.
+One answer is **flexibility**. Suppose we have eight large experts and select two of them. The number of possible combinations is limited. 
 
-Suppose we have eight large experts and select two of them. The number of possible combinations is limited.
+> Instead of having a few large experts, why not have many smaller experts?
 
-Instead, we can split the expert computation into many smaller experts and activate more of them.
+We can split the expert computation into many smaller experts and activate more of them. This is the idea behind **fine-grained expert segmentation**. Suppose we have roughly the same total expert capacity. We could build:
 
-This is the idea behind **fine-grained expert segmentation**.
+```bash
+8 large experts
+OR 
+64 smaller experts 
+```
 
-DeepSeekMoE, for example, proposed splitting the experts into a much larger number of smaller experts and activating a correspondingly larger number of them. The goal is to allow more flexible combinations of specialized knowledge. [^2]
+and activate a subset of them.
 
-This gives the router a finer-grained set of choices:
+The second approach gives the router many more possible combinations to choose from. This can be useful because the model does not have to commit a token to one very large “specialist.” It can combine several smaller specialists. For example:
+
+```bash
+Token A → Expert 3 + Expert 11 + Expert 42 + Expert 57
+Token B → Expert 2 + Expert 8 + Expert 19 + Expert 61
+```
+
+The resulting combinations give the model a much larger routing space. OLMoE, for example, uses 64 small experts and activates 8 per token [^5]. Its released configuration has about 6.9B total parameters with about 1.3B active parameters per token. DeepSeek-V3 pushes this idea much further, using hundreds of routed experts while activating only a small subset for each token. DeepSeekMoE proposed splitting the experts into a much larger number of smaller experts and activating a correspondingly larger number of them. The goal is to allow more flexible combinations of specialized knowledge [^2]. This gives the router a finer-grained set of choices:
 
 $$
+\boxed{
 \text{many small experts}
 +
 \text{top-}k\text{ routing}
 \rightarrow
-\text{more possible combinations}
+\text{more possible combinations}}
 $$
 
-This is one of the important ideas behind modern DeepSeek-style MoE architectures.
+<!--
+```bash
+Many Small Experts + Top-k Routing ——> More Possible Combinations 
+```
+-->
+
+So MoE is not just: 
+
+> _“Let’s make several copies of the FFN.”_
+
+The design of the expert pool itself matters. This is one of the important ideas behind modern DeepSeek-style MoE architectures.
 
 ---
 
-## Shared Experts
+## **Shared Experts**
 
-DeepSeekMoE also introduced the idea of **shared experts**.
-
-A shared expert is always active rather than being selected by the router.
-
-The intuition is that some information is useful for almost every token.
-
-Instead of forcing the routed experts to repeatedly learn this common information, we can give the model a dedicated expert for broadly useful patterns.
-
-The architecture therefore contains:
+DeepSeekMoE also introduced the idea of **shared experts**. A shared expert is always active rather than being selected by the router. The intuition is that some information is useful for almost every token. Instead of forcing the routed experts to repeatedly learn this common information, we can give the model a dedicated expert for broadly useful patterns. The architecture therefore contains:
 
 $$
-\text{Shared Experts}
-+
-\text{Routed Experts}
+\boxed{\text{Shared Experts} + \text{Routed Experts}}
 $$
 
-The shared component handles more general information, while the routed experts can specialize.
-
-The DeepSeekMoE paper found benefits from combining fine-grained experts with shared experts, although the value of shared experts is architecture-dependent and is not universally guaranteed. [^2]
+The shared component handles more general information, while the routed experts can specialize. The DeepSeekMoE paper found benefits from combining fine-grained experts with shared experts, although the value of shared experts is architecture-dependent and is not universally guaranteed [^2].
 
 ---
 
-## Expert Capacity & Token Overflow
+## **Expert Capacity & Token Overflow**
 
-There is a practical problem with routing.
+There is a practical problem with routing. Suppose we have $16$ tokens and $8$ experts. If tokens were distributed perfectly evenly, each expert would receive $\frac{16}{8}=2$ tokens. So we could give every expert a capacity of 2. But routing decisions depend on the actual input. There is nothing inherently stopping the router from doing this instead:
 
-Suppose we have $16$ tokens and $8$ experts.
+```bash
+Expert 1:  8 tokens
+Expert 2:  5 tokens
+Expert 3:  2 tokens
+Expert 4:  1 token
+Expert 5:  0 tokens
+Expert 6:  0 tokens
+Expert 7:  0 tokens
+Expert 8:  0 tokens
 
-If tokens were distributed perfectly evenly, each expert would receive:
+OR
+
+Expert 1:  5 tokens
+Expert 2:  3 tokens
+Expert 3:  2 tokens
+Expert 4:  2 token
+Expert 5:  1 tokens
+Expert 6:  1 tokens
+Expert 7:  1 tokens
+Expert 8:  1 tokens
+```
+
+Now the first expert has received more tokens than it can process in both cases. This creates **token overflow**. Some experts are overloaded while others are sitting idle in the first case. And in a distributed system, experts may live on different GPUs. So routing is not merely a modeling decision, but also a systems problem. Historically, one way to deal with this was to give every expert a fixed capacity.
+
+For example:
 
 $$
-\frac{16}{8}=2
+C =
+\text{capacity factor}
+\times
+\frac{T}{N}
 $$
 
-tokens.
+where:
 
-So we could give every expert a capacity of two.
+* $T$ = number of tokens
+* $N$ = number of experts
 
-But routing decisions depend on the actual input.
+If an expert receives more tokens than its capacity, something has to happen. One option is to drop the excess tokens. The token essentially skips the MoE computation and continues through the residual pathway. That avoids exceeding the allocated compute and memory budget, but now some tokens are not getting the expert computation the model intended.
 
-We might instead get something like:
-
-$$
-[5,3,2,2,1,1,1,1]
-$$
-
-Now the first expert has received more tokens than it can process.
-
-This creates **token overflow**.
-
-One traditional solution is to increase the expert's capacity.
-
-For example, a capacity factor of $1.5$ would increase the available capacity above the ideal balanced allocation.
-
-But larger capacity means:
+Another traditional solution is to increase the expert's capacity. But then we have the opposite problem. We can calculate the expert capacity as: _**total tokens in a batch / number of experts**_. For example, a capacity factor of $1.5$ would increase the available capacity above the ideal balanced allocation in the second case. But larger capacity means:
 
 - more memory,
 - more computation,
 - more padding,
 - more communication.
 
-So we have a trade-off:
+Suppose an expert receives only 2 tokens but we allocate space for 8. We now have six empty slots. The hardware still has to deal with those padded tensor shapes. So we have a trade-off:
 
 $$
+\boxed{
 \text{low capacity}
 \rightarrow
-\text{token dropping}
+\text{token overflow}
+}
 $$
 
 $$
+\boxed{
 \text{high capacity}
 \rightarrow
-\text{wasted computation}
+\text{wasted computation/memory}
+}
 $$
 
-So can we avoid both?
+This is one reason modern MoE implementations care so much about efficient routing kernels. So can we avoid both?
 
 ---
 
-## Dropless MoE
+## **Dropless MoE**
 
-Instead of forcing every expert to process the same number of tokens, we can organize the expert computation around the **actual routing assignments**.
-
-One way to think about this is using block-sparse matrix multiplication.
-
-Rather than padding every expert to the same token count, the computation can use blocks whose sizes correspond to the number of tokens actually assigned to each expert.
-
-Conceptually:
+Instead of forcing every expert to process the same number of tokens, we can organise the expert computation around the **actual routing assignments**. One way to think about this is using block-sparse matrix multiplication. Rather than padding every expert to the same token count, the computation can use blocks whose sizes correspond to the number of tokens actually assigned to each expert. Conceptually:
 
 $$
+\boxed{
 X
 \rightarrow
 \text{Routing}
@@ -380,94 +477,87 @@ X
 \text{Expert computation}
 \rightarrow
 \text{Scatter back}
+}
 $$
 
-This allows us to avoid dropping tokens simply because an expert received more tokens than expected, while also avoiding unnecessary padding.
+For example, we can use sparse/block operations that operate on the actual routed tokens:
 
-This style of implementation is often referred to as **dropless MoE**.
+```bash
+Token routing:
+Expert 1 → x1, x7, x9
+Expert 2 → x2
+Expert 3 → x3, x4, x5, x6
 
-The exact implementation depends heavily on the GPU kernels and distributed training system, but the underlying goal is simple:
+Rather than padding everything to four tokens:
+Expert 1 → x1, x7, x9, PAD
+Expert 2 → x2, PAD, PAD, PAD
+Expert 3 → x3, x4, x5, x6
+```
+
+This allows us to avoid dropping tokens simply because an expert received more tokens than expected, while also avoiding unnecessary padding. This style of implementation is often referred to as **dropless MoE**. The exact implementation depends heavily on the GPU kernels and distributed training system, but the underlying goal is simple:
 
 > Compute only the expert work that actually exists.
 
+OLMoE, for example, uses token-choice routing with dropless routing. The important distinction is that MoE sparsity is not just about the neural network architecture. We need the underlying hardware and kernels to exploit that sparsity too. Otherwise, theoretical efficiency can disappear in implementation overhead.
+
 ---
 
-## The Load Balancing Problem
+## **The Load Balancing Problem**
 
-There is a deeper problem with sparse routing.
-
-At the beginning of training, all experts are randomly initialized.
-
-Suppose the router happens to send many of the first tokens to experts $E_1$ and $E_2$.
-
-Those experts are updated more often.
-
-They become better.
-
-The router then has even more reason to send tokens to them.
-
-This can create a feedback loop:
+There is a deeper problem with sparse routing. At the beginning of training, all experts are randomly initialised. Suppose the router happens to send many of the first tokens to experts $E_1$ and $E_2$. Those experts are updated more often so they become better. The router then has even more reason to send tokens to them, and the cycle continues. This can create a **self-reinforcing** feedback loop:
 
 $$
+\boxed{
 \text{more tokens}
 \rightarrow
 \text{more updates}
 \rightarrow
 \text{better experts}
 \rightarrow
-\text{more routing}
+\text{higher routing score}
+\rightarrow
+\text{more tokens}
+\rightarrow
+\text{same better experts}
+}
 $$
 
-Eventually, some experts may receive very few tokens.
+Eventually, some experts may receive very few tokens. These underused experts become effectively **dead**. This is the **load balancing problem**. The goal is not necessarily to make every expert equally good, but to prevent the router from collapsing onto a small subset of experts by distributing the processing of tokens as evenly as possible among the experts.
 
-These underused experts become effectively **dead**.
+### **Noisy Top-$k$ Gating** <a name="noisy-top--gating"></a>
 
-This is the **load balancing problem**.
-
-The goal is not necessarily to make every expert equally good.
-
-The goal is to prevent the router from collapsing onto a small subset of experts.
-
-### Noisy Top-$k$ Gating
-
-One early approach is to add noise to the router logits:
+One early approach is to add **Gaussian noise** to the router logits:
 
 $$
 h'_i(x)=h_i(x)+\epsilon_i
 $$
 
-The noise encourages exploration.
+The noise encourages exploration. Instead of always selecting the same experts, the router occasionally explores other experts, giving them opportunities to receive tokens and learn. The router selects a more diverse set of experts and prevents the same experts from always being chosen. We can further improve this by adding a tunable scaling factor for each expert. This is called **noisy top-K gating**. This idea appears in noisy top-$k$ gating approaches to MoE routing [^3]. But exploration alone is not enough. We still need an explicit mechanism to encourage balanced expert utilisation.
 
-Instead of always selecting the same experts, the router occasionally explores other experts, giving them opportunities to receive tokens and learn.
 
-This idea appears in noisy top-$k$ gating approaches to MoE routing. [^3]
-
-But exploration alone is not enough.
-
-We still need an explicit mechanism to encourage balanced expert utilization.
-
----
-
-## Importance vs Load
+### **Importance vs Load**
 
 There are two slightly different things we can measure.
 
-### Importance
+#### **Importance**
 
-We can measure how much routing probability an expert receives.
-
-For expert $i$:
+We can measure how much routing probability an expert receives. For expert $i$, the importance is:
 
 $$
 I_i =
 \sum_x p_i(x)
 $$
 
+$$
+P_i =
+\frac{1}{T} I_i
+$$
+
 An expert can therefore have high importance even if it is not selected very often.
 
-### Load
+#### **Load**
 
-Instead, we can count how many tokens are actually routed to the expert:
+Instead, we can count how many tokens are actually routed/assigned to the expert $i$:
 
 $$
 L_i =
@@ -475,40 +565,16 @@ L_i =
 \mathbf{1}[i\in S(x)]
 $$
 
-This measures actual expert usage.
-
-These two quantities are not necessarily the same.
-
-For example, the router might give eight experts reasonably balanced probabilities while repeatedly selecting only four of them through top-$k$ routing.
-
-So balancing probabilities alone does not guarantee balanced computation.
+This measures actual expert usage. These two quantities ($L_i, I_i$) are not necessarily the same. For example, the router might give eight experts reasonably balanced probabilities while repeatedly selecting only four of them through top-$k$ routing. Therefore, balancing probabilities alone does not guarantee balanced computation. Unfortunately, the number of tokens received by each expert is a **discrete quantity** that cannot be used directly for backpropagation. Instead, we can define a **smooth estimator** for the number of examples assigned to each expert in the batch. The smoothness enables gradients to flow through the estimator, making it possible to apply backpropagation.
 
 ---
 
-## Load Balancing Loss
-
-A common approach is to add an auxiliary load balancing loss to the language modeling objective.
-
-Conceptually:
-
-$$
-L =
-L_{\text{LM}}
-+
-\alpha L_{\text{balance}}
-$$
-
-where:
-
-- $L_{\text{LM}}$ is the normal next-token prediction loss.
-- $L_{\text{balance}}$ encourages more uniform expert usage.
-- $\alpha$ controls how strongly the balancing objective affects training.
+## **Load Balancing Loss**
 
 A commonly used formulation combines the fraction of tokens routed to each expert with the average routing probability assigned to that expert:
 
 $$
-L_{\text{balance}} =
-\alpha N
+\mathcal{L}_{\text{balance}} = N
 \sum_{i=1}^{N}
 f_i p_i
 $$
@@ -519,100 +585,149 @@ where:
 - $p_i$ is the average router probability assigned to expert $i$.
 - $N$ is the number of experts.
 
-The factor $N$ keeps the scale of the loss comparable as the number of experts changes.
+The factor $N$ keeps the scale of the loss comparable as the number of experts changes. Essentially, it keeps the scale of the loss from shrinking simply because we increased the number of experts. Under perfectly uniform routing where $f_i = p_i = \frac{1}{N}$, the scaling factor $N$ cancels out the splitting effect of the cross-expert summation:
 
-If routing is perfectly uniform:
-
+<!--
 $$
 f_i = p_i = \frac{1}{N}
 $$
+-->
 
-and therefore:
+<!-- and therefore: -->
 
+
+$$
+N \sum_{i=1}^{N} f_i p_i = 
+N \sum_{i=1}^{N} \left( \frac{1}{N} \cdot \frac{1}{N} \right) =
+N \sum_{i=1}^{N} \frac{1}{N^2} = N \cdot \frac{N}{N^2} = 1
+$$  
+
+<!--
 $$
 N \sum_i f_i p_i = 1
 $$
+-->
+A common approach is to add an auxiliary load balancing loss to the language modeling objective. Conceptually:
 
-The important idea is that the balancing loss gives the router a reason to spread tokens across experts instead of collapsing onto a few.
+$$
+\mathcal{L} =
+\mathcal{L}_{\text{LM}}
++
+\alpha \mathcal{L}_{\text{balance}}
+$$
 
-However, there is an obvious downside.
+where:
 
-If $\alpha$ is too large, the model may optimize for balanced routing at the expense of the actual language modeling objective.
+- $\mathcal{L}_{\text{LM}}$ is the normal next-token prediction loss.
+- $\mathcal{L}_{\text{balance}}$ encourages more uniform expert usage.
+- $\alpha$ is a hyperparameter that controls the influence of the load balancing loss during training. It controls how strongly the balancing objective affects training.
 
-If $\alpha$ is too small, the balancing loss may have almost no effect.
+
+The important idea is that the balancing loss gives the router a reason to spread tokens across experts instead of collapsing onto a few. However, there is an obvious downside.
+
+- If $\alpha$ is too large, the model may optimise for balanced routing at the expense of the actual language modeling objective. The router is forced to care too much about uniformity, and uniform routing is not necessarily what we actually want. The model should learn to specialize.
+
+- If $\alpha$ is too small, the balancing loss may have almost no effect.
 
 So:
 
 $$
+\boxed{
 \alpha \uparrow
 \rightarrow
 \text{better balance, potentially worse model objective}
+}
 $$
 
 $$
+\boxed{
 \alpha \downarrow
 \rightarrow
 \text{less interference, potentially worse balance}
+}
 $$
+
+From experimental results, we see that a clear advantage of using load balancing loss is that it produces lower training and validation loss. Without load balancing, two out of eight experts receive all the training tokens while the remaining six experts are poorly trained. With load balancing loss, the tokens are distributed much more evenly across all experts.
 
 ---
 
-## Device-Level Load Balancing
+## **Device-Level Load Balancing**
 
-In a real distributed MoE model, experts are often spread across different GPUs.
-
-This introduces another problem.
-
-Even if the **experts** are balanced globally, the **devices** might not be.
-
-For example:
+In a real distributed MoE model, experts are often spread across different GPUs. This introduces another problem. Even if the **experts** are balanced globally, the **devices** might not be. For example:
 
 $$
+\boxed{
 \text{GPU}_1
 \rightarrow
 \text{many tokens}
+}
 $$
 
 $$
+\boxed{
 \text{GPU}_2
 \rightarrow
 \text{few tokens}
+}
 $$
 
-The model is still bottlenecked by the overloaded GPU.
-
-Therefore, large-scale MoE systems may also consider load at the device level.
-
-The same general principle applies:
+The model is still bottlenecked by the overloaded GPU. Therefore, large-scale MoE systems may also consider load at the device level. These experts may live on different devices. Therefore, in addition to expert-level balance, we can further distribute the computational load evenly across devices and alleviate bottlenecks. The computation of device-level balance loss follows a similar formulation but aggregates token counts and router probabilities at the device level. The same general principle applies:
 
 $$
+\boxed{
 \text{balanced experts}
 +
 \text{balanced devices}
 \rightarrow
-\text{better hardware utilization}
+\text{better hardware utilization }
+}
 $$
 
 This matters because MoE introduces communication between devices whenever tokens need to be dispatched to experts located on different GPUs.
 
 ---
 
-## Auxiliary-Loss-Free Load Balancing
+## **DeepSeek V3's Bias Adjustment Trick**
 
-DeepSeek-V3 introduced an interesting alternative to the traditional auxiliary balancing loss.
+DeepSeek V3 uses a simple trick to balance the load. Instead of using softmax, the router in DeepSeek V3 directly applies a **sigmoid** function on the predicted logits, one for each expert. Suppose the router is slightly biased towards selecting the first two experts. To overcome this imbalance, we add a small **bias** to each expert depending on whether the number of tokens routed to the expert is larger or smaller than the average. This simple bias adjustment increases the likelihood of tokens being routed to a broader range of experts. By dynamically adjusting the bias for overloaded or underloaded experts, we keep balanced expert load while achieving better performance. 
 
-Instead of adding another loss term that directly competes with the language modeling objective, DeepSeek-V3 uses a **dynamic expert-level bias** to influence which experts are selected. [^4]
+**Note**: The bias adjustments were **only** used for determining the top-K routing. The final output still uses the original probabilities as weights for combining expert outputs.
+
+---
+
+## **Auxiliary-Loss-Free Load Balancing**
+
+
+DeepSeek-V3 introduced an interesting alternative to the traditional auxiliary balancing loss. Instead of adding another loss term that directly competes with the language modeling objective, DeepSeek-V3 uses a **dynamic expert-level bias** to influence which experts are selected [^4]. Conceptually:
+
+```bash
+CASE 1:
+overloaded expert
+      ↓
+lower routing bias
+      ↓
+less likely to be selected 
+```
+
+```bash
+CASE 2:
+underloaded expert
+      ↓
+higher routing bias
+      ↓
+more likely to be selected
+```
 
 The idea is roughly:
 
 1. Measure how many tokens each expert is receiving.
 2. Compare each expert's load with the average.
-3. Increase the routing bias for under-utilized experts.
+3. Increase the routing bias for under-utilised experts.
 4. Decrease the routing bias for overloaded experts.
 5. Use the adjusted scores for top-$k$ selection.
 6. Keep the original router scores for weighting the selected expert outputs.
 
-Conceptually:
+Mathematically:
 
 $$
 h'_i(x)=h_i(x)+b_i
@@ -620,45 +735,29 @@ $$
 
 where $b_i$ is a dynamically updated expert-specific bias.
 
-If an expert is overloaded:
+- If an expert is overloaded $b_i \downarrow$
+- If an expert is underloaded $b_i \uparrow$
 
-$$
-b_i \downarrow
-$$
 
-If an expert is underloaded:
+The bias is used to influence the selection of the top-$K$ experts. But the original routing probabilities are still used when combining the expert outputs. That means the mechanism can encourage balanced routing without directly adding a load-balancing penalty to the main optimization objective. This is why it is often described as loss-free load balancing. It is a nice example of a recurring theme in large-scale ML:
 
-$$
-b_i \uparrow
-$$
+> Sometimes the best way to fix an optimization problem is to change the algorithm around the objective rather than adding another term to the objective.
 
-The key detail is that this bias is used for **routing selection**, rather than changing the probabilities used to combine the final expert outputs.
-
-This allows DeepSeek-V3 to perform load balancing without introducing the same auxiliary-loss trade-off. The DeepSeek-V3 technical report describes this as an **auxiliary-loss-free load balancing strategy**. [^4]
+Essentially, the key detail is that this bias is used for **routing selection**, rather than changing the probabilities used to combine the final expert outputs. This allows DeepSeek-V3 to perform load balancing without introducing the same auxiliary-loss trade-off. The DeepSeek-V3 technical report describes this as an **auxiliary-loss-free load balancing strategy** [^4]. Results demonstrate that this **auxiliary-loss-free** load balancing strategy avoids the trade-off between load balance and model performance. There is also an important nuance here. DeepSeek-V3 does not completely eliminate the need to monitor routing balance. Sequence-level imbalance can still matter, especially when individual sequences produce skewed routing patterns. DeepSeek-V3 uses a **sequence-wise balance loss** to prevent severe imbalance within individual sequences; so it’s not completely loss-free, but it avoids a global auxiliary loss that competes directly with the main objective.
 
 ---
 
-## Router Stability & the Router Z-Loss
+## **Router Stability & the Router Z-Loss**
 
-Load balancing is not the only issue with the router.
-
-Recall that the router begins with logits:
-
-$$
-h(x)
-$$
-
-and converts them to probabilities using softmax:
+Load balancing is not the only issue with the router. Recall that the router begins with logits $h(x)$ and converts them to probabilities using softmax:
 
 $$
 p_i =
-\frac{e^{h_i}}
-{\sum_j e^{h_j}}
+\frac{e^{h_i(x)}}
+{\sum_j e^{h_j(x)}}
 $$
 
-An interesting property of softmax is that it is **shift invariant**.
-
-For any constant $c$:
+An interesting property of softmax is that it is **shift invariant**. For any constant $c$:
 
 $$
 \text{Softmax}(h) =
@@ -676,15 +775,13 @@ $$
 {\sum_j e^{h_j}}
 $$
 
-This creates a subtle problem.
+This creates a subtle problem. The router can increase all of its logits by the same amount without changing its output probabilities. So the probabilities remain stable while the underlying logits can grow arbitrarily large. This becomes dangerous when using reduced-precision arithmetic such as FP16. For example:
 
-The router can increase all of its logits by the same amount without changing its output probabilities.
+$$[2, 1, 0] \text{ and } [102, 101, 100]$$
 
-So the probabilities remain stable while the underlying logits can grow arbitrarily large.
+produce exactly the same softmax distribution. The model therefore has no incentive, from the softmax probabilities alone, to keep the absolute magnitude of the logits small. This poses a numerical problem because large logits can interact badly with exponentiation especially in modern LLMs that are trained using reduced-precision arithmetic (BF16 or FP16) for memory reduction and training speed increase. 
 
-This becomes dangerous when using reduced-precision arithmetic such as FP16.
-
-### Safe Softmax
+### **Safe Softmax**
 
 A standard numerical trick is to subtract the maximum logit before exponentiation:
 
@@ -694,28 +791,22 @@ $$
 {\sum_j e^{h_j-\max(h)}}
 $$
 
-This prevents excessively large exponentials from overflowing.
+This prevents excessively large exponentials from overflowing. However, it only treats the numerical symptom. The underlying logits can still drift to extremely large values. Using safe softmax is like wearing a seat belt while driving. It does provide important protections, but it does not mean we should press the accelerator recklessly and allow the logits to grow without constraints.
 
-But it only treats the numerical symptom.
+### **Router Z-Loss**
 
-The underlying logits can still drift.
-
-### Router Z-Loss
-
-A more direct approach is to regularize the normalization term.
-
-Define:
+To prevent the logits from becoming excessively large, a straightforward approach is to add a loss term that penalizes the sum of their square values. Unfortunately, this hurts model performance because it interferes with the router probability from the softmax. A more direct approach is to regularise the normalisation term. The idea is to penalize large values of the router’s log-normalizer. This ensures that the gradient from this loss does not change the router probabilities. Let's define:
 
 $$
 Z(x) =
 \log
-\sum_i e^{h_i(x)}
+\sum_{i=1}^{N} e^{h_i(x)}
 $$
 
-Then the router Z-loss can be written as:
+We square the log normalizer to penalize both positive and negative shifts and average them across the batch. This is known as the **router Z-loss**. The router Z-loss can be written as:
 
 $$
-L_Z =
+\mathcal{L}_Z =
 \frac{1}{B}
 \sum_{x}
 Z(x)^2
@@ -723,19 +814,75 @@ $$
 
 where $B$ is the batch size.
 
-The logarithm prevents the regularization term from growing exponentially, while the square penalizes large positive or negative shifts.
-
-The intuition is:
+The logarithm prevents the regularisation term from growing exponentially, while the squared term penalises large positive or negative shifts (large values of the log-normalizer). The router Z-loss keeps the logits centered and prevents them from drifting to arbitrarily large values, ensuring training stability is crucial for reliable scaling of mixture of experts to larger and more powerful models. The intuition is:
 
 > Keep the router logits numerically well-behaved without unnecessarily changing which experts the router prefers.
 
-This is particularly important when scaling MoE training to large models.
+This is particularly important when scaling MoE training to large models reliably. Scaling the number of experts is not enough. We also have to scale the stability machinery around them. From controlled experiments in [OLMoE](https://arxiv.org/abs/2409.02060) [^5], without Z-loss, the training curve has **many loss spikes**. In contrast, adding router Z-loss leads to more stable training and better performance.
 
 ---
 
-## Putting It All Together
+## **Putting It All Together**
 
-The entire sparse MoE pipeline can now be summarized as:
+At this point, the architecture looks something like this:
+
+```bash
+                    Token representation
+                           |
+                         RMSNorm
+                           |
+                      Transformer
+                        Attention
+                           |
+                      MoE / FFN
+                           |
+                    +------+------+
+                    |             |
+                  Router       Experts
+                    |             |
+             score every      Expert 1
+               expert         Expert 2
+                    |          ...
+                 Top-K         Expert N
+                    |             |
+                    +------+------+
+                           |
+                    Weighted combine
+                           |
+                      Residual add
+                           |
+                         Output
+```
+
+And during training, we are optimizing more than just next-token prediction. A simplified objective is:
+
+$$
+\boxed{
+\mathcal{L}_{CE} + \alpha\mathcal{L}_{LB} + \beta\mathcal{L}_{Z}=
+\mathcal{L}_{LM} + \alpha\mathcal{L}_{\text{balance}} + \beta\mathcal{L}_{Z}
+}
+$$
+
+where:
+
+* $\mathcal{L}_{CE}$ teaches the model to predict the next token ($=\mathcal{L}_{LM}$)
+* $\mathcal{L}_{LB}$ encourages healthy expert utilization ($=\mathcal{L}_{\text{balance}}$)
+* $\mathcal{L}_{Z}$ keeps the router numerically stable
+
+Some modern architectures replace the explicit load-balancing loss with other routing strategies, such as DeepSeek-V3’s loss-free bias adjustment. So there is not one universal MoE recipe. There is a family of design decisions around:
+
+* number of experts
+* expert size
+* number of active experts
+* routing function
+* load balancing
+* capacity
+* communication
+* numerical stability
+* shared experts
+* hardware kernels
+
+That is what makes modern MoE systems much more interesting than the simple diagram suggests. The entire sparse MoE pipeline can now be summarised as:
 
 $$
 x
@@ -758,7 +905,7 @@ But making this work at scale requires solving several different problems:
 | Problem | Technique |
 |---|---|
 | Too many FFN parameters | Sparse expert activation |
-| Limited expert specialization | Fine-grained experts |
+| Limited expert specialisation | Fine-grained experts |
 | Common information repeated across experts | Shared experts |
 | Uneven token assignments | Capacity management |
 | Token dropping / padding | Dropless MoE |
@@ -771,17 +918,81 @@ The thing I find most interesting about MoE is that the main idea is actually ve
 
 > **Build a much larger network, but only use a small part of it for each token.**
 
-The difficult part is everything that comes afterward.
-
-The router has to learn where each token should go. The experts have to specialize without some of them becoming useless. The tokens have to be distributed across GPUs without creating communication bottlenecks. And the whole routing system has to remain numerically stable while the model is being trained.
-
-That is what makes modern MoE architectures more than simply "a bunch of FFNs with a router."
+The difficult part is everything that comes afterward. The router has to learn where each token should go. The experts have to specialise without some of them becoming useless. The tokens have to be distributed across GPUs without creating communication bottlenecks. And the whole routing system has to remain numerically stable while the model is being trained. That is what makes modern MoE architectures more than simply "a bunch of FFNs with a router."
 
 ---
 
-## Appendix
+## **The Bigger Picture**
 
-### Citation
+The thing I found most interesting about MoE is that it changes how we think about scaling neural networks.
+
+A dense model says:
+
+> “Make the whole network bigger, and every token pays for the bigger network.”
+
+An MoE model says:
+
+> “Make the network much bigger, but only activate the parts that matter for this token.”
+
+That gives us two different notions of model size:
+
+$$
+\boxed{\text{Total Parameters}}
+$$
+
+and:
+
+$$
+\boxed{\text{Active Parameters per Token}}
+$$
+
+Those numbers can be dramatically different. This distinction is now fundamental when comparing large MoE models. A model with 1T total parameters is not necessarily performing 1T parameters’ worth of computation for every token. Only a subset of those parameters may participate in a given forward pass. But there is an important caveat that is easy to miss:
+
+**Sparse compute does not mean sparse memory.**
+
+The expert weights still have to exist somewhere. During training and inference, the system has to store and distribute those parameters across devices. And the router has to move tokens to the devices that contain the selected experts. That introduces communication overhead, especially the all-to-all communication used in distributed MoE systems. So MoE does not magically make a trillion-parameter model equivalent to a tiny model. Instead, it changes the trade-off:
+
+$$
+\boxed{
+\text{more total capacity}
+\quad\text{vs.}\quad
+\text{roughly controlled active compute}
+}
+$$
+
+while introducing additional memory, communication, and systems complexity. That trade-off is the real reason MoE is powerful. One mental model I’ll keep i.e. the easiest way I’ve found to remember MoE is:
+
+- The FFN gives the model capacity.
+- The experts split that capacity into specialists.
+- The router decides which specialists a token needs.
+- Load balancing prevents the specialists from becoming unused or overloaded.
+- Router Z-loss keeps the routing mechanism numerically stable.
+- And underneath all of this, the hardware has to make the sparse computation actually efficient.
+
+So the architecture is really two problems intertwined:
+
+$$
+\boxed{
+\text{Machine Learning} + \text{Systems Engineering}
+}
+$$
+
+The _**machine learning problem**_ is:
+
+> How do we learn useful routing and specialization?
+
+The _**systems problem**_ is:
+
+> How do we execute that routing efficiently across accelerators?
+
+That combination is what makes Mixture of Experts such a powerful scaling strategy. And honestly, after working through it, the name makes a lot more sense. It really is a mixture of experts. The interesting part is deciding who gets called for each token.
+
+
+---
+
+## **Appendix**
+
+### **Citation**
 
 If you found this blog post helpful, please consider citing it:
 
@@ -796,7 +1007,9 @@ If you found this blog post helpful, please consider citing it:
 }
 ```
 
-### References
+
+
+### **References**
 
 [^1]: Jia-Bin Huang. [Mixture of Experts (MoE), Visually Explained](https://www.youtube.com/watch/0QQlYR1r6pQ). YouTube. Accessed August 2026.
 
@@ -806,4 +1019,4 @@ If you found this blog post helpful, please consider citing it:
 
 [^4]: DeepSeek-AI et al. [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437). arXiv, 2024.
 
-[^5]: DeepSeek-AI. [DeepSeek-V3 GitHub Repository](https://github.com/deepseek-ai/DeepSeek-V3). GitHub, 2024.
+[^5]: Muennighoff et al. [OLMoE: Open Mixture-of-Experts Language Models](https://arxiv.org/abs/2409.02060). arXiv, 2024.
