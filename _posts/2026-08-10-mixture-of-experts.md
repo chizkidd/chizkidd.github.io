@@ -962,7 +962,7 @@ $$
 }
 $$
 
-while introducing additional memory, communication, and systems complexity. That trade-off is the real reason MoE is powerful. The easiest way I’ve found to remember MoE is shown below:
+while introducing additional memory, communication, and systems complexity. That trade-off is the real reason MoE is powerful. The easiest way I’ve found to remember MoE is shown below.
 
 {% capture c %}
 - The **FFN** gives the model **capacity**.
@@ -972,7 +972,7 @@ while introducing additional memory, communication, and systems complexity. That
 - **Router Z-loss** keeps the routing mechanism **numerically stable**.
 - And underneath all of this, the **hardware has to make the sparse computation actually efficient**.
 {% endcapture %}
-{% include callout.html type="note" title="Key Takeaway" content=c %}
+{% include callout.html type="note" title="Key Takeaways" content=c %}
 
 So the architecture is really two problems intertwined:
 
