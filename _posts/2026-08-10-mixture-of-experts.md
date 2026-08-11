@@ -865,8 +865,8 @@ $$
 
 where:
 
-* $\mathcal{L}_{CE}$ teaches the model to predict the next token ($=\mathcal{L}_{LM}$)
-* $\mathcal{L}_{LB}$ encourages healthy expert utilization ($=\mathcal{L}_{\text{balance}}$)
+* $\mathcal{L}\_{CE}$ teaches the model to predict the next token ($=\mathcal{L}\_{LM}$)
+* $\mathcal{L}\_{LB}$ encourages healthy expert utilization ($=\mathcal{L}\_{\text{balance}}$)
 * $\mathcal{L}_{Z}$ keeps the router numerically stable
 
 Some modern architectures replace the explicit load-balancing loss with other routing strategies, such as DeepSeek-V3’s loss-free bias adjustment. So there is not one universal MoE recipe. There is a family of design decisions around:
