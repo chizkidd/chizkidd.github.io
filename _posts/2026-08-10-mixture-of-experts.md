@@ -950,7 +950,7 @@ $$
 
 Those numbers can be dramatically different. This distinction is now fundamental when comparing large MoE models. A model with 1T total parameters is not necessarily performing 1T parameters’ worth of computation for every token. Only a subset of those parameters may participate in a given forward pass. But there is an important caveat that is easy to miss:
 
-**Sparse compute does not mean sparse memory.**
+> **Sparse compute does not mean sparse memory.**
 
 The expert weights still have to exist somewhere. During training and inference, the system has to store and distribute those parameters across devices. And the router has to move tokens to the devices that contain the selected experts. That introduces communication overhead, especially the all-to-all communication used in distributed MoE systems. So MoE does not magically make a trillion-parameter model equivalent to a tiny model. Instead, it changes the trade-off:
 
