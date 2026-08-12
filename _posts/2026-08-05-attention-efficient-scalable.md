@@ -154,9 +154,9 @@ $$
 </div>
 
 
-><u>**MHA**</u>: each of head₁, head₂, head₃, head₄ has its own Q, K, V.<br>
-><u>**GQA**</u>: head₁ and head₂ share one K/V pair; head₃ and head₄ share another K/V pair.<br>
-><u>**MQA**</u>: head₁, head₂, head₃, head₄ all share a single K/V pair.
+>**<u>MHA</u>**: each of head₁, head₂, head₃, head₄ has its own Q, K, V.<br>
+><**<u>GQA</u**: head₁ and head₂ share one K/V pair; head₃ and head₄ share another K/V pair.<br>
+>**<u>MQA</u**: head₁, head₂, head₃, head₄ all share a single K/V pair.
 
 - GQA strikes a balance between the memory efficiency of MQA and the expressive power of MHA.
 - GQA is a popular choice in modern LLMs, including Llama 3 8B (Meta), Qwen 3 4B (Alibaba), Gemma 3 27B (Google), Mistral Small 3.1 24B (Mistral), SmolLM3 3B (Hugging Face), etc.
@@ -303,8 +303,8 @@ $$
   </figure>
 </div>
 
-> <u>**Regular (causal) self-attention mask:**</u> each token attends to all preceding tokens.<br>
-> <u>**Sliding Window Attention mask (window = 3):**</u> each token attends only to itself and the previous two tokens.
+> **<u>Regular (causal) self-attention mask:</u** each token attends to all preceding tokens.<br>
+> **<u>Sliding Window Attention mask (window = 3):</u** each token attends only to itself and the previous two tokens.
 
 ---
 
