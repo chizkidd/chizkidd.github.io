@@ -908,7 +908,7 @@ And during training, we are optimizing more than just next-token prediction. A s
 
 $$
 \boxed{
-\mathcal{L}_{\text{CE}} + \alpha\mathcal{L}_{\text{LB}} + \beta\mathcal{L}_{Z}
+\mathcal{L}_{\text{CE}} + \alpha\mathcal{L}_{\text{LB}} + \beta\mathcal{L}_{\text{Z}}
 }
 $$
 
