@@ -34,6 +34,8 @@ mathjax: true
 
 ## Self-Attention
 
+- See detailed notes on transformer and attention [here](https://chizkidd.github.io/2026/04/04/muon-muonclip/#multihead-latent-attention-mla).
+
 $$
 Q = XW_Q, \quad K = XW_K, \quad V = XW_V
 $$
@@ -69,7 +71,7 @@ $$
 \text{MHA} = \text{multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_1, \text{head}_2, \dots, \text{head}_H)W_O = Z
 $$
 
-OR
+$$\text{OR}$$
 
 $$
 \begin{aligned}
@@ -143,7 +145,7 @@ $$
     Multi-head attention (MHA) vs Grouped query attention (GQA)
   </h3>
   <figure style="margin: 0; padding: 0;">
-    <img src="https://substackcdn.com/image/fetch/$s_!h6wM!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F6f39923c-8357-487d-9e69-40ee18a902e8_2523x1248.png" alt="Multi-Head Attention and Group Query Attention" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <img src="https://substackcdn.com/image/fetch/$s_!h6wM!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F6f39923c-8357-487d-9e69-40ee18a902e8_2523x1248.png" alt="Multi-Head Attention vs Group Query Attention" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
       Figure 1: Multi-Head Attention vs Group Query Attention. 
       <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://magazine.sebastianraschka.com/p/visual-attention-variants?r=2u5avh&utm_medium=ios&triedRedirect=true" style="color: #666666; text-decoration: underline;">Sebastian Raschka</a>)</span>
@@ -152,9 +154,9 @@ $$
 </div>
 
 
->**MHA**: each of head₁, head₂, head₃, head₄ has its own Q, K, V.<br>
->**GQA**: head₁ and head₂ share one K/V pair; head₃ and head₄ share another K/V pair.<br>
->**MQA**: head₁, head₂, head₃, head₄ all share a single K/V pair.
+><u>**MHA**</u>: each of head₁, head₂, head₃, head₄ has its own Q, K, V.<br>
+><u>**GQA**</u>: head₁ and head₂ share one K/V pair; head₃ and head₄ share another K/V pair.<br>
+><u>**MQA**</u>: head₁, head₂, head₃, head₄ all share a single K/V pair.
 
 - GQA strikes a balance between the memory efficiency of MQA and the expressive power of MHA.
 - GQA is a popular choice in modern LLMs, including Llama 3 8B (Meta), Qwen 3 4B (Alibaba), Gemma 3 27B (Google), Mistral Small 3.1 24B (Mistral), SmolLM3 3B (Hugging Face), etc.
@@ -293,7 +295,6 @@ $$
   <!-- Figure and Image Container -->
   <figure style="margin: 0; padding: 0;">
     <img src="https://substackcdn.com/image/fetch/$s_!edFZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48a9cd31-24a5-47d9-ae37-506763ebc67d_1292x704.png" alt="Causal Self Attention and Sliding Window Attention" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
-    
     <!-- Captions with Light-Muted Source Styling -->
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
       Figure 3: Causal Self Attention vs Sliding Window Attention (Window = 3). 
@@ -302,8 +303,8 @@ $$
   </figure>
 </div>
 
-- Regular (causal) self-attention mask: each token attends to all preceding tokens.
-- Sliding Window Attention mask (window = 2): each token attends only to itself and the previous two tokens.
+> <u>**Regular (causal) self-attention mask:**</u> each token attends to all preceding tokens.<br>
+> <u>**Sliding Window Attention mask (window = 3):**</u> each token attends only to itself and the previous two tokens.
 
 ---
 

@@ -30,6 +30,19 @@ $$\text{(En) "I am sorry"} \xrightarrow{\text{Encoder}} \xrightarrow{\text{Decod
 
 ---
 
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <h3 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #1a1a1a;">
+    Transformer architecture
+  </h3>
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://machinelearningmastery.com/wp-content/uploads/2025/05/Full_Transformer-704x1024.png" alt="Transformer architecture from the paper “Attention is All You Need”" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Transformer architecture
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://arxiv.org/abs/1706.03762" style="color: #666666; text-decoration: underline;">Attention is all you need</a>)</span>
+    </figcaption>
+  </figure>
+</div>
+
 ## Input Text Sequence Representation
 
 ![encoder-decoder](/assets/images/2026/transformers/enc-dec.png)

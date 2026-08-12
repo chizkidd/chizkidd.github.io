@@ -53,6 +53,19 @@ A Transformer layer typically alternates between an **attention mechanism** and 
 
 > "Which other tokens should this token pay attention to?"
 
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <h3 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #1a1a1a;">
+    The decoder-only transformer architecture. 
+  </h3>
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://substackcdn.com/image/fetch/$s_!_Ipr!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F9540283e-b4bc-4c3f-943c-5df959b1733b_1656x818.png" alt="The decoder-only transformer architecture" style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 1: The decoder-only transformer architecture. 
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://cameronrwolfe.substack.com/p/moe-llms" style="color: #666666; text-decoration: underline;">Cameron R. Wolfe</a>)</span>
+    </figcaption>
+  </figure>
+</div>
+
 The FFN is different. It operates independently on each token after attention has produced its contextual representation. A simplified Transformer block looks roughly like:
 
 $$
@@ -190,7 +203,7 @@ And there is another observation: **A token does not need every feature in the F
 
 For example, a token about chemistry probably does not need every feature that might be useful for programming, mathematics, or another language. So instead of making one enormous FFN that processes every token, we can divide the FFN into multiple smaller networks. Each one becomes an **expert**. The model can then choose which experts should process each token. This is the central idea behind a sparse **Mixture of Experts (MoE)**. 
 
-Let’s visualize it:
+<!-- Let’s visualize it:
 
 ```bash
 
@@ -207,7 +220,17 @@ Let’s visualize it:
                    Combine
                       |
                     Output
-```
+``` -->
+
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://towardsdatascience.com/wp-content/uploads/2021/01/13DyfyeNt_Z8IUaktSp0RJQ-768x386.png" alt="Mixture of Experts (MoE) routing in a Switch Transformer encoder block." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 2: Mixture of Experts (MoE) routing in a Switch Transformer encoder block. The standard dense feed-forward network (FFN) layer is replaced by a sparse Switch FFN layer (light blue) that processes sequence tokens independently. As illustrated, a router independently directs two tokens (x₁ = “More”, x₂ = “Parameters”) via solid lines to specific FFN experts across 4 FFN experts. The final layer output (dotted line) is the selected FFN's response multiplied by its router gate value.
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://arxiv.org/abs/2101.03961" style="color: #666666; text-decoration: underline;">William Fedus, Barret Zoph, Noam Shazeer 2022 [^6]</a>)</span>
+    </figcaption>
+  </figure>
+</div>
 
 The crucial part is that we do not run every expert. The router selects only a small number of experts for each token. If we have 64 experts but activate only 8 for a token, then the model can contain a lot more total parameters than a dense model with roughly the same amount of computation per token. A simplified MoE layer can be written as:
 
@@ -246,6 +269,16 @@ Each expert is itself an FFN. Instead of evaluating all $N$ experts for every to
 > **Total parameters** and **active parameters** are no longer the same thing.
 
 A model can therefore have a very large parameter count without requiring every token to use the entire model.
+
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://emergentmind-storage-cdn-c7atfsgud9cecchk.z01.azurefd.net/ai-images/03157e12b0f6f9932938ab69125bb2aa.webp" alt="Sparse Mixture-of-Experts Overview." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 3: Sparse Mixture-of-Experts (s-MoE) overview. Core mechanism, motivation, training challenge and solution.
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://www.emergentmind.com/topics/sparse-mixture-of-experts-s-moe" style="color: #666666; text-decoration: underline;">Emergent Mind</a>)</span>
+    </figcaption>
+  </figure>
+</div>
 
 ### **The Router**
 
@@ -417,12 +450,11 @@ Expert 7:  1 tokens
 Expert 8:  1 tokens
 ```
 
-Now the first expert has received more tokens than it can process in both cases. This creates **token overflow**. Some experts are overloaded while others are sitting idle in the first case. And in a distributed system, experts may live on different GPUs. So routing is not merely a modeling decision, but also a systems problem. Historically, one way to deal with this was to give every expert a fixed capacity.
+Now the first expert has received more tokens than it can process in both cases. This creates **token overflow**. Some experts are overloaded while others are sitting idle in the first case. And in a distributed system, experts may live on different GPUs. So routing is not merely a modeling decision, but also a systems problem. Historically, one way to deal with this is to give every expert a fixed batch size. This allows us to define the **expert capacity**, which is the maximum number of tokens in a batch that can be routed to each expert. Expert capacity allows more buffer to help mitigate token overflow during routing [^6]. 
 
-For example:
 
 $$
-C =
+\text{expert capacity} =
 \text{capacity factor}
 \times
 \frac{T}{N}
@@ -430,12 +462,21 @@ $$
 
 where:
 
-* $T$ = number of tokens
+* $T$ = number of total tokens per batch
 * $N$ = number of experts
 
-If an expert receives more tokens than its capacity, something has to happen. One option is to drop the excess tokens. The token essentially skips the MoE computation and continues through the residual pathway. That avoids exceeding the allocated compute and memory budget, but now some tokens are not getting the expert computation the model intended.
 
-Another traditional solution is to increase the expert's capacity. But then we have the opposite problem. We can calculate the expert capacity as: _**total tokens in a batch / number of experts**_. For example, a capacity factor of $1.5$ would increase the available capacity above the ideal balanced allocation in the second case. But larger capacity means:
+<div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
+  <figure style="margin: 0; padding: 0;">
+    <img src="https://substackcdn.com/image/fetch/$s_!vE2b!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F417c5fc8-2524-48e1-a9ef-460b4476d323_1784x1184.png" alt="Illustration of token routing dynamics." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
+      Figure 4:  Illustration of token routing dynamics.
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://www.emergentmind.com/topics/sparse-mixture-of-experts-s-moe" style="color: #666666; text-decoration: underline;">William Fedus, Barret Zoph, Noam Shazeer 2022  [^6]</a>)</span>
+    </figcaption>
+  </figure>
+</div>
+
+If an expert receives more tokens than its capacity, something has to happen. One option is to drop the excess tokens. The token essentially skips the MoE computation and continues through the residual pathway. That avoids exceeding the allocated compute and memory budget, but now some tokens are not getting the expert computation the model intended. Another traditional solution is to increase the expert's capacity. But then we have the opposite problem. For example, a capacity factor of $1.5$ would increase the available capacity above the ideal balanced allocation in the second case as shown above, but larger capacity means:
 
 - more memory,
 - more computation,
@@ -539,32 +580,31 @@ The noise encourages exploration. Instead of always selecting the same experts, 
 
 ### **Importance vs Load**
 
-There are two slightly different things we can measure.
+Given N experts indexed by $i = 1 \text{ to } N$ and a batch $B$ with $T$ tokens, there are two slightly different things we can measure.
 
 #### **Importance**
 
-We can measure how much routing probability an expert receives. For expert $i$, the importance is:
+We can measure how much routing probability an expert receives. For expert $i$, the importance $I_i$ is:
 
 $$
-I_i =
-\sum_x p_i(x)
+I_i = \sum_{x \in B} p_i(x)
 $$
 
-$$
-P_i =
-\frac{1}{T} I_i
-$$
 
 An expert can therefore have high importance even if it is not selected very often.
 
 #### **Load**
 
-Instead, we can count how many tokens are actually routed/assigned to the expert $i$:
+Instead, we can count how many tokens are actually routed/assigned to the expert $i$. For expert $i$, the load $L_i$ is:
 
 $$
-L_i =
-\sum_x
-\mathbf{1}[i\in S(x)]
+L_i = \sum_{x \in B} \mathbb{1}[i\in S(x)]
+$$
+
+
+$$
+\text{where }
+S(x) = \text{TopK}(p(x),k)
 $$
 
 This measures actual expert usage. These two quantities ($L_i, I_i$) are not necessarily the same. For example, the router might give eight experts reasonably balanced probabilities while repeatedly selecting only four of them through top-$k$ routing. Therefore, balancing probabilities alone does not guarantee balanced computation. Unfortunately, the number of tokens received by each expert is a **discrete quantity** that cannot be used directly for backpropagation. Instead, we can define a **smooth estimator** for the number of examples assigned to each expert in the batch. The smoothness enables gradients to flow through the estimator, making it possible to apply backpropagation.
@@ -573,21 +613,30 @@ This measures actual expert usage. These two quantities ($L_i, I_i$) are not nec
 
 ### **Load Balancing Loss**
 
-A commonly used formulation combines the fraction of tokens routed to each expert with the average routing probability assigned to that expert:
+A commonly used loss formulation combines the fraction of tokens routed to each expert with the average routing probability assigned to that expert. Mathematically, the load balancing loss is:
+
 
 $$
-\mathcal{L}_{\text{balance}} = N
+P_i =
+\frac{1}{T} I_i,
+\qquad
+f_i =
+\frac{1}{T} L_i
+$$
+
+$$
+\mathcal{L}_{\text{LB}} = N
 \sum_{i=1}^{N}
-f_i p_i
+f_i P_i
 $$
 
 where:
 
 - $f_i$ is the fraction of tokens routed to expert $i$.
-- $p_i$ is the average router probability assigned to expert $i$.
+- $P_i$ is the average router probability assigned to expert $i$.
 - $N$ is the number of experts.
 
-The factor $N$ keeps the scale of the loss comparable as the number of experts changes. Essentially, it keeps the scale of the loss from shrinking simply because we increased the number of experts. Under perfectly uniform routing where $f_i = p_i = \frac{1}{N}$, the scaling factor $N$ cancels out the splitting effect of the cross-expert summation:
+The factor $N$ keeps the scale of the loss comparable as the number of experts changes. Essentially, it keeps the scale of the loss from shrinking simply because we increased the number of experts. Under perfectly uniform routing where $f_i = P_i = \frac{1}{N}$, the scaling factor $N$ cancels out the splitting effect of the cross-expert summation:
 
 <!--
 $$
@@ -599,7 +648,7 @@ $$
 
 
 $$
-N \sum_{i=1}^{N} f_i p_i = 
+N \sum_{i=1}^{N} f_i P_i = 
 N \sum_{i=1}^{N} \left( \frac{1}{N} \cdot \frac{1}{N} \right) =
 N \sum_{i=1}^{N} \frac{1}{N^2} = N \cdot \frac{N}{N^2} = 1
 $$  
@@ -613,15 +662,15 @@ A common approach is to add an auxiliary load balancing loss to the language mod
 
 $$
 \mathcal{L} =
-\mathcal{L}_{\text{LM}}
+\mathcal{L}_{\text{CE}}
 +
-\alpha \mathcal{L}_{\text{balance}}
+\alpha \mathcal{L}_{\text{LB}}
 $$
 
 where:
 
-- $\mathcal{L}_{\text{LM}}$ is the normal next-token prediction loss.
-- $\mathcal{L}_{\text{balance}}$ encourages more uniform expert usage.
+- $\mathcal{L}_{\text{CE}}$ is the normal next-token prediction loss (cross-entropy loss).
+- $\mathcal{L}_{\text{LB}}$ encourages more uniform expert usage (load-balancing loss).
 - $\alpha$ is a hyperparameter that controls the influence of the load balancing loss during training. It controls how strongly the balancing objective affects training.
 
 
@@ -654,8 +703,7 @@ From experimental results, we see that a clear advantage of using load balancing
 ---
 
 ### **Device-Level Load Balancing**
-
-In a real distributed MoE model, experts are often spread across different GPUs. This introduces another problem. Even if the **experts** are balanced globally, the **devices** might not be. For example:
+In a real distributed MoE model, experts are often spread across different GPUs. This introduces another problem, a systems problem. Even if the **experts** are balanced globally, the **devices** might not be. For example:
 
 $$
 \boxed{
@@ -860,16 +908,15 @@ And during training, we are optimizing more than just next-token prediction. A s
 
 $$
 \boxed{
-\mathcal{L}_{CE} + \alpha\mathcal{L}_{LB} + \beta\mathcal{L}_{Z}=
-\mathcal{L}_{LM} + \alpha\mathcal{L}_{\text{balance}} + \beta\mathcal{L}_{Z}
+\mathcal{L}_{\text{CE}} + \alpha\mathcal{L}_{\text{LB}} + \beta\mathcal{L}_{Z}
 }
 $$
 
 where:
 
-* $\mathcal{L}\_{CE}$ teaches the model to predict the next token ($=\mathcal{L}\_{LM}$)
-* $\mathcal{L}\_{LB}$ encourages healthy expert utilization ($=\mathcal{L}\_{\text{balance}}$)
-* $\mathcal{L}_{Z}$ keeps the router numerically stable
+* $\mathcal{L}\_{\text{CE}}$ teaches the model to predict the next token 
+* $\mathcal{L}\_{\text{LB}}$ encourages healthy expert utilization
+* $\mathcal{L}_{\text{Z}}$ keeps the router numerically stable
 
 Some modern architectures replace the explicit load-balancing loss with other routing strategies, such as DeepSeek-V3’s loss-free bias adjustment. So there is not one universal MoE recipe. There is a family of design decisions around:
 
@@ -1025,3 +1072,6 @@ If you found this blog post helpful, please consider citing it:
 [^4]: DeepSeek-AI et al. [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437). arXiv, 2024.
 
 [^5]: Muennighoff et al. [OLMoE: Open Mixture-of-Experts Language Models](https://arxiv.org/abs/2409.02060). arXiv, 2024.
+
+[^6]: William Fedus et al. [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). arXiv, 2021.
+
