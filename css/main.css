@@ -618,3 +618,28 @@ a:visited { color: #205caa; }
   display: block;
   margin: 1.5em auto;
 }
+
+/* Scroll to top button */
+#scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background-color: #333;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  opacity: 0.85;
+}
+
+#scroll-to-top:hover {
+  opacity: 1;
+  background-color: #555;
+}
