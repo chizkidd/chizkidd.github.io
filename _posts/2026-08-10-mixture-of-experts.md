@@ -1092,5 +1092,7 @@ If you found this blog post helpful, please consider citing it:
 
 <!-- https://cameronrwolfe.substack.com/p/moe-llms 
 
-https://substack.com/@maartengrootendorst/p-148217245-->
+https://substack.com/@maartengrootendorst/p-148217245
+
+https://open.substack.com/pub/maartengrootendorst/p/a-visual-guide-to-mixture-of-experts?utm_campaign=post&utm_medium=web-->
 
