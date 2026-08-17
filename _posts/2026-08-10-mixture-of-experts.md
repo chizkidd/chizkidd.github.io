@@ -1090,5 +1090,7 @@ If you found this blog post helpful, please consider citing it:
 
 [^6]: William Fedus et al. [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). arXiv, 2021.
 
-<!-- https://cameronrwolfe.substack.com/p/moe-llms -->
+<!-- https://cameronrwolfe.substack.com/p/moe-llms 
+
+https://substack.com/@maartengrootendorst/p-148217245-->
 
