@@ -227,7 +227,7 @@ For example, a token about chemistry probably does not need every feature that m
     <img src="https://towardsdatascience.com/wp-content/uploads/2021/01/13DyfyeNt_Z8IUaktSp0RJQ-768x386.png" alt="Mixture of Experts (MoE) routing in a Switch Transformer encoder block." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
       Figure 2: Mixture of Experts (MoE) routing in a Switch Transformer encoder block. The standard dense feed-forward network (FFN) layer is replaced by a sparse Switch FFN layer (light blue) that processes sequence tokens independently. As illustrated, a router independently directs two tokens (x₁ = “More”, x₂ = “Parameters”) via solid lines to specific FFN experts across 4 FFN experts. The final layer output (dotted line) is the selected FFN's response multiplied by its router gate value.
-      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://arxiv.org/abs/2101.03961" style="color: #666666; text-decoration: underline;">William Fedus, Barret Zoph, Noam Shazeer, 2022 [^6]</a>)</span>
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://arxiv.org/abs/2101.03961" style="color: #666666; text-decoration: underline;">William Fedus, Barret Zoph, Noam Shazeer, 2022</a>)</span>
     </figcaption>
   </figure>
 </div>
@@ -270,12 +270,16 @@ Each expert is itself an FFN. Instead of evaluating all $N$ experts for every to
 
 A model can therefore have a very large parameter count without requiring every token to use the entire model.
 
+<!-- https://emergentmind-storage-cdn-c7atfsgud9cecchk.z01.azurefd.net/ai-images/03157e12b0f6f9932938ab69125bb2aa.webp 
+
+https://www.emergentmind.com/topics/sparse-mixture-of-experts-s-moe-->
+
 <div style="text-align: center; margin-bottom: 24px; break-inside: avoid; display: inline-block; width: 100%;">
   <figure style="margin: 0; padding: 0;">
-    <img src="https://emergentmind-storage-cdn-c7atfsgud9cecchk.z01.azurefd.net/ai-images/03157e12b0f6f9932938ab69125bb2aa.webp" alt="Sparse Mixture-of-Experts Overview." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
+    <img src="/assets/images/2026/moe/sparse-MoE-transparent-background.png" alt="Sparse Mixture-of-Experts Overview." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
       Figure 3: Sparse Mixture-of-Experts (s-MoE) overview. Core mechanism, motivation, training challenge and solution.
-      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://www.emergentmind.com/topics/sparse-mixture-of-experts-s-moe" style="color: #666666; text-decoration: underline;">Emergent Mind</a>)</span>
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://www.emergentmind.com/topics/sparse-mixture-of-experts-moe" style="color: #666666; text-decoration: underline;">Emergent Mind</a>)</span>
     </figcaption>
   </figure>
 </div>
@@ -427,7 +431,7 @@ The shared component handles more general information, while the routed experts 
     <img src="https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/moe-memory/3.webp?1" alt="DeepSeekMoE architecture illustration showing conventional top-2 routing, fine-grained expert segmentation, and shared expert isolation" style="max-width: 100%; width: 500px; height: auto; display: block; margin: 0 auto 12px;">
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
       Figure 4: Illustration of DeepSeekMoE. Subfigure (a) showcases an MoE layer with the conventional top-2 routing strategy. Subfigure (b) illustrates the fine-grained expert segmentation strategy. Subsequently, subfigure (c) demonstrates the integration of the shared expert isolation strategy, constituting the complete DeepSeekMoE architecture. It is noteworthy that across these three architectures, the number of expert parameters and computational costs remain constant.
-      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://arxiv.org/abs/2401.06066" style="color: #666666; text-decoration: underline;">Damai Dai et al., 2024 [^2]</a>)</span>
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://arxiv.org/abs/2401.06066" style="color: #666666; text-decoration: underline;">Damai Dai et al., 2024</a>)</span>
     </figcaption>
   </figure>
 </div>
@@ -482,7 +486,7 @@ where:
     <img src="https://substackcdn.com/image/fetch/$s_!vE2b!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F417c5fc8-2524-48e1-a9ef-460b4476d323_1784x1184.png" alt="Illustration of token routing dynamics." style="max-width: 100%; width: 450px; height: auto; display: block; margin: 0 auto 12px;">
     <figcaption style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #666666; line-height: 1.4; max-width: 500px; margin: 0 auto; text-align: center;">
       Figure 5:  Illustration of token routing dynamics.
-      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://www.emergentmind.com/topics/sparse-mixture-of-experts-s-moe" style="color: #666666; text-decoration: underline;">William Fedus, Barret Zoph, Noam Shazeer, 2022  [^6]</a>)</span>
+      <span style="color: #999999; font-size: 0.8rem;">(Source: <a href="https://www.emergentmind.com/topics/sparse-mixture-of-experts-s-moe" style="color: #666666; text-decoration: underline;">William Fedus, Barret Zoph, Noam Shazeer, 2022</a>)</span>
     </figcaption>
   </figure>
 </div>
