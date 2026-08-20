@@ -1,4 +1,4 @@
-/* Base */
+ /* Base */
 /* ----------------------------------------------------------*/
 
 * {
@@ -106,18 +106,65 @@ a:visited { color: #205caa; }
   z-index: 1;
 }
 
-/* NEW: dark mode toggle, crescent-shaped via box-shadow cutout */
+/* NEW: theme toggle — dark crescent in light mode, light sun in dark mode */
 #theme-toggle {
   float: left;
   width: 20px;
   height: 20px;
   margin: 18px 0 0 8px;
+  padding: 0;
   border: none;
-  background-color: var(--text);
+  background: transparent;
   cursor: pointer;
+  position: relative;
+}
+
+/* Light mode: dark crescent (base disc + inset cutout) */
+#theme-toggle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  box-shadow: -8px -2px 0 0 var(--bg);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--text);
+  box-shadow: inset -8px -2px 0 0 var(--bg);
+  transition: all 0.2s ease;
+}
+
+/* Ray dots, hidden in light mode */
+#theme-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  display: none;
+}
+
+/* Dark mode: shrink disc, drop the cutout, show rays */
+html[data-theme="dark"] #theme-toggle::before {
+  top: 4px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
+  box-shadow: none;
+}
+
+html[data-theme="dark"] #theme-toggle::after {
+  display: block;
+  box-shadow:
+    0 -9px 0 -1.2px var(--text),
+    0 9px 0 -1.2px var(--text),
+    -9px 0 0 -1.2px var(--text),
+    9px 0 0 -1.2px var(--text),
+    6.5px -6.5px 0 -1.2px var(--text),
+    -6.5px -6.5px 0 -1.2px var(--text),
+    6.5px 6.5px 0 -1.2px var(--text),
+    -6.5px 6.5px 0 -1.2px var(--text);
 }
 
 /* UPDATED: Hamburger menu aligned with content, not fixed */
