@@ -108,24 +108,20 @@ a:visited { color: #205caa; }
 
 /* NEW: dark mode toggle, crescent-shaped via box-shadow */
 #theme-toggle {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 10px;
+  float: left;
+  width: 20px;
+  height: 20px;
+  margin: 18px 0 0 8px;
   border: none;
   background: transparent;
   cursor: pointer;
   border-radius: 50%;
-  box-shadow: 6px -1px 0 0 var(--text);
-  transform: scale(0.75);
+  box-shadow: 8px -2px 0 0 var(--text);
   transition: box-shadow 0.2s ease;
-  vertical-align: middle;
-  position: relative;
-  top: -2px;
 }
 
 html[data-theme="dark"] #theme-toggle {
-  box-shadow: 9px -1px 0 0 var(--text);
+  box-shadow: 11px -2px 0 0 var(--text);
 }
 
 /* UPDATED: Hamburger menu aligned with content, not fixed */
