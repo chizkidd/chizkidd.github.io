@@ -652,7 +652,7 @@ P_i =
 \qquad
 f_i =
 \frac{1}{T} L_i =
-= \frac{1}{T} \sum_{x \in B} \mathbb{1}[i \in S(x)]
+\frac{1}{T} \sum_{x \in B} \mathbb{1}[i \in S(x)]
 $$
 
 $$
