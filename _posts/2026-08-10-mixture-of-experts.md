@@ -87,6 +87,14 @@ $$
 For a single token embedding $x$, a simplified FFN can be written as:
 
 $$
+\begin{aligned} 
+z &= xW_{\text{up}} + b_{\text{up}} \\ 
+a &= \sigma(z) \\ 
+y &= aW_{\text{down}} + b_{\text{down}} 
+\end{aligned}
+$$ 
+
+<!-- $$
 z = xW_{\text{up}} + b_{\text{up}}
 $$
 
@@ -96,7 +104,7 @@ $$
 
 $$
 y = aW_{\text{down}} + b_{\text{down}}
-$$
+$$ -->
 
 where:
 
@@ -151,12 +159,12 @@ The second projection maps the activated features back into the model dimension.
 
 > The FFN can be thought of as a large collection of learned feature detectors that activate different pieces of stored information depending on the input.
 
-This interpretation is useful for understanding why increasing the FFN hidden dimension can improve model capacity. But there is a catch.
+This interpretation is useful for understanding why increasing the FFN hidden dimension can improve model capacity. 
 
 
 ### **Why make the FFN bigger?**
 
-Now suppose we want a more capable model. One obvious option is to increase $d_h$, the hidden dimension of the FFN. More hidden dimensions means more learned features and more capacity. But there is a catch. If we make the FFN four times larger, eight times larger, or even more, we also increase the amount of computation performed for **every token**. A dense model has to use the same FFN for every token. That means the computational cost grows roughly with the total size of the network. This gives us a frustrating trade-off:
+Now suppose we want a more capable model. One obvious option is to increase $d_h$, the hidden dimension of the FFN. More hidden dimensions means more learned features and more capacity. However, if we make the FFN four times larger, eight times larger, or even more, we also increase the amount of computation performed for **every token**. A dense model has to use the same FFN for every token. That means the computational cost grows roughly with the total size of the network. This gives us a frustrating trade-off:
 
 $$
 \boxed{
@@ -306,9 +314,11 @@ $$
 
 Each value in $h(x)$ is the router's score, or **logit**, for one expert. We can turn these logits into probabilities using softmax:
 
-$$
+$$p_i(x) = \frac{\exp(h(x)_i)} {\sum_{j=1}^{N}\exp(h(x)_j)}$$ 
+
+<!-- $$
 p_i(x) = \frac{\exp(h_i(x))} {\sum_{j=1}^{N}\exp(h_j(x))}
-$$
+$$ -->
 
 <!--
 $$
@@ -586,9 +596,13 @@ Eventually, some experts may receive very few tokens. These underused experts be
 
 One early approach is to add **Gaussian noise** to the router logits:
 
-$$
+$$h(x) = xW_g$$ 
+
+$$h'(x)_i = h(x)_i + \epsilon \cdot \text{Softplus}\big((xW_{\text{noise}})_i\big) \quad \text{where } \epsilon \sim \mathcal{N}(0, 1)$$ 
+
+<!-- $$
 h'_i(x)=h_i(x)+\epsilon_i
-$$
+$$ -->
 
 The noise encourages exploration. Instead of always selecting the same experts, the router occasionally explores other experts, giving them opportunities to receive tokens and learn. The router selects a more diverse set of experts and prevents the same experts from always being chosen. We can further improve this by adding a tunable scaling factor for each expert. This is called **noisy top-K gating**. This idea appears in noisy top-$k$ gating approaches to MoE routing [^3]. But exploration alone is not enough. We still need an explicit mechanism to encourage balanced expert utilisation.
 
@@ -633,10 +647,12 @@ A commonly used loss formulation combines the fraction of tokens routed to each 
 
 $$
 P_i =
-\frac{1}{T} I_i,
+\frac{1}{T} I_i =
+\frac{1}{T} \sum_{x \in B} p_i(x),
 \qquad
 f_i =
-\frac{1}{T} L_i
+\frac{1}{T} L_i =
+= \frac{1}{T} \sum_{x \in B} \mathbb{1}[i \in S(x)]
 $$
 
 $$
@@ -795,7 +811,7 @@ The idea is roughly:
 Mathematically:
 
 $$
-h'_i(x)=h_i(x)+b_i
+h'(x)_i = h(x)_i + b_i
 $$
 
 where $b_i$ is a dynamically updated expert-specific bias.
@@ -816,11 +832,13 @@ Essentially, the key detail is that this bias is used for **routing selection**,
 
 Load balancing is not the only issue with the router. Recall that the router begins with logits $h(x)$ and converts them to probabilities using softmax:
 
-$$
+$$p_i(x) = \frac{e^{h(x)_i}}{\sum_{j=1}^{N} e^{h(x)_j}}$$ 
+
+<!-- $$
 p_i =
 \frac{e^{h_i(x)}}
 {\sum_j e^{h_j(x)}}
-$$
+$$ -->
 
 An interesting property of softmax is that it is **shift invariant**. For any constant $c$:
 
@@ -850,11 +868,13 @@ produce exactly the same softmax distribution. The model therefore has no incent
 
 A standard numerical trick is to subtract the maximum logit before exponentiation:
 
-$$
+$$p_i(x) = \text{Softmax}(h)_i = \frac{e^{h(x)_i - \max(h(x))}}{\sum_{j=1}^{N} e^{h(x)_j - \max(h(x))}}$$ 
+
+<!-- $$
 \text{Softmax}(h)_i =
 \frac{e^{h_i-\max(h)}}
 {\sum_j e^{h_j-\max(h)}}
-$$
+$$ -->
 
 This prevents excessively large exponentials from overflowing. However, it only treats the numerical symptom. The underlying logits can still drift to extremely large values. Using safe softmax is like wearing a seat belt while driving. It does provide important protections, but it does not mean we should press the accelerator recklessly and allow the logits to grow without constraints.
 
@@ -872,12 +892,10 @@ We square the log normalizer to penalize both positive and negative shifts and a
 
 $$
 \mathcal{L}_Z =
-\frac{1}{B}
-\sum_{x}
+\frac{1}{T}
+\sum_{x \in B}
 Z(x)^2
 $$
-
-where $B$ is the batch size.
 
 The logarithm prevents the regularisation term from growing exponentially, while the squared term penalises large positive or negative shifts (large values of the log-normalizer). The router Z-loss keeps the logits centered and prevents them from drifting to arbitrarily large values, ensuring training stability is crucial for reliable scaling of mixture of experts to larger and more powerful models. The intuition is:
 
