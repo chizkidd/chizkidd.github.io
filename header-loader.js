@@ -58,8 +58,8 @@
                 </div>
                 <div id="nav-trigger" style="display: none; position: absolute; right: 0; top: 45px; background: white; border: 1px solid #e8e8e8; border-radius: 5px; min-width: 160px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; flex-direction: column;">
                     <a href="https://chizkidd.github.io/about/">About</a>
+                    <a href="https://chizkidd.github.io/courses/">Courses</a>
                     <a href="https://chizkidd.github.io/projects/">Projects</a>
-                    <a href="https://chizkidd.github.io/games/">Games</a>
                 </div>
             </nav>
         </div>

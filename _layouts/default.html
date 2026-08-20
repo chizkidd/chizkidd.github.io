@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html>
-
   {% include head.html %}
 
-    <body>
+  <body>
 
-    {% include header.html %} 
+    <script>
+      (function () {
+        var stored = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', stored || (prefersDark ? 'dark' : 'light'));
+      })();
+    </script>
+
+    {% include header.html %}
 
     <div class="page-content">
       <div class="wrap">
-      {{ content }}
+        {{ content }}
       </div>
     </div>
 
@@ -18,5 +25,7 @@
     {% include scroll-to-top.html %}
 
     <script src="{{ '/scroll-to-top.js' | relative_url }}"></script>
-    </body>
+    <script src="{{ '/dark-mode.js' | relative_url }}"></script>
+
+  </body>
 </html>

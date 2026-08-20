@@ -8,12 +8,35 @@
 
 html, body { height: 100%; }
 
+/* Theme variables (NEW) */
+:root {
+  --bg: #fdfdfd;
+  --bg-content: #fff;
+  --text: #333;
+  --text-body: #000;
+  --border: #e8e8e8;
+  --code-bg: #eef;
+  --code-border: #d5d5e9;
+}
+
+html[data-theme="dark"] {
+  --bg: #15171a;
+  --bg-content: #1c1e22;
+  --text: #e4e4e4;
+  --text-body: #d0d0d0;
+  --border: #333;
+  --code-bg: #23262b;
+  --code-border: #3a3d42;
+}
+
 body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   font-weight: 300;
-  background-color: #fdfdfd;
+  background-color: var(--bg); /* CHANGED: was #fdfdfd */
+  color: var(--text-body); /* NEW */
+  transition: background-color 0.2s ease, color 0.2s ease; /* NEW */
 
   /* GRID STICKY FOOTER */
   display: grid;
@@ -65,22 +88,44 @@ a:visited { color: #205caa; }
 
 .site-header {
   border-top: 5px solid #333;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--border); /* CHANGED: was #e8e8e8 */
   min-height: 56px;
-  background-color: white;
+  background-color: var(--bg); /* CHANGED: was white */
 }
 
 .site-title,
 .site-title:hover,
 .site-title:visited {
   display: block;
-  color: #333;
+  color: var(--text); /* CHANGED: was #333 */
   font-size: 26px;
   letter-spacing: -1px;
   float: left;
   line-height: 56px;
   position: relative;
   z-index: 1;
+}
+
+/* NEW: dark mode toggle, crescent-shaped via box-shadow */
+#theme-toggle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 6px -1px 0 0 var(--text);
+  transform: scale(0.75);
+  transition: box-shadow 0.2s ease;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+}
+
+html[data-theme="dark"] #theme-toggle {
+  box-shadow: 9px -1px 0 0 var(--text);
 }
 
 /* UPDATED: Hamburger menu aligned with content, not fixed */
@@ -110,8 +155,8 @@ a:visited { color: #205caa; }
 .site-nav .trigger {
   clear: both;
   display: none;
-  background-color: white;
-  border: 1px solid #e8e8e8;
+  background-color: var(--bg-content); /* CHANGED: was white */
+  border: 1px solid var(--border); /* CHANGED: was #e8e8e8 */
   border-radius: 5px;
   padding: 5px 0;
   margin-top: 5px;
@@ -138,7 +183,7 @@ a:visited { color: #205caa; }
 /* Site footer */
 
 .site-footer {
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--border); /* CHANGED: was #e8e8e8 */
   padding: 30px 0;
 }
 
@@ -199,7 +244,7 @@ a:visited { color: #205caa; }
 
 .page-content {
   padding: 30px 0;
-  background-color: #fff;
+  background-color: var(--bg-content); /* CHANGED: was #fff */
 }
 
 
@@ -208,7 +253,7 @@ a:visited { color: #205caa; }
 
 /* NEW STYLE: Matches the "Chizoba Obasi blog" header */
 .header-matched-heading {
-    color: #333;
+    color: var(--text); /* CHANGED: was #333 */
     font-size: 32px; /* Increased for better impact */
     letter-spacing: -1.2px; /* Slightly tighter for larger text */
     font-weight: 400;
@@ -268,7 +313,7 @@ a:visited { color: #205caa; }
 
 .posts-heading {
     /* NEW: Match the size, weight, and alignment of the header title */
-    color: #333; /* Use the same text color as the site title */
+    color: var(--text); /* CHANGED: was #333 */
     font-size: 26px; /* Match the size of the site title */
     letter-spacing: -1px; /* Match the site title */
     font-weight: 400; /* Match the general h1-h6 weight */
@@ -287,7 +332,7 @@ a:visited { color: #205caa; }
 
 .games-heading {
     /* NEW: Match the size, weight, and alignment of the header title */
-    color: #333; /* Use the same text color as the site title */
+    color: var(--text); /* CHANGED: was #333 */
     font-size: 26px; /* Match the size of the site title */
     letter-spacing: -1px; /* Match the site title */
     font-weight: 400; /* Match the general h1-h6 weight */
@@ -387,8 +432,8 @@ a:visited { color: #205caa; }
 
 .post pre,
 .post code {
-  border: 1px solid #d5d5e9;
-  background-color: #eef;
+  border: 1px solid var(--code-border); /* CHANGED: was #d5d5e9 */
+  background-color: var(--code-bg); /* CHANGED: was #eef */
   padding: 8px 12px;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -610,6 +655,16 @@ a:visited { color: #205caa; }
 
 .callout--danger { border-left-color: #dc2626; }
 .callout--danger .callout__title { background-color: #fee2e2; color: #991b1b; }
+
+/* Dark mode overrides */
+html[data-theme="dark"] .callout {
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .callout--important .callout__title { background-color: #14532d; color: #bbf7d0; }
+html[data-theme="dark"] .callout--note .callout__title { background-color: #1e3a5f; color: #bfdbfe; }
+html[data-theme="dark"] .callout--warning .callout__title { background-color: #78350f; color: #fed7aa; }
+html[data-theme="dark"] .callout--danger .callout__title { background-color: #7f1d1d; color: #fecaca; }
 
 /* Post images */
 .post-content img {
