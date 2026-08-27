@@ -303,8 +303,8 @@ $$
   </figure>
 </div>
 
-> **<u>Regular (causal) self-attention mask:</u** each token attends to all preceding tokens.<br>
-> **<u>Sliding Window Attention mask (window = 3):</u** each token attends only to itself and the previous two tokens.
+>**<u>Regular (causal) self-attention mask:</u>** each token attends to all preceding tokens.<br>
+>**<u>Sliding Window Attention mask (window = 3):</u>** each token attends only to itself and the previous two tokens.
 
 ---
 
