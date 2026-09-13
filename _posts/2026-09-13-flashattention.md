@@ -17,7 +17,7 @@ The mechanism, in three words: **Tiling + Online Softmax + Recomputation**. Ever
 
 ### 0.1 How to Read This Handbook
 
-Before the fix, here is what the standard attention implementation looks like. Load $Q, K, V \in \mathbb{R}^{N \times d}$ in HBM, then:
+This [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358). Before the fix, here is what the standard attention implementation looks like. Load $Q, K, V \in \mathbb{R}^{N \times d}$ in HBM, then:
 
 1. Read $Q, K$ from HBM, compute $S$, write $S$ to HBM.
 2. Read $S$ from HBM, compute $P$, write $P$ to HBM.
