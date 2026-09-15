@@ -7,7 +7,7 @@ date: 2026-09-13
 mathjax: true
 ---
 
-## 0. Introduction
+# 0. Introduction
 
 **How IO-Aware Attention Makes Transformers Faster Without Approximating Attention**
 
@@ -17,7 +17,7 @@ This [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyV
 > A technical handbook on exact tiled attention: GPU memory traffic, online softmax, forward and backward passes, IO complexity, the evolution from FlashAttention-1 through FlashAttention-4, and current framework behavior.
 
 
-### 0.1 Standard Naive Attention Implementation
+## 0.1 Standard Naive Attention Implementation
 
 Before the fix, here is what the standard attention implementation looks like. Load $Q, K, V \in \mathbb{R}^{N \times d}$ in HBM, then:
 
@@ -26,7 +26,7 @@ Before the fix, here is what the standard attention implementation looks like. L
 3. Read $P, V$ by blocks from HBM, compute $O$, write $O$ to HBM.
 4. Return $O$.
 
-### 0.2 How to Read This Handbook
+## 0.2 How to Read This Handbook
 
 What stands out to me is the number of round trips to HBM in naive standard attention. Every intermediate value $(S$, $P$, $O)$ has to be written out and read back. That is the problem FlashAttention is solving.
 The handbook itself frames the subject as easiest to understand when three different questions are kept separate:
@@ -43,7 +43,7 @@ The central lesson I take from this framing is that wall-clock speed is not dete
 
 The word *exact* is doing real work here. Exactness is a statement about the mathematical function, not about bitwise reproducibility. The kernel is free to reorder floating-point operations. It is not free to change the function being computed.
 
-### 0.3 Notation
+## 0.3 Notation
 
 For one attention head, let
 
@@ -77,7 +77,7 @@ The practical difference I keep coming back to:
 
 That question, not the arithmetic, is what FlashAttention was built to answer.
 
-## Contents
+## Table of Contents
 
 ### Part 1: The Fundamental Problem
 - [1.1 What FlashAttention actually optimizes](#111-what-flashattention-actually-optimizes)
@@ -136,9 +136,9 @@ That question, not the arithmetic, is what FlashAttention was built to answer.
 
 ---
 
-## Part 1: The Fundamental Problem
+# Part 1: The Fundamental Problem
 
-### 1.1 What FlashAttention Actually Optimizes
+## 1.1 What FlashAttention Actually Optimizes
 
 Start with the ordinary attention function:
 
@@ -148,7 +148,7 @@ $$
 
 FlashAttention is **IO-aware**. My working definition:
 
-- Minimize data movement between the different levels of GPU memory, rather than just trying to reduce the number of mathematical operations (FLOPs).
+- **Minimize data movement between the different levels of GPU memory, rather than just trying to reduce the number of mathematical operations (FLOPs).
 
 - The speed bottleneck in modern AI hardware is often not how fast the GPU can compute math, but how fast it can **read and write data**. This is the memory-compute tradeoff.
 
@@ -165,7 +165,7 @@ This distinction is why "FlashAttention is a faster kind of attention" can be mi
 
 The original paper contrasts this approach with approximate attention methods that reduce arithmetic by changing the mathematical problem. Dense FlashAttention does not make that trade. The same paper also introduced a block-sparse extension, but that sparse extension is a different case because omitting blocks changes which interactions are computed.
 
-### 1.2 The Attention Equation Is Not the Implementation
+## 1.2 The Attention Equation Is Not the Implementation
 
 The equation does not tell you where tensors live.
 
@@ -199,7 +199,7 @@ FlashAttention reuses the same dependencies. Blocks of $Q$, $K$, and $V$ are bro
 
 This idea generalizes beyond attention. Fused kernels, tiling, recomputation, and operator scheduling often trade a small amount of extra arithmetic for much less movement of large intermediates. On modern accelerators, that can be the right trade because matrix-multiply throughput has grown much faster than many other parts of the memory and execution hierarchy. FlashAttention-3 and -4 make that hardware dependence increasingly explicit.
 
-### 1.3 GPU Memory Hierarchy and Why IO Matters
+## 1.3 GPU Memory Hierarchy and Why IO Matters
 
 GPUs expose a hierarchy rather than one uniform pool of equally fast memory. The names and capacities vary by architecture, but the mental model is:
 
@@ -240,7 +240,7 @@ So one loaded $Q\_i$ can participate in lots of computation. This is called **re
 
 > Do not turn this into a universal slogan that attention is always "memory-bound." The bottleneck depends on sequence length, head dimension, dtype, mask pattern, GPU generation, forward vs. backward, and which kernel is running. FA3 and FA4 exist partly because, as hardware changed, the dominant bottlenecks changed too.
 
-### 1.4 Why Materializing $S$ and $P$ Is Expensive
+## 1.4 Why Materializing $S$ and $P$ Is Expensive
 
 The quadratic intermediate becomes concrete very quickly. Suppose a batch contains one sequence, with 32 attention heads, sequence length $N = 8192$, and a two-byte dtype such as FP16 or BF16. One dense tensor with shape
 
@@ -290,7 +290,7 @@ FlashAttention avoids storing the full matrix in HBM. It forms score tiles, appl
 
 This is also why the memory benefit is especially important during training, where naive autograd would otherwise want large intermediates for the backward pass.
 
-### 1.5 Dense Arithmetic Is Still Quadratic
+## 1.5 Dense Arithmetic Is Still Quadratic
 
 FlashAttention changes the memory schedule, not the mathematical function. The function is still dense attention. That means:
 
@@ -318,7 +318,7 @@ My side-by-side summary:
 | Full attention intermediates | Avoid $\mathcal{O}(N^2)$ storage |
 | HBM traffic | Reduced substantially |
 
-### 1.6 Memory-Efficient Exact Attention Predates FlashAttention
+## 1.6 Memory-Efficient Exact Attention Predates FlashAttention
 
 It would be historically inaccurate to say FlashAttention first discovered that exact attention can avoid quadratic memory.
 
@@ -356,9 +356,9 @@ This distinction matters because "memory-efficient" does not automatically mean 
 
 ---
 
-## Part 2: The Mathematical Trick
+# Part 2: The Mathematical Trick
 
-### 2.1 Tiling Queries, Keys, and Values
+## 2.1 Tiling Queries, Keys, and Values
 
 **Most important.** This is the section where the trick lives.
 
@@ -423,7 +423,7 @@ Actual kernels choose tile shapes and loop order based on on-chip capacity, head
 
 That is the key mathematical trick in the next chapters.
 
-### 2.2 Softmax Is the Difficult Part of Streaming
+## 2.2 Softmax Is the Difficult Part of Streaming
 
 A numerically stable softmax for one row $x\_1, \ldots, x\_N$ uses
 
@@ -509,7 +509,7 @@ $$
 
 and the combined numerator is $[\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}]$, matching the full softmax computed in one shot.
 
-### 2.3 Online Softmax from First Principles
+## 2.3 Online Softmax from First Principles
 
 Process scalar logits $x\_1, x\_2, \ldots$ one at a time. Initialize
 
@@ -565,7 +565,7 @@ The same idea works row by row and block by block, which is what makes a tiled e
 
 **Mathematical insight II.** We do not need the entire probability vector. We only need enough information to reconstruct its contribution to the final output.
 
-### 2.4 The Blockwise Merge Recurrence
+## 2.4 The Blockwise Merge Recurrence
 
 For one query row, suppose the running state after some key blocks is
 
@@ -629,7 +629,7 @@ FlashAttention's published algorithms express equivalent running-max / running-n
 
 **This recurrence is the heart of tiled exact attention.**
 
-### 2.5 A Complete Numerical Example
+## 2.5 A Complete Numerical Example
 
 Consider one already-scaled, unmasked attention row
 
