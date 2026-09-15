@@ -965,7 +965,7 @@ One reason FlashAttention and activation checkpointing can coexist: both trade r
 
 ### 3.5 Causal Masking and Tile Skipping
 
-Consider autoregressive attention. Token $i$ cannot attend to future token $j > i$.
+Consider autoregressive attention. Query token $i$ cannot attend to future key token $j > i$.
 
 The attention matrix looks like
 
