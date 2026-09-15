@@ -903,7 +903,7 @@ $$
 
 HBM accesses under the specified regime.
 
-The exact theorem has assumptions, so do not interpret this as "FlashAttention always moves exactly this many bytes." It is an asymptotic result for a particular memory model.
+The exact theorem has assumptions, so do not interpret this as "FlashAttention always moves exactly this many bytes." It is an asymptotic result for a particular memory model that is **communication-complexity bound.**
 
 **Why does larger SRAM help?** Suppose you have more on-chip memory. You can fit larger tiles. Larger tiles mean:
 
@@ -937,7 +937,13 @@ A naive attention implementation may create $\mathcal{O}(N^2)$ attention interme
 - row-wise $\ell$
 - output accumulator $a$
 
-The auxiliary attention state scales roughly linearly with sequence length, but linear memory is not linear computation. The computation is still
+The auxiliary attention memory is
+
+$$
+\mathcal{O}(Nd).
+$$
+
+For a fixed head dimension $d$, the auxiliary attention state scales linearly with sequence length $N$, but linear memory is not linear computation. The computation is still
 
 $$
 \mathcal{O}(N^2 d).
