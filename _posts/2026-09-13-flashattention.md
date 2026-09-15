@@ -11,26 +11,31 @@ mathjax: true
 
 **How IO-Aware Attention Makes Transformers Faster Without Approximating Attention**
 
-The mechanism, in three words: **Tiling + Online Softmax + Recomputation**. Everything in this handbook is elaboration on that summary.
+
+This [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358). The mechanism, in three words: **Tiling + Online Softmax + Recomputation**. Everything in this handbook is elaboration on that summary.
 
 > A technical handbook on exact tiled attention: GPU memory traffic, online softmax, forward and backward passes, IO complexity, the evolution from FlashAttention-1 through FlashAttention-4, and current framework behavior.
 
-### 0.1 How to Read This Handbook
 
-This [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358). Before the fix, here is what the standard attention implementation looks like. Load $Q, K, V \in \mathbb{R}^{N \times d}$ in HBM, then:
+### 0.1 Standard Naive Attention Implementation
+
+Before the fix, here is what the standard attention implementation looks like. Load $Q, K, V \in \mathbb{R}^{N \times d}$ in HBM, then:
 
 1. Read $Q, K$ from HBM, compute $S$, write $S$ to HBM.
 2. Read $S$ from HBM, compute $P$, write $P$ to HBM.
 3. Read $P, V$ by blocks from HBM, compute $O$, write $O$ to HBM.
 4. Return $O$.
 
-What stands out to me is the number of round trips to HBM. Every intermediate value — $S$, $P$, $O$ — has to be written out and read back. That is the problem FlashAttention is solving.
+### 0.2 How to Read This Handbook
 
+What stands out to me is the number of round trips to HBM in naive standard attention. Every intermediate value $(S$, $P$, $O)$ has to be written out and read back. That is the problem FlashAttention is solving.
 The handbook itself frames the subject as easiest to understand when three different questions are kept separate:
 
-> 1. What mathematical function is being computed? For dense attention, the target remains ordinary scaled dot-product attention.
-> 2. How much arithmetic does that function require? Dense all-pairs query-key scoring remains quadratic in sequence length.
-> 3. How does the implementation move data through the GPU memory hierarchy? This is where FlashAttention changes the algorithmic execution dramatically.
+> 1. **What mathematical function is being computed?** For dense attention, the target remains ordinary scaled dot-product attention.
+>
+> 2. **How much arithmetic does that function require?** Dense all-pairs query-key scoring remains quadratic in sequence length.
+>
+> 3. **How does the implementation move data through the GPU memory hierarchy?** This is where FlashAttention changes the algorithmic execution dramatically.
 
 The central lesson I take from this framing is that wall-clock speed is not determined by FLOP count alone. An algorithm can perform essentially the same mathematical work, or even recompute intermediate values, and still run faster because it moves far less data to and from high-bandwidth memory.
 
@@ -38,7 +43,7 @@ The central lesson I take from this framing is that wall-clock speed is not dete
 
 The word *exact* is doing real work here. Exactness is a statement about the mathematical function, not about bitwise reproducibility. The kernel is free to reorder floating-point operations. It is not free to change the function being computed.
 
-### 0.2 Notation
+### 0.3 Notation
 
 For one attention head, let
 
@@ -55,10 +60,10 @@ $$
 where $B$ represents an optional additive mask or bias, and
 
 $$
-P = \mathrm{softmax}\_{\mathrm{row}}(S), \quad O = PV.
+P = \mathrm{softmax}_{\mathrm{row}}(S), \quad O = PV.\
 $$
 
-Throughout, HBM refers to large off-chip high-bandwidth GPU memory. On-chip memory is a broad teaching term for much smaller, faster storage such as registers and shared memory/SRAM. Exact hardware details vary by GPU generation.
+Throughout, **HBM** refers to large off-chip high-bandwidth GPU memory. **On-chip memory** is a broad teaching term for much smaller, faster storage such as registers and shared memory/**SRAM.** Exact hardware details vary by GPU generation.
 
 The practical difference I keep coming back to:
 
@@ -68,9 +73,9 @@ The practical difference I keep coming back to:
 | large | smaller |
 | off-chip | on-chip |
 
-**System problem:** where do all those intermediate values $(S, P, O)$ live while the GPU computes them?
+>**System problem:** Where do all those intermediate values $(S, P, O)$ live while the GPU computes them?
 
-That question — not the arithmetic — is what FlashAttention was built to answer.
+That question, not the arithmetic, is what FlashAttention was built to answer.
 
 ## Contents
 
@@ -143,9 +148,9 @@ $$
 
 FlashAttention is **IO-aware**. My working definition:
 
-Minimize data movement between the different levels of GPU memory, rather than just trying to reduce the number of mathematical operations (FLOPs).
+- Minimize data movement between the different levels of GPU memory, rather than just trying to reduce the number of mathematical operations (FLOPs).
 
-The speed bottleneck in modern AI hardware is often not how fast the GPU can compute math, but how fast it can **read and write data**. This is the memory-compute tradeoff.
+- The speed bottleneck in modern AI hardware is often not how fast the GPU can compute math, but how fast it can **read and write data**. This is the memory-compute tradeoff.
 
 A textbook implementation often makes this look like three large operations:
 
@@ -154,7 +159,6 @@ A textbook implementation often makes this look like three large operations:
 FlashAttention's central contribution is to make the algorithm IO-aware. It partitions the computation into tiles that fit in fast on-chip memory, streams blocks of $K$ and $V$, and maintains enough row-wise softmax state to produce the exact output without materializing the full $N \times N$ attention matrix in HBM.
 
 > **What changes:** the execution schedule, memory traffic, and stored intermediates.
->
 > **What does not change:** the dense scaled-dot-product attention function being evaluated.
 
 This distinction is why "FlashAttention is a faster kind of attention" can be misleading. It is better thought of as an algorithm and kernel family for evaluating attention efficiently on accelerators. A model can use causal masking, RoPE, MQA/GQA, or other attention features and still use a FlashAttention implementation underneath.
