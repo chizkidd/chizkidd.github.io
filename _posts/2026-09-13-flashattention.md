@@ -21,10 +21,13 @@ The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg
 
 In this blog post, we're covering the fundamental problem FlashAttention-1 (FA1) tackles, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
+## **Appendix**
+- [References](#references)
+- [Citation](#citation)
 
 ---
 
-# Table of Contents
+## Table of Contents
 
 [0. Introduction](#0-introduction)
 <!-- - [0.1 Standard Naive Attention Implementation](#0-introduction) -->
@@ -88,9 +91,9 @@ In this blog post, we're covering the fundamental problem FlashAttention-1 (FA1)
 
 ---
 
-# 0. Introduction
+## 0. Introduction
 
-## 0.1 How to Read This Handbook
+### 0.1 How to Read This Handbook
 
 What stands out to me is the number of round trips to HBM in naive standard attention. Every intermediate value $(S$, $P$, $O)$ has to be written out and read back. That is the problem FlashAttention is solving.
 The handbook itself frames the subject as easiest to understand when three different questions are kept separate:
@@ -107,7 +110,7 @@ The lesson I keep coming back to here: FLOP count alone doesn't decide wall-cloc
 
 The word *exact* is doing real work here. Exactness is a statement about the mathematical function, not about bitwise reproducibility. The kernel is free to reorder floating-point operations. It is not free to change the function being computed.
 
-## 0.2 Notation
+### 0.2 Notation
 
 For one attention head, let
 
@@ -141,9 +144,9 @@ The practical difference I keep coming back to:
 
 That question, not the arithmetic, is what FlashAttention was built to answer.
 
-# 1. The Fundamental Problem
+## 1. The Fundamental Problem
 
-## 1.1 What FlashAttention Actually Optimizes
+### 1.1 What FlashAttention Actually Optimizes
 
 Start with the ordinary attention function:
 
@@ -196,7 +199,7 @@ This framing matters, because calling FlashAttention "a faster kind of attention
 The original paper draws a line between this and approximate attention methods, which cut arithmetic by changing the math itself. Dense FlashAttention doesn't do that. It keeps the math intact. The block-sparse extension from the same paper is a different story, since skipping blocks literally changes which query-key interactions get computed.
 
 
-## 1.2 The Attention Equation Is Not the Implementation
+### 1.2 The Attention Equation Is Not the Implementation
 
 The equation does not tell you where tensors live. Let's look at a **standard naive attention implementation**:
 
@@ -232,7 +235,7 @@ FlashAttention's move is simple: keep the work close. Blocks of $Q$, $K$, and $V
 
 The pattern isn't unique to attention. **Fused kernels, tiling, recomputation, operator scheduling**; they all do the same thing. Spend a little extra arithmetic to avoid dragging huge intermediates through memory. On modern hardware, that's usually a winning bet. Matmul throughput has raced ahead of the rest of the memory hierarchy, so the math is cheap and the data movement is what hurts. FlashAttention-3 (FA3) and FlashAttention-4 (FA4) take this further, and they're upfront about it: the algorithm bends to the hardware, not the other way around. 
 
-## 1.3 GPU Memory Hierarchy and Why IO Matters
+### 1.3 GPU Memory Hierarchy and Why IO Matters
 
 GPUs expose a hierarchy rather than one uniform pool of equally fast memory. The names and capacities vary by architecture, but the mental model is:
 
@@ -294,7 +297,7 @@ This does not mean attention is "always memory bound." FA3 and FA4 exist partly 
 - Which kernel is running
 
 
-## 1.4 Why Materializing $S$ and $P$ Is Expensive
+### 1.4 Why Materializing $S$ and $P$ Is Expensive
 
 The quadratic intermediate becomes concrete very quickly. Suppose a batch contains one sequence, with 32 attention heads, sequence length $N = 8192$, and a two-byte dtype such as FP16 or BF16. Concretely, my arithmetic:
 
@@ -374,7 +377,7 @@ This matters most during training, where naive autograd would want those large i
 
 **Important distinction:** FlashAttention acknowledges that $N^2$ interactions exist and says: *Do not store the entire result of these interactions as a giant intermediate if we can consume each piece immediately.*
 
-## 1.5 Dense Arithmetic Is Still Quadratic
+### 1.5 Dense Arithmetic Is Still Quadratic
 
 FlashAttention changes the memory schedule, not the math. The function itself is still dense attention. That means forming all query-key scores for $N$ tokens with head dimension $d$ still costs work proportional to $N^2 d$. There's no way around that.
 
@@ -400,7 +403,7 @@ Essentially, the key takeaways are summarized below:
 | Full attention intermediates | Avoid $\mathcal{O}(N^2)$ storage |
 | HBM traffic | Reduced substantially |
 
-## 1.6 Memory-Efficient Exact Attention Predates FlashAttention
+### 1.6 Memory-Efficient Exact Attention Predates FlashAttention
 
 It would be historically inaccurate to say FlashAttention first discovered that exact attention can avoid quadratic memory.
 
@@ -435,9 +438,9 @@ FlashAttention's key contribution was to bring together the techniques below int
 
 ---
 
-# 2. The Mathematical Trick
+## 2. The Mathematical Trick
 
-## 2.1 Tiling Queries, Keys, and Values
+### 2.1 Tiling Queries, Keys, and Values
 
 **Most important.** This is the section where the trick lives. 
  >The score tile $S\_{ij}$ is small enough to be processed near the compute units. Its contribution is folded into running row statistics and an output accumulator, then the tile can be discarded.
@@ -486,7 +489,7 @@ FlashAttention's key contribution was to bring together the techniques below int
 
 That is the key mathematical trick in the next chapters.
 
-## 2.2 Softmax Is the Difficult Part of Streaming
+### 2.2 Softmax Is the Difficult Part of Streaming
 
 A numerically stable softmax for one row $x\_1, \ldots, x\_N$ uses
 
@@ -572,7 +575,7 @@ $$
 
 and the combined numerator is $[\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}]$, matching the full softmax computed in one shot.
 
-## 2.3 Online Softmax from First Principles
+### 2.3 Online Softmax from First Principles
 
 Process scalar logits $x\_1, x\_2, \ldots$ one at a time. Initialize
 
@@ -628,7 +631,7 @@ The same idea works row by row and block by block, which is what makes a tiled e
 
 **Mathematical insight II.** We do not need the entire probability vector. We only need enough information to reconstruct its contribution to the final output.
 
-## 2.4 The Blockwise Merge Recurrence
+### 2.4 The Blockwise Merge Recurrence
 
 For one query row, suppose the running state after some key blocks is
 
@@ -692,7 +695,7 @@ FlashAttention's published algorithms express equivalent running-max / running-n
 
 **This recurrence is the heart of tiled exact attention.**
 
-## 2.5 A Complete Numerical Example
+### 2.5 A Complete Numerical Example
 
 Consider one already-scaled, unmasked attention row
 
@@ -800,9 +803,9 @@ $$
 
 ---
 
-# 3. Putting the Mathematics onto the GPU
+## 3. Putting the Mathematics onto the GPU
 
-## 3.1 FlashAttention Forward Pass
+### 3.1 FlashAttention Forward Pass
 
 A useful conceptual forward pass is:
 
@@ -886,7 +889,7 @@ My step list for the forward pass:
 9. Move to the next $K, V$ tile until every tile is completed/covered.
 10. Normalize the accumulator row-wise $O = a / \ell$, then write $O$.
 
-## 3.2 Why Dense FlashAttention Is Exact
+### 3.2 Why Dense FlashAttention Is Exact
 
 Does FlashAttention approximate attention? For dense FlashAttention, **no**. The target remains
 
@@ -946,7 +949,7 @@ Three caveats keep the word *exact* precise:
 
 This distinction matters when evaluating numerical tests. A sensible tolerance depends on dtype, accumulation order, sequence length, and backend rather than requiring binary identity.
 
-## 3.3 IO Complexity: What the Theorem Actually Says
+### 3.3 IO Complexity: What the Theorem Actually Says
 
 Let me get more theoretical.
 
@@ -993,7 +996,7 @@ Several details matter:
 
 Intuitively, more usable on-chip memory lets larger working tiles stay resident and be reused for more attention work before data must be reloaded from HBM. In the theorem's regime, that increased reuse is why the HBM-access bound decreases as $M$ grows.
 
-## 3.4 Memory Complexity: Linear Auxiliary State, Not Linear Compute
+### 3.4 Memory Complexity: Linear Auxiliary State, Not Linear Compute
 
 Another important distinction: linear auxiliary state is not linear compute.
 
@@ -1036,7 +1039,7 @@ Also avoid claiming that total model memory is $O(N)$. Other Transformer compone
 
 One reason FlashAttention and activation checkpointing can coexist: both trade recomputation for reduced stored state, but at different scopes of the training graph.
 
-## 3.5 Causal Masking and Tile Skipping
+### 3.5 Causal Masking and Tile Skipping
 
 Consider autoregressive attention. Query token $i$ cannot attend to future key token $j > i$.
 
@@ -1094,7 +1097,7 @@ This avoids computing many invalid tiles in a causal kernel. FlashAttention-2 ex
 
 > Local/sliding-window attention can similarly skip tiles outside the permitted window. But once the model intentionally restricts which pairs are attended, the *model's attention pattern* is sparse/local. FlashAttention can be the kernel used to execute that pattern, but it is no longer the same mathematical problem as unrestricted dense attention.
 
-## 3.6 Backward Pass: Recompute Instead of Save
+### 3.6 Backward Pass: Recompute Instead of Save
 
 This is vital for training.
 
@@ -1181,7 +1184,7 @@ with appropriate masking.
 
 This is the **memory-compute tradeoff** applied to the backward pass.
 
-## 3.7 Why More FLOPs Can Still Be Faster
+### 3.7 Why More FLOPs Can Still Be Faster
 
 This is one of the biggest lessons from FlashAttention.
 
@@ -1222,9 +1225,9 @@ This is the systems lesson that makes FlashAttention important beyond attention 
 
 ---
 
-# 4. Architectural Compatibility
+## 4. Architectural Compatibility
 
-## 4.1 MHA, MQA, and GQA Compatibility (Shared K/V Heads)
+### 4.1 MHA, MQA, and GQA Compatibility (Shared K/V Heads)
 
 FlashAttention is not tied to standard MHA.
 
@@ -1267,7 +1270,7 @@ $$
 
 > Current PyTorch SDPA also exposes `enable_gqa`. Its documentation labels GQA support experimental and imposes backend- and tensor-shape constraints, so production code should follow the exact version's documentation rather than assuming universal fused-kernel support.
 
-## 4.2 Variable Lengths, Local Attention, and Dropout
+### 4.2 Variable Lengths, Local Attention, and Dropout
 
 Real systems aren't always: same sequence length + dense attention + no dropout.
 
@@ -1315,7 +1318,7 @@ PyTorch issue: `scaled_dot_product_attention` applies dropout according to the s
 
 ## Appendix: Source Section Mapping
 
-| Source § | Hierarchical |
+<!-- | Source § | Hierarchical |
 |---|---|
 | 1-6 | 1.1-1.6 |
 | 7-11 | 2.1-2.5 |
@@ -1325,5 +1328,49 @@ PyTorch issue: `scaled_dot_product_attention` applies dropout according to the s
 | 31-32 | 6.1-6.2 |
 | 33-34 | 7.1-7.2 |
 | 35 | 8.1 |
-| 36-37 | 9.1-9.2 |
+| 36-37 | 9.1-9.2 | -->
 
+### **References**
+
+[^1]: Ashish Vaswani et al. [Attention Is All You Need](https://arxiv.org/abs/1706.03762). NeurIPS 2017.
+
+[^2]: Maxim Milakov and Natalia Gimelshein. [Online normalizer calculation for softmax](https://arxiv.org/abs/1805.02867). arXiv, 2018.
+
+[^3]: Markus N. Rabe and Charles Staats. [Self-attention Does Not Need O(n²) Memory](https://arxiv.org/abs/2112.05682). arXiv, 2021.
+
+[^4]: Tri Dao et al. [FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness](https://arxiv.org/abs/2205.14135). NeurIPS 2022.
+
+[^5]: Tri Dao. [FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning](https://arxiv.org/abs/2307.08691). ICLR 2024.
+
+[^6]: Jay Shah et al. [FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision](https://arxiv.org/abs/2407.08608). NeurIPS 2024.
+
+[^7]: Ted Zadouri et al. [FlashAttention-4: Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling](https://arxiv.org/abs/2603.05451). arXiv, 2026.
+
+[^8]: Dao-AILab. [flash-attention official repository and current implementation documentation](https://github.com/Dao-AILab/flash-attention). GitHub. Accessed September 2026.
+
+[^9]: PyPI. [flash-attn-4 package metadata and release history](https://pypi.org/project/flash-attn-4/). PyPI. Accessed September 2026.
+
+[^10]: PyTorch. [torch.nn.functional.scaled_dot_product_attention documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html). PyTorch Documentation. Accessed September 2026.
+
+[^11]: PyTorch. [torch.nn.attention.sdpa_kernel documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.attention.sdpa_kernel.html). PyTorch Documentation. Accessed September 2026.
+
+[^12]: PyTorch. [torch.nn.attention module and FlashAttention implementation registration APIs](https://docs.pytorch.org/docs/stable/nn.attention.html). PyTorch Documentation. Accessed September 2026.
+
+[^13]: PyTorch. [Reproducibility documentation, including scaled-dot-product attention backend differences](https://docs.pytorch.org/docs/stable/notes/randomness.html). PyTorch Documentation. Accessed September 2026.
+
+[^14]: Woosuk Kwon et al. [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180). SOSP 2023.
+
+### **Citation**
+
+If you found this blog post helpful, please consider citing it:
+
+```bibtex
+@article{obasi2026understandingFlashAttention,
+  title   = "Understanding FlashAttention: Personal Notes",
+  author  = "Obasi, Chizoba",
+  journal = "chizkidd.github.io",
+  year    = "2026",
+  month   = "Sep",
+  url     = "https://chizkidd.github.io/2026/09/11/understanding-flashattention/"
+}
+```
