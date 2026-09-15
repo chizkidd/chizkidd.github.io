@@ -21,13 +21,9 @@ The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg
 
 In this blog post, we're covering the fundamental problem FlashAttention-1 (FA1) tackles, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
-## **Appendix**
-- [References](#references)
-- [Citation](#citation)
-
 ---
 
-## Table of Contents
+## **Table of Contents**
 
 [0. Introduction](#0-introduction)
 <!-- - [0.1 Standard Naive Attention Implementation](#0-introduction) -->
@@ -88,6 +84,11 @@ In this blog post, we're covering the fundamental problem FlashAttention-1 (FA1)
 [9 Practical Engineering](#9-practical-engineering)
 - [9.1 Common implementation mistakes](#91-common-implementation-mistakes)
 - [9.2 Common misconceptions and the practical mental model](#92-common-misconceptions-and-the-practical-mental-model)
+
+
+## **Appendix**
+- [References](#references)
+- [Citation](#citation)
 
 ---
 
