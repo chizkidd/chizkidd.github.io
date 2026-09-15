@@ -1043,7 +1043,9 @@ During the forward pass, we do not save the entire $P$ matrix ($N \times N$). We
    - d) Discard the tile
 2. This trades more computation for less memory traffic/storage.
 
-Conceptually: forward: don't store $P$. Backward: recompute $P$ tile-by-tile.
+**Conceptually:**
+- Forward: don't store $P$.
+- Backward: recompute $P$ tile-by-tile.
 
 The gradient rehashing for $P$:
 
@@ -1059,6 +1061,9 @@ $$
 dS = P \odot (dP - D\_i[:, \text{None}])
 $$
 
+Where $D\_i[:, \text{None}]$ is the column/vector broadcast across each row.
+
+
 and then:
 
 $$
@@ -1069,13 +1074,7 @@ $$
 dK \mathrel{+}= dS^T \cdot Q / \sqrt{d}
 $$
 
-with appropriate masking. Where
-
-$$
-D\_i[:, \text{None}] = \sum\_j P\_{ij}\, dP\_{ij}
-$$
-
-is the column/vector broadcast across each row.
+with appropriate masking. 
 
 > A naive training implementation can save $P = \mathrm{softmax}(S)$ for backward. FlashAttention avoids keeping that $N^2$ tensor in HBM. Instead, it stores compact row-wise normalization information and recomputes score/probability tiles when gradients are needed.
 >
