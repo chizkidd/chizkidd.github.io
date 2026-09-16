@@ -517,7 +517,7 @@ The new block is then evaluated against the same $m\_{\text{new}}$.
 None of this is an approximation. It's just the identity
 
 $$
-e^{x_j - m_{\text{old}}}\, e^{m_{\text{old}} - m_{\text{new}}} = e^{x_j - m_{\text{new}}}.
+e^{x - m_{\text{old}}}\, e^{m_{\text{old}} - m_{\text{new}}} = e^{x - m_{\text{new}}}.
 $$
 
 >**Mathematical insight.** The running maximum is a change of numerical reference point. When that reference changes, previously accumulated exponentials can be rescaled exactly in real arithmetic rather than recomputed from scratch.
@@ -583,99 +583,51 @@ $$
 
 This matches the full softmax computed in one shot.
 
-<!-- **Worked example 2.** <br>Now stream two blocks. Let Block 1 $= [2, 1]$ and Block 2 $= [4, 3]$. After Block 1, $m\_{\text{old}} = 2$. Block 1 is evaluated at $m\_{\text{old}}$ as $[e^{0}, e^{-1}]$. When Block 2 arrives with $m\_b = 4$,
-
-$$
-m_{\text{new}} = \max(2, 4) = 4, \qquad \alpha = e^{2 - 4} = e^{-2}.
-$$
-
-Rescaling Block 1 under the new reference:
-
-$$
-[\alpha e^{0}, \; \alpha e^{-1}] = [e^{-2}, \; e^{-3}].
-$$
-
-Block 2 at the new reference:
-
-$$
-[e^{4 - 4}, \; e^{3 - 4}] = [e^{0}, \; e^{-1}].
-$$
-
-Putting it all together, with $x = [2, 1, 4, 3]$:
-
-$$
-\mathrm{softmax}(x) = \frac{[e^{-2}, \; e^{-3}, \; e^{0}, \; e^{-1}]}{e^{-2} + e^{-3} + e^{0} + e^{-1}}.
-$$
-
-The streaming computation for Block 1 is
-
-$$
-\ell = \sum\_j e^{x\_j - m} = e^{0} + e^{-1} = 1 + e^{-1},
-$$
-
-giving normalized outputs $[e^{0}, e^{-1}] / (1 + e^{-1})$. For Block 2, the running normalizer is
-
-$$
-\ell\_{\text{new}} = \alpha\, \ell\_{\text{old}} + \sum\_{j \in \text{Block 2}} e^{x\_j - m\_{\text{new}}} = e^{-2}(1 + e^{-1}) + e^{0} + e^{-1},
-$$
-
-and the combined numerator is $[\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}]$, matching the full softmax computed in one shot. -->
-
 ### 2.3 Online Softmax from First Principles
 
 Process scalar logits $x\_1, x\_2, \ldots$ one at a time. Initialize
 
 $$
-m\_0 = -\infty, \qquad \ell\_0 = 0.
+m_0 = -\infty, \qquad \ell_0 = 0.
 $$
 
-After observing $x\_j$, update
+After observing $x\_j$:
 
 $$
-m\_j = \max(m\_{j-1}, x\_j), \qquad \ell\_j = \ell\_{j-1} e^{m\_{j-1} - m\_j} + e^{x\_j - m\_j}.
+m_j = \max(m_{j-1}, x_j), \qquad \ell_j = \ell_{j-1} e^{m_{j-1} - m_j} + e^{x_j - m_j}.
 $$
 
-Milakov and Gimelshein show that this produces the same stable softmax normalizer while requiring fewer passes over the input than the conventional safe-softmax procedure.
+Milakov and Gimelshein showed this produces the same stable softmax normalizer as the conventional safe-softmax procedure, just with fewer passes over the input.
 
-For attention, we also need the weighted value sum. Introduce an unnormalized accumulator $a$:
-
-$$
-a = \sum\_j e^{x\_j - m} v\_j.
-$$
-
-When the maximum changes from $m$ to $m'$, rescale both $\ell$ and $a$ by $e^{m - m'}$. Then add the new exponentials and value contributions under the new reference. At the end,
+Attention needs a weighted value sum. So we need to maintain a value-weighted, unnormalized accumulator:
 
 $$
-o = \frac{a}{\ell}.
+a = \sum_j e^{x_j - m} v_j.
 $$
 
-My working version of the update:
+When the maximum moves from $m$ to $m'$, the accumulated statistics shift to the new reference before anything new gets added:
 
 $$
-a \doteq \sum\_j e^{x\_j - m} v\_j
+a_{\text{old}} \to a_{\text{old}}\, e^{m_{\text{old}} - m_{\text{new}}}, \qquad \ell_j \to \ell_{j-1}\, e^{m_{j-1} - m_j} + e^{x_j - m_j}.
 $$
 
-When the maximum changes:
-
-$$
-a\_{\text{old}} \to a\_{\text{old}}\, e^{m\_{\text{old}} - m\_{\text{new}}}
-$$
-
-$$
-\ell\_j \to \ell\_{j-1}\, e^{m\_{j-1} - m\_j} + e^{x\_j - m\_j}
-$$
-
-Then add the new value contributions. At the end:
+Then the new value contributions get folded in. At the end:
 
 $$
 o = \frac{a}{\ell}.
 $$
 
-> For attention, $x\_j$ is not a fixed input vector stored in advance. Each block of logits is generated on demand from a matrix product $Q K\_j^T / \sqrt{d}$ plus mask/bias terms. The online recurrence lets the kernel consume that block immediately.
+> For attention, $x\_j$ is not a fixed input vector stored in advance. Each block of logits is generated on demand from a matrix product $QK\_j^T / \sqrt{d}$ plus mask/bias terms. The online recurrence lets the kernel consume that block immediately.
 
 The same idea works row by row and block by block, which is what makes a tiled exact softmax-attention forward pass possible.
 
-**Mathematical insight II.** We do not need the entire probability vector. We only need enough information to reconstruct its contribution to the final output.
+<!-- **Mathematical insight II.** We don't need the entire probability vector. We only need enough information to reconstruct its contribution to the final output. -->
+
+{% capture c %}
+We don't need the entire probability vector. We only need enough information to reconstruct its contribution to the final output.
+{% endcapture %}
+{% include callout.html type="note" title="Mathematical insight II" content=c %}
+
 
 ### 2.4 The Blockwise Merge Recurrence
 
@@ -685,65 +637,65 @@ $$
 (m, \ell, a),
 $$
 
-where $m$ is the maximum score seen so far, $\ell$ is the stable softmax denominator under that maximum, and $a \in \mathbb{R}^{d\_v}$ is the unnormalized value accumulator.
+where $m$ is the running maximum score, $\ell$ is the stable softmax normalizer under that maximum, and $a \in \mathbb{R}^{d\_v}$ is the unnormalized value accumulator.
 
-For a new score block $s \in \mathbb{R}^b$ with matching values $V\_b \in \mathbb{R}^{b \times d\_v}$, let
+A new block lands: scores $s \in \mathbb{R}^b$, values $V\_b \in \mathbb{R}^{b \times d\_v}$. First, find the block's own maximum and update the running one:
 
 $$
-m\_b = \max(s), \qquad m' = \max(m, m\_b),
+m_b = \max(s), \qquad m' = \max(m, m_b).
 $$
+
+The rescale factor and the block's exponentials follow:
 
 $$
 \alpha = e^{m - m'}, \qquad p = e^{s - m'}.
 $$
 
-Then update
+Then update:
 
 $$
-\ell' = \alpha \ell + \sum\_j p\_j,
-$$
-
-$$
-a' = \alpha a + p^T V\_b,
+\ell' = \alpha \ell + \sum_j p_j, \qquad a' = \alpha a + p^T V_b,
 $$
 
 $$
 m \leftarrow m', \qquad \ell \leftarrow \ell', \qquad a \leftarrow a'.
 $$
 
-Finally,
+At the end:
 
 $$
 o = a / \ell.
 $$
 
-The mean of the running state:
+When you process a block of query rows, not just one, the running state changes shape. $m$ and $\ell$ each become vectors, one entry per row, and $a$ becomes a matrix. If you have masks, apply them to the score tile before the exponentials. Masked positions contribute zero probability, so they drop out of the update entirely.
 
-- $m$ = max score seen so far
-- $\ell$ = stable softmax denominator, exponential sum (normalizer)
+
+
+> The recurrence is the algebraic reason tile boundaries do not change the dense softmax result. A different tiling changes the order of floating-point operations, but not the intended real-arithmetic function.
+
+**This recurrence is what makes tiled exact attention possible.**
+
+<!-- The mean of the running state:
+
+- $m$ = running maximum score 
+- $\ell$ = stable softmax normalizer
 - $a$ = unnormalized value accumulator
 
 The blockwise recurrence in my own notation:
 
 - For one query row, maintain $(m, \ell, a)$.
 - Suppose the next score block is $s = [s\_1, s\_2, \ldots, s\_b]$ with corresponding values $V\_b \in \mathbb{R}^{b \times d\_v}$.
-- First calculate the block maximum: $m\_b = \max(s)$, then update the global maximum: $m' = \max(m, m\_b)$.
+- First calculate the block maximum: $m\_b = \max(s)$, 
+- Then update the global maximum: $m' = \max(m, m\_b)$.
 - Define: $\alpha = e^{m - m'}$, $p = e^{s - m'}$.
-- Then update: $\ell' = \alpha \ell + \sum\_j p\_j$, $a' = \alpha a + p^T V\_b$.
-- Then set $m \leftarrow m'$, $\ell \leftarrow \ell'$, $a \leftarrow a'$.
-- Finally at the end: $o = a / \ell$.
-
-> For a block of query rows, $m$ and $\ell$ become row-wise vectors and $a$ becomes a matrix. Masks can be applied to the score tile before the exponentials, with masked positions contributing zero probability.
-
-> The recurrence is the algebraic reason tile boundaries do not change the dense softmax result. A different tiling changes the order of floating-point operations, but not the intended real-arithmetic function.
-
-FlashAttention's published algorithms express equivalent running-max / running-normalizer / output updates in block form.
-
-**This recurrence is the heart of tiled exact attention.**
+- Then update: 
+    - $\ell' = \alpha \ell + \sum\_j p\_j$, $a' = \alpha a + p^T V\_b$.
+    - $m \leftarrow m'$, $\ell \leftarrow \ell'$, $a \leftarrow a'$.
+- Finally at the end: $o = a / \ell$. -->
 
 ### 2.5 A Complete Numerical Example
 
-Consider one already-scaled, unmasked attention row
+Take one already-scaled, unmasked attention row
 
 $$
 s = [2, 1, 4, 3]
@@ -755,7 +707,7 @@ $$
 v\_1 = [1, 0], \quad v\_2 = [0, 1], \quad v\_3 = [2, 0], \quad v\_4 = [0, 2].
 $$
 
-The global maximum is 4, so stable unnormalized weights are
+The global maximum is 4, so the stable unnormalized weights are
 
 $$
 [e^{-2}, e^{-3}, e^{-1}, e^{-1}] \approx [0.135335, 0.049787, 1, 0.367879].
@@ -773,13 +725,21 @@ $$
 O \approx [1.37497284, 0.50582424].
 $$
 
-Now process two blocks. For $[2, 1]$:
+Now run it through in two blocks, the way a tiled kernel would: $[2, 1]$ and $[4, 3]$.
+
+**Block 1: $s = [2, 1]$.** Running max $m\_1 = 2$, stable exponentials $[e^{0}, e^{-1}] = [1, e^{-1}]$. So
 
 $$
-m\_1 = 2, \qquad \ell\_1 = 1 + e^{-1} = 1.36787944, \qquad a\_1 = [1, e^{-1}].
+\ell\_1 = 1 + e^{-1} \approx 1.36788,
 $$
 
-For the second block $[4, 3]$, the new maximum is 4, so
+and the value accumulator comes out to
+
+$$
+a\_1 = 1 \cdot [1, 0] + e^{-1} \cdot [0, 1] = [1, e^{-1}].
+$$
+
+**Block 2: $s = [4, 3]$.** The block max is $m\_b = 4$, beating the running max, so $m' = \max(2, 4) = 4$. The rescale factor:
 
 $$
 \alpha = e^{2 - 4} = e^{-2}.
@@ -788,64 +748,26 @@ $$
 Then
 
 $$
-\ell\_2 = \alpha \ell\_1 + 1 + e^{-1} = 1.55300179,
+\ell\_2 = \alpha \ell\_1 + e^{0} + e^{-1} = e^{-2}(1 + e^{-1}) + 1 + e^{-1} = e^{-2} + e^{-3} + 1 + e^{-1} \approx 1.553,
 $$
 
-$$
-a\_2 = \alpha a\_1 + [2, 2 e^{-1}] \approx [2.13533528, 0.78554595].
-$$
-
-Therefore
+and
 
 $$
-a\_2 / \ell\_2 \approx [1.37497284, 0.50582424],
+a\_2 = e^{-2} \cdot [1, e^{-1}] + [2 e^{0}, 2 e^{-1}] = [2 + e^{-2}, 2 e^{-1} + e^{-3}] \approx [2.135, 0.7855].
+$$
+
+**Output:**
+
+$$
+O\_2 = a\_2 / \ell\_2 \approx [1.375, 0.506],
 $$
 
 matching the full-row computation.
 
 > The old block was not revisited. Its contribution was merely rescaled when a larger maximum appeared.
 
-**Tying everything together.** Block 1 was never recomputed when block 2 revealed a larger maximum; we rescaled the statistics from block 1. This is what makes streaming possible.
-
-My step-by-step computation:
-
-The score row: $s = [2, 1, 4, 3]$. Values: $v\_1 = [1, 0]$, $v\_2 = [0, 1]$, $v\_3 = [2, 0]$, $v\_4 = [0, 2]$.
-
-**Blocks:** $[2, 1]$ and $[4, 3]$.
-
-**Block 1.** Scores: $[2, 1]$. Maximum: $m\_1 = 2$. Stable exponentials:
-
-$$
-[e^{0}, e^{-1}] = [1, e^{-1}]
-$$
-
-So
-
-$$
-\ell\_1 = 1 + e^{-1} \approx 1.36788.
-$$
-
-Value accumulator:
-
-$$
-a\_1 = 1 \cdot [1, 0] + e^{-1} \cdot [0, 1] = [1, e^{-1}].
-$$
-
-**Block 2.** Scores: $[4, 3]$. $m\_b = 4$. $m' = \max(2, 4) = 4$. $\alpha = e^{m - m'} = e^{2 - 4} = e^{-2}$.
-
-$$
-\ell\_2 = \alpha \ell\_1 + e^{0} + e^{-1} = e^{-2}(1 + e^{-1}) + 1 + e^{-1} = e^{-2} + e^{-3} + 1 + e^{-1} \approx 1.553
-$$
-
-$$
-a\_2 = e^{-2} \cdot [1, e^{-1}] + [2 e^{0}, 2 e^{-1}] = [2 + e^{-2}, 2 e^{-1} + e^{-3}] \approx [2.135, 0.7855]
-$$
-
-**Output.**
-
-$$
-O\_2 = a\_2 / \ell\_2 \approx [1.375, 0.506]
-$$
+**This rescale-instead-of-recompute is what makes streaming possible.**
 
 ---
 
@@ -853,27 +775,57 @@ $$
 
 ### 3.1 FlashAttention Forward Pass
 
-A useful conceptual forward pass is:
+The forward pass, conceptually:
 
-1. Partition $Q$ into query-row tiles and $K, V$ into key/value tiles.
-2. For each query tile, initialize row-wise running maxima, normalizers, and output accumulators.
-3. Load a key/value tile and form the local score tile $Q\_i K\_j^T / \sqrt{d}$.
-4. Apply causal/local masks or additive biases that belong to this tile.
-5. Compute the tile maximum, update the running maximum, and rescale previous state.
+1. Partition $Q$ into query-row tiles, and $K$ and $V$ into key/value tiles.
+2. For each query tile, initialize row-wise running maxima, normalizers, and output accumulators: $m = -\infty$, $\ell = 0$, $a = 0$.
+3. Load a $K\_j, V\_j$ tile and form the local score tile $S\_{ij} = Q\_i K\_j^T / \sqrt{d}$.
+4. Apply masks or biases $B\_{ij} / M\_{ij}$ belonging to this tile.
+5. Find the tile maximum, update the running maximum $\max(m, m\_b)$, and rescale the previous state.
 6. Exponentiate the current tile relative to the updated maximum.
-7. Update the denominator and the value-weighted output accumulator.
-8. Continue until every required key tile has been contributed.
-9. Normalize the accumulator row-wise and write the output.
+7. Update the normalizer $\ell$ and the value-weighted accumulator $a$.
+8. Repeat for every required key tile.
+9. Normalize the accumulator row-wise $O = a / \ell$, then write the output.
 
-The original FlashAttention algorithm chooses block sizes so the relevant tiles and state fit in on-chip SRAM, reducing trips to HBM.
+The original algorithm picks block sizes so the tiles and running state fit in on-chip SRAM, cutting trips to HBM. A quick summary of the forward pass is shown below:
 
-An educational implementation can reproduce the algebra in a few lines of PyTorch, but such code is not a high-performance FlashAttention kernel. Production implementations depend on GPU-specific tiling, thread/warp scheduling, asynchronous copies, tensor-core instructions, and other low-level details.
+```python
+for each K/V block:
+    scores = Q @ K_block.T / sqrt(d)
+    update running softmax, l
+    update output accumulator, a
+    calculate the normalized output, O
+```
+
+You can reproduce the algebra in a few lines of PyTorch, but that's not the same as a high-performance FlashAttention kernel. Real production implementations additionally exploit **GPU-specific tiling, registers, shared memory, warp scheduling, tensor cores, async copies, specialized intrinsics, and occupancy optimization.**
 
 > The essential algorithmic idea is independent of one CUDA kernel: generate a score tile, consume it immediately through online softmax and $V$ accumulation, and never materialize the complete score/probability matrix in HBM.
 
 **Minimal educational PyTorch.**
 
 ```python
+# Single query block, tiled over K/V. Production kernels also
+# tile Q; the outer loop is omitted here to focus on the recurrence.
+def tiled_attention(q, k, v, block=128):
+    scale = 1 / math.sqrt(q.shape[-1])
+    m = q.new_full((q.shape[0],), -float("inf"))
+    l = q.new_zeros(q.shape[0])
+    a = q.new_zeros((q.shape[0], v.shape[-1]))
+
+    for j in range(0, k.shape[0], block):
+        kj, vj = k[j:j+block], v[j:j+block]
+        s = (q @ kj.T) * scale
+        m_new = torch.maximum(m, s.max(dim=-1).values)
+        alpha = torch.exp(m - m_new)
+        p = torch.exp(s - m_new[:, None])
+        a = a * alpha[:, None] + p @ vj
+        l = l * alpha + p.sum(dim=-1)
+        m = m_new
+
+    return a / l[:, None]
+```
+
+<!-- ```python
 def tiled_attention(q, k, v, block=128):
     scale = 1 / math.sqrt(q.shape[-1])
     n_q, n_kv = q.shape[0], k.shape[0]
@@ -899,41 +851,9 @@ def tiled_attention(q, k, v, block=128):
         O[i:i+block] = a / l[:, None]
 
     return O
-```
+``` -->
 
-Conceptually, for each KV block:
-
-- scores = $Q \times K\_{block}^T$
-- update running softmax, $\ell$
-- update output accumulator, $a$
-
-This isn't a high-performance FlashAttention kernel. Real implementations additionally exploit:
-
-- GPU-specific tiling
-- Registers
-- Shared memory
-- Warp scheduling
-- Tensor cores
-- Async copies
-- Specialized intrinsics
-- Occupancy optimization
-
-This distinction will become very important for FA-2/3/4.
-
-Later FlashAttention generations keep this semantic structure while changing how work is scheduled on newer hardware.
-
-My step list for the forward pass:
-
-1. Load $Q\_i$.
-2. Initialize $(m, \ell, a) = (-\infty, 0, 0)$ — $m = -\infty$, $\ell = 0$, $a = 0$.
-3. Load a $K\_j, V\_j$ tile.
-4. Compute the local score tile $S\_{ij} = Q\_i K\_j^T / \sqrt{d}$.
-5. Apply masks/biases $B\_{ij} / M\_{ij}$.
-6. Find the tile maximum and update the running maximum $\max(m, m\_b)$.
-7. Compute exponentials relative to the new maximum.
-8. Update $\ell$ and $a$.
-9. Move to the next $K, V$ tile until every tile is completed/covered.
-10. Normalize the accumulator row-wise $O = a / \ell$, then write $O$.
+That production-educational code gap matters a lot for FA-2, FA-3, and FA-4. Every generation keeps the same semantic structure, but schedules the work differently for newer hardware. Same math, different schedule, each tuned to the hardware of its generation.
 
 ### 3.2 Why Dense FlashAttention Is Exact
 
