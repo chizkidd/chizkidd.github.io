@@ -19,7 +19,7 @@ The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg
 
 > A technical handbook on exact tiled attention: GPU memory traffic, online softmax, forward and backward passes, IO complexity, the evolution from FlashAttention-1 through FlashAttention-4, and current framework behavior.
 
-In this blog post, we're covering the fundamental problem FlashAttention-1 (FA1) tackles, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
+In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addresses, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
 ---
 
@@ -92,7 +92,7 @@ In this blog post, we're covering the fundamental problem FlashAttention-1 (FA1)
 
 ---
 
-## 0. Introduction
+## **0. Introduction**
 
 ### 0.1 How to Read This Handbook
 
@@ -145,7 +145,7 @@ The practical difference I keep coming back to:
 
 That question, not the arithmetic, is what FlashAttention was built to answer.
 
-## 1. The Fundamental Problem
+## **1. The Fundamental Problem**
 
 ### 1.1 What FlashAttention Actually Optimizes
 
@@ -232,7 +232,7 @@ The GPU spends significant time moving an $N^2$ object through memory. **FlashAt
 
 FlashAttention's move is simple: keep the work close. Blocks of $Q$, $K$, and $V$ sit near the compute units, score tiles get built and consumed on the spot, and only the running row statistics plus the output survive across tiles. Nothing else needs to stick around.
 
-> **Algorithmic lesson.** A computational graph is not a memory schedule. Writing $P = \mathrm{softmax}(QK^T)$ on paper does not require an implementation to store all of $QK^T$ or $P$ in off-chip memory at once.
+> **Algorithmic lesson.** A computational graph is not a memory schedule. Writing <!--$P = \mathrm{softmax}(QK^T)$--> `P = softmax(QK^T)` on paper does not require an implementation to store all of $QK^T$ or $P$ in off-chip memory at once.
 
 The pattern isn't unique to attention. **Fused kernels, tiling, recomputation, operator scheduling**; they all do the same thing. Spend a little extra arithmetic to avoid dragging huge intermediates through memory. On modern hardware, that's usually a winning bet. Matmul throughput has raced ahead of the rest of the memory hierarchy, so the math is cheap and the data movement is what hurts. FlashAttention-3 (FA3) and FlashAttention-4 (FA4) take this further, and they're upfront about it: the algorithm bends to the hardware, not the other way around. 
 
@@ -281,7 +281,7 @@ FlashAttention-1 (FA1) models the HBM/SRAM asymmetry and explicitly optimizes th
 **Why tiling helps:** Suppose $Q\_i$ (a query tile/ block) needs to interact with many $K/V$ tiles/blocks prior to writing its output state. Instead of constantly moving $Q\_i$ back and forth, we can keep it close to the compute units while processing:
 
 $$
-K\_1, V\_1 \to K\_2, V\_2 \to K\_3, V\_3 \to \cdots
+K_1, V_1 \to K_2, V_2 \to K_3, V_3 \to \cdots
 $$
 
 Therefore, one loaded $Q\_i$ can participate in lots of computation. This is called **reuse**. Tiling doesn't only make tensors smaller, it also **increases reuse** while a tile is resident on chip. Conversely, $K/V$ blocks can be streamed through query blocks according to the chosen schedule.
@@ -363,7 +363,7 @@ flowchart LR
     PV --> Discard["discard tile"]
 
     classDef boxed fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,font-size:22px
-    classDef plain fill:none,stroke:none,font-size:22px
+    classDef plain fill:none,stroke:none,font-size:22px,font-weight:bold
 
     class QK,Softmax,PV boxed
     class Discard plain
@@ -400,15 +400,13 @@ Essentially, the key takeaways are summarized below:
 
 | Quality | Dense FlashAttention |
 |---|---|
-| Arithmetic | $\mathcal{O}(N^2 d)$ |
-| Full attention intermediates | Avoid $\mathcal{O}(N^2)$ storage |
+| Arithmetic | $O(N^2 d)$ |
+| Full attention intermediates | Avoid $O(N^2)$ storage |
 | HBM traffic | Reduced substantially |
 
 ### 1.6 Memory-Efficient Exact Attention Predates FlashAttention
 
-It would be historically inaccurate to say FlashAttention first discovered that exact attention can avoid quadratic memory.
-
-Earlier work by **Rabe and Staats** demonstrated exact memory-efficient attention with quadratic computation but subquadratic memory. They showed that attention does not require $O(N^2)$ memory with respect to $N$. **Milakov and Gimelshein** also performed earlier work on online softmax that showed a memory-efficient, online recurrent methodology of computing the classical stable softmax normalizer. FlashAttention builds the same kind of running-max/running-normalizer idea into tiled attention, while also accumulating the value-weighted output.
+It would be historically inaccurate to say FlashAttention first discovered that exact attention can avoid quadratic memory. Earlier work by **Rabe and Staats** demonstrated exact memory-efficient attention with quadratic computation but subquadratic memory. They showed that attention does not require $O(N^2)$ memory with respect to $N$. **Milakov and Gimelshein** also performed earlier work on online softmax that showed a memory-efficient, online recurrent methodology of computing the classical stable softmax normalizer. FlashAttention builds the same kind of running-max/running-normalizer idea into tiled attention, while also accumulating the value-weighted output.
 The lineage/evolution from stable softmax to FlashAttention is shown in Figure 5 below:
 
 <!-- $$
@@ -439,44 +437,46 @@ FlashAttention's key contribution was to bring together the techniques below int
 
 ---
 
-## 2. The Mathematical Trick
+## **2. The Mathematical Trick**
 
 ### 2.1 Tiling Queries, Keys, and Values
 
 **Most important.** This is the section where the trick lives. 
  >The score tile $S\_{ij}$ is small enough to be processed near the compute units. Its contribution is folded into running row statistics and an output accumulator, then the tile can be discarded.
 
-- Suppose $Q \in \mathbb{R}^{N\_q \times d}$, $K \in \mathbb{R}^{N\_k \times d}$, and $V \in \mathbb{R}^{N\_k \times d\_v}$. Instead of processing everything at once, divide them into blocks. For example:
+- Suppose $Q \in \mathbb{R}^{N\_q \times d}$, $K \in \mathbb{R}^{N\_k \times d}$, and $V \in \mathbb{R}^{N\_k \times d\_v}$. Instead of processing everything $N_q, N_k$ at once, divide them into blocks. For example:
 
     $$
-    Q: \boxed{Q\_1} \boxed{Q\_2} \boxed{Q\_3} \quad K, V: \boxed{K\_1, V\_1} \boxed{K\_2, V\_2} \boxed{K\_3, V\_3}
+    Q: \boxed{Q_1} \boxed{Q_2} \boxed{Q_3} \quad K, V: \boxed{K_1, V_1} \boxed{K_2, V_2} \boxed{K_3, V_3}
     $$
 
-    For one pair ($Q_i, K_j/V_j$), we process that score tile $S_{ij}$ locally:
+    For one query-key/value pair ($Q_i, K_j/V_j$), we process that score tile $S_{ij}$ locally:
 
     $$
-    S\_{ij} \doteq \frac{Q\_i K\_j^T}{\sqrt{d}} + B\_{ij},
+    S_{ij} \doteq \frac{Q_i K_j^T}{\sqrt{d}} + B_{ij},
     $$
 
     Then, for each query block:
 
-    1. Calculate score tile
+    ```text
+    1. Calculate score tile, S_ij
     2. Row-wise softmax and update
-    3. Multiply by $V\_j$ and accumulate
+    3. Multiply by V_j and accumulate
     4. Update the running output
     5. Discard the tile 
-    6. Move to the next tile while ignoring the need to write a global $S$ or $P$ matrix.
+    6. Move to the next tile while ignoring the need to write a global S or P matrix.
+    ```
 
     The softmax used at each tile is
 
     $$
-    \mathrm{softmax}(x\_i) = \frac{e^{x\_i}}{\sum\_j e^{x\_j}}.
+    \mathrm{softmax}(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}.
     $$
 
 - **Matrix multiplication is easy to tile** because it is fundamentally accumulation:
 
     $$
-    AB = \sum\_j A\_j B\_j,
+    AB = \sum_j A_j B_j,
     $$
 
     so we can calculate pieces and add them.
@@ -495,38 +495,51 @@ That is the key mathematical trick in the next chapters.
 A numerically stable softmax for one row $x\_1, \ldots, x\_N$ uses
 
 $$
-m = \max\_j x\_j, \qquad \ell = \sum\_j e^{x\_j - m}, \qquad p\_j = \frac{e^{x\_j - m}}{\ell}.
+m = \max_j x_j, \qquad \ell = \sum_j e^{x_j - m}, \qquad \_j = \frac{e^{x_j - m}}{\ell}.
 $$
 
-The subtraction by $m$ prevents overflow from large positive logits. But it seems to create a streaming problem: how can an early block be normalized if a later block may contain a larger maximum?
+Subtracting $m$ keeps large logits from blowing up. However, it seems to create a streaming problem: **how does one normalize an early block if a later block turns out to have a bigger maximum?**
 
-The answer is to retain sufficient statistics that can be **rescaled** when the maximum changes. Suppose the running state after earlier elements is $(m\_{\text{old}}, \ell\_{\text{old}})$ and a new block has maximum $m\_b$. Define
-
-$$
-m\_{\text{new}} = \max(m\_{\text{old}}, m\_b).
-$$
-
-Every contribution accumulated under the old maximum can be converted to the new reference by multiplying it by
+Keep the running stats around, and **rescale** them when the maximum changes. Say the state after the earlier elements is $(m\_{\text{old}}, \ell\_{\text{old}})$, and the new block's maximum is $m\_b$. Then
 
 $$
-\alpha \doteq e^{m\_{\text{old}} - m\_{\text{new}}}.
+m_{\text{new}} = \max(m_{\text{old}}, m_b).
 $$
 
-The new block is evaluated relative to the same $m\_{\text{new}}$.
-
-This is not an approximation. It is the identity
+Anything accumulated under the old max converts to the new one by a single factor:
 
 $$
-e^{x\_j - m\_{\text{old}}}\, e^{m\_{\text{old}} - m\_{\text{new}}} = e^{x\_j - m\_{\text{new}}}.
+\alpha \doteq e^{m_{\text{old}} - m_{\text{new}}}.
 $$
 
-**Mathematical insight.** The running maximum is a change of numerical reference point. When that reference changes, previously accumulated exponentials can be rescaled exactly in real arithmetic rather than recomputed from scratch.
+The new block is then evaluated against the same $m\_{\text{new}}$.
 
-The online-normalizer recurrence predates FlashAttention and provides the mathematical basis for streaming stable softmax.
-
-**Worked example.** Start with two extreme values to see why the max subtraction matters:
+None of this is an approximation. It's just the identity
 
 $$
+e^{x_j - m_{\text{old}}}\, e^{m_{\text{old}} - m_{\text{new}}} = e^{x_j - m_{\text{new}}}.
+$$
+
+>**Mathematical insight.** The running maximum is a change of numerical reference point. When that reference changes, previously accumulated exponentials can be rescaled exactly in real arithmetic rather than recomputed from scratch.
+
+The online-normalizer recurrence predates FlashAttention and is the mathematical basis for streaming stable softmax.
+
+
+
+**Worked example 1.** <br>Start with two extreme values to see why the max subtraction matters:
+
+$$
+\begin{aligned}
+x &= [1000, 999], \quad \text{Directly computing $e^{1000}$ overflows}\\
+m &= 1000 \\
+x - m &= [1000 - 1000, \; 999 - 1000] = [0, -1] \\
+e^[0, -1] &\approx [1, 0.368] \\
+\end{aligned}
+$$
+
+The exponential values $1$ and $0.368$ are perfectly manageable.
+
+<!-- $$
 x = [1000, 999].
 $$
 
@@ -536,12 +549,40 @@ $$
 x - m = [1000 - 1000, \; 999 - 1000] = [0, -1],
 $$
 
-and $e^{0} = 1$, $e^{-1} \approx 0.368$ are perfectly manageable.
+and $e^{0} = 1$, $e^{-1} \approx 0.368$ are perfectly manageable. -->
 
-Now stream two blocks. Let Block 1 $= [2, 1]$ and Block 2 $= [4, 3]$. After Block 1, $m\_{\text{old}} = 2$. Block 1 is evaluated at $m\_{\text{old}}$ as $[e^{0}, e^{-1}]$. When Block 2 arrives with $m\_b = 4$,
+**Worked example 2.** <br>Now stream two blocks. Let Block 1 $= [2, 1]$ and Block 2 $= [4, 3]$.
+$$
+\begin{aligned}
+\text{Block 1}: [2, 1]&, \text{ Block 2}:[4, 3]\\
+\text{After Block 1} &: m_{\text{old}} = 2 \\
+\text{Evaluating Block 1 at } m_{\text{old}} &: [e^{0}, e^{-1}] \\
+\text{When Block 2 arrives} &: m_b = 4 \\
+\text{Now in Block 2} &: m_{\text{new}} = \max(2, 4) = 4, \quad \alpha = e^{2 - 4} = e^{-2}\\
+\text{Rescaling Block 1 at the new reference} &: [\alpha e^{0}, \; \alpha e^{-1}] = [e^{-2}, \; e^{-3}] \\
+\text{Block 2 at the new reference} &: [e^{4 - 4}, \; e^{3 - 4}] = [e^{0}, \; e^{-1}] \\
+\end{aligned}
+$$
+
+Putting it all together, with $x = [2, 1, 4, 3]$:
 
 $$
-m\_{\text{new}} = \max(2, 4) = 4, \qquad \alpha = e^{2 - 4} = e^{-2}.
+\begin{aligned}
+\mathrm{softmax}(x) &= \frac{[e^{-2}, \; e^{-3}, \; e^{0}, \; e^{-1}]}{e^{-2} + e^{-3} + e^{0} + e^{-1}}\\
+\text{Block 1 streaming computation} &: \ell = \sum_j e^{x_j - m} = e^{0} + e^{-1} = 1 + e^{-1}, \\
+\text{Block 1 normalized output} &: \frac{[e^{0}, e^{-1}]}{(1 + e^{-1})} \\
+\text{Block 2 running normalizer} &: \ell_{\text{new}} = \alpha\, \ell_{\text{old}} + \sum_{j \in \text{Block 2}} e^{x_j - m_{\text{new}}} = e^{-2}(1 + e^{-1}) + e^{0} + e^{-1} \\
+\text{Block 2 unnormalized accumulator} &: a = [\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}] \\
+\text{Block 1 normalized output} &: \frac{[e^{-2}, e^{-3}, e^{0}, e^{-1}]}{(e^{-2} + e^{-3} + 1 + e^{-1})} \
+\end{aligned}
+$$
+
+This matches the full softmax computed in one shot.
+
+<!-- **Worked example 2.** <br>Now stream two blocks. Let Block 1 $= [2, 1]$ and Block 2 $= [4, 3]$. After Block 1, $m\_{\text{old}} = 2$. Block 1 is evaluated at $m\_{\text{old}}$ as $[e^{0}, e^{-1}]$. When Block 2 arrives with $m\_b = 4$,
+
+$$
+m_{\text{new}} = \max(2, 4) = 4, \qquad \alpha = e^{2 - 4} = e^{-2}.
 $$
 
 Rescaling Block 1 under the new reference:
@@ -574,7 +615,7 @@ $$
 \ell\_{\text{new}} = \alpha\, \ell\_{\text{old}} + \sum\_{j \in \text{Block 2}} e^{x\_j - m\_{\text{new}}} = e^{-2}(1 + e^{-1}) + e^{0} + e^{-1},
 $$
 
-and the combined numerator is $[\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}]$, matching the full softmax computed in one shot.
+and the combined numerator is $[\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}]$, matching the full softmax computed in one shot. -->
 
 ### 2.3 Online Softmax from First Principles
 
@@ -804,7 +845,7 @@ $$
 
 ---
 
-## 3. Putting the Mathematics onto the GPU
+## **3. Putting the Mathematics onto the GPU**
 
 ### 3.1 FlashAttention Forward Pass
 
@@ -1226,7 +1267,7 @@ This is the systems lesson that makes FlashAttention important beyond attention 
 
 ---
 
-## 4. Architectural Compatibility
+## **4. Architectural Compatibility**
 
 ### 4.1 MHA, MQA, and GQA Compatibility (Shared K/V Heads)
 
@@ -1317,7 +1358,7 @@ PyTorch issue: `scaled_dot_product_attention` applies dropout according to the s
 
 > Do not infer feature support from the name "FlashAttention." Check the exact library, kernel generation, device, dtype, head dimension, mask/bias, and training/inference path that will actually run.
 
-## Appendix: Source Section Mapping
+## **Appendix**
 
 <!-- | Source § | Hierarchical |
 |---|---|
