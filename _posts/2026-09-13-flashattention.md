@@ -855,9 +855,60 @@ def tiled_attention(q, k, v, block=128):
 
 That production-educational code gap matters a lot for FA-2, FA-3, and FA-4. Every generation keeps the same semantic structure, but schedules the work differently for newer hardware. Same math, different schedule, each tuned to the hardware of its generation.
 
+
 ### 3.2 Why Dense FlashAttention Is Exact
 
-Does FlashAttention approximate attention? For dense FlashAttention, **no**. The target remains
+Does FlashAttention approximate attention? For dense FlashAttention, **NO**. The target function is untouched:
+
+$$
+\mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}} + B\right) V.
+$$
+
+A short checklist for why this counts as exact:
+
+- No Q-K pairs are intentionally removed.
+- No low-rank approximation is introduced.
+- No alternative kernelized attention function replaces softmax.
+- Tiling just processes the same interactions in blocks.
+
+Online softmax doesn't swap the exponential or normalization for something else either. The block recurrence only changes the order in which sufficient statistics get accumulated.
+
+But *exact* needs a qualification. Suppose two implementations compute $a + b + c$:
+
+- **A:** $(a + b) + c$
+- **B:** $a + (b + c)$
+
+In exact mathematics,
+
+$$
+(a + b) + c = a + (b + c).
+$$
+
+In floating point, in some cases,
+
+$$
+(a + b) + c \neq a + (b + c).
+$$
+
+Tiling changes the reduction order. Fusion can change how rounding shakes out. So:
+
+$$
+\text{exact algorithm} \neq \text{bitwise identical output}.
+$$
+Three caveats keep the word *exact* precise:
+
+- **Floating point has finite precision.** Reorder the additions and reductions and you'll get small numerical differences from another implementation. PyTorch says so directly: SDPA backends can differ because floating-point ops get fused and ordered differently.
+
+- **Dropout is random during training.** If you want two runs to match bit-for-bit, you have to line up the random behavior too. Attention semantics alone won't be enough.
+
+- **Sparse variants aren't dense.** The block-sparse variant in the original paper skips blocks entirely, so it approximates full dense attention rather than reproducing it.
+
+> "Exact" doesn't mean "bitwise identical to every reference kernel." It means the algorithm isn't quietly changing dense softmax attention to save work.
+
+This distinction becomes important in numerical testing. A sensible tolerance depends on **dtype, accumulation order, sequence length, and backend, rather than binary identity as a pre-requisite.** 
+
+
+<!-- Does FlashAttention approximate attention? For dense FlashAttention, **no**. The target remains
 
 $$
 \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}} + B\right) V.
@@ -870,9 +921,7 @@ My checklist for why this is exact:
 - No alternative kernelized attention function replaces softmax.
 - This algorithm simply processes the same interactions in blocks.
 
-But *exact* has a qualification. Let me illustrate.
-
-Suppose two implementations compute $a + b + c$:
+But *exact* has a qualification. Let me illustrate. Suppose two implementations compute $a + b + c$:
 
 - **A:** $(a + b) + c$
 - **B:** $a + (b + c)$
@@ -913,7 +962,8 @@ Three caveats keep the word *exact* precise:
 
 > "Exact" does not mean "bitwise identical to every reference kernel." It means the algorithm is not intentionally changing dense softmax attention to reduce the mathematical work.
 
-This distinction matters when evaluating numerical tests. A sensible tolerance depends on dtype, accumulation order, sequence length, and backend rather than requiring binary identity.
+This distinction matters when evaluating numerical tests. A sensible tolerance depends on dtype, accumulation order, sequence length, and backend rather than requiring binary identity. -->
+
 
 ### 3.3 IO Complexity: What the Theorem Actually Says
 
