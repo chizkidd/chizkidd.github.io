@@ -495,7 +495,7 @@ That is the key mathematical trick in the next chapters.
 A numerically stable softmax for one row $x\_1, \ldots, x\_N$ uses
 
 $$
-m = \max_j x_j, \qquad \ell = \sum_j e^{x_j - m}, \qquad \_j = \frac{e^{x_j - m}}{\ell}.
+m = \max_j x_j, \qquad \ell = \sum_j e^{x_j - m}, \qquad p_j = \frac{e^{x_j - m}}{\ell}.
 $$
 
 Subtracting $m$ keeps large logits from blowing up. However, it seems to create a streaming problem: **how does one normalize an early block if a later block turns out to have a bigger maximum?**
@@ -525,8 +525,9 @@ $$
 The online-normalizer recurrence predates FlashAttention and is the mathematical basis for streaming stable softmax.
 
 
+### Worked example 1. 
 
-**Worked example 1.** <br>Start with two extreme values to see why the max subtraction matters:
+Start with two extreme values to see why the max subtraction matters:
 
 $$
 \begin{aligned}
@@ -551,7 +552,10 @@ $$
 
 and $e^{0} = 1$, $e^{-1} \approx 0.368$ are perfectly manageable. -->
 
-**Worked example 2.** <br>Now stream two blocks. Let Block 1 $= [2, 1]$ and Block 2 $= [4, 3]$.
+### Worked example 2.
+
+Now let's work through streaming two blocks.
+
 $$
 \begin{aligned}
 \text{Block 1}: [2, 1]&, \text{ Block 2}:[4, 3]\\
