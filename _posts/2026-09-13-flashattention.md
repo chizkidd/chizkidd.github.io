@@ -106,7 +106,7 @@ What stands out to me is the number of round trips to HBM in naive standard atte
 
 The lesson I keep coming back to here: FLOP count alone doesn't decide wall-clock speed. An algorithm can do essentially the same math, or even recompute intermediates from scratch, and still finish faster just because it shuttles far less data to and from high-bandwidth memory (HBM).
 
-<!-- > **Core distinction.** Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.[^4], [^10], [^13] -->
+<!-- > **Core distinction.** Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.[^4] $^,$ [^10] $^,$ [^13] -->
 
 {% capture c %}
 Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered. $^{4, 10, 13}$
@@ -313,7 +313,7 @@ A kernel becomes **IO-aware when the placement and movement of data are part of 
 {% endcapture %}
 {% include callout.html type="note" title="IO-Awareness" content=c %}
 
-This does not mean attention is "always memory bound." FA3 and FA4 exist partly because, as hardware changed, the dominant bottlenecks changed too.[^6], [^7] The bottleneck depends on:
+This does not mean attention is "always memory bound." FA3 and FA4 exist partly because, as hardware changed, the dominant bottlenecks changed too.[^6] $^,$ [^7] The bottleneck depends on:
 - Sequence length, $N$
 - Head dimension, $d_h$
 - dtype
@@ -411,7 +411,7 @@ This matters most during training, where naive autograd would want those large i
 
 FlashAttention changes the memory schedule, not the math. The function itself is still dense attention. That means forming all query-key scores for $N$ tokens with head dimension $d$ still costs work proportional to $N^2 d$. There's no way around that.
 
-Here's the thing about multiplying probabilities by values: it's another dense pairwise matrix multiplication of the same broad order. FlashAttention reshuffles these operations, but it doesn't skip the dense set of query-key interactions. Those still happen.[^4] [^,] [^5]
+Here's the thing about multiplying probabilities by values: it's another dense pairwise matrix multiplication of the same broad order. FlashAttention reshuffles these operations, but it doesn't skip the dense set of query-key interactions. Those still happen.[^4] $^,$ [^5]
 
 So three things must not get conflated:
 
@@ -711,7 +711,7 @@ $$
 o = a / \ell.
 $$
 
-When you process a block of query rows, not just one, the running state changes shape. $m$ and $\ell$ each become vectors, one entry per row, and $a$ becomes a matrix. If you have masks, apply them to the score tile before the exponentials. Masked positions contribute zero probability, so they drop out of the update entirely. FA1 and FA2 express equivalent running-max/running normalizer/output updates in block form.[^4], [^5]
+When you process a block of query rows, not just one, the running state changes shape. $m$ and $\ell$ each become vectors, one entry per row, and $a$ becomes a matrix. If you have masks, apply them to the score tile before the exponentials. Masked positions contribute zero probability, so they drop out of the update entirely. FA1 and FA2 express equivalent running-max/running normalizer/output updates in block form.[^4] $^,$ [^5]
 
 <!-- > The recurrence is the algebraic reason tile boundaries do not change the dense softmax result. A different tiling changes the order of floating-point operations, but not the intended real-arithmetic function. -->
 
@@ -910,7 +910,7 @@ def tiled_attention(q, k, v, block=128):
     return O
 ``` -->
 
-That production-educational code gap matters a lot for FA-2, FA-3, and FA-4. Every generation keeps the same semantic structure, but schedules the work differently for newer hardware.[^5], [^6], [^7] Same math, different schedule, each tuned to the hardware of its generation.
+That production-educational code gap matters a lot for FA-2, FA-3, and FA-4. Every generation keeps the same semantic structure, but schedules the work differently for newer hardware.[^5] $^,$ [^6] $^,$ [^7] Same math, different schedule, each tuned to the hardware of its generation.
 
 
 ### 3.2 Why Dense FlashAttention Is Exact
@@ -954,7 +954,7 @@ $$
 $$
 Three caveats keep the word *exact* precise:
 
-- **Floating point has finite precision.** Reorder the additions and reductions and you'll get small numerical differences from another implementation. PyTorch says so directly: SDPA backends can differ because floating-point ops get fused and ordered differently.[^10], [^13]
+- **Floating point has finite precision.** Reorder the additions and reductions and you'll get small numerical differences from another implementation. PyTorch says so directly: SDPA backends can differ because floating-point ops get fused and ordered differently.[^10] $^,$ [^13]
 
 - **Dropout is random during training.** If you want two runs to match bit-for-bit, you have to line up the random behavior too. Attention semantics alone won't be enough.
 
@@ -1186,7 +1186,7 @@ This is the **memory-compute tradeoff** applied to the backward pass.
 
 This is one of the biggest lessons from FlashAttention. The usual assumption is that fewer FLOPs means faster. On a GPU, that's not always true.
 
-Different operations run at completely different throughputs. Tensor cores chew through matrix multiplication. Everything else is comparatively expensive: exponentials, reductions, synchronization, shared-memory operations, HBM transfers.[^4], [^5] ***Therefore, doing extra arithmetic can be the right move if it kills expensive memory traffic.***
+Different operations run at completely different throughputs. Tensor cores chew through matrix multiplication. Everything else is comparatively expensive: exponentials, reductions, synchronization, shared-memory operations, HBM transfers.[^4] $^,$ [^5] ***Therefore, doing extra arithmetic can be the right move if it kills expensive memory traffic.***
 
 Consider two options:
 
