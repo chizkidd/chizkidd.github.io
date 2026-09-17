@@ -34,7 +34,7 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 - [1.1 What FlashAttention actually optimizes](#11-what-flashattention-actually-optimizes)
 - [1.2 The attention equation is not the implementation](#12-the-attention-equation-is-not-the-implementation)
 - [1.3 GPU memory hierarchy and why IO matters](#13-gpu-memory-hierarchy-and-why-io-matters)
-- [1.4 Why materializing $S$ and $P$ is expensive](#14-why-materializing-s-and-p-is-expensive)
+- [1.4 Why materializing $S$ and $P$ is expensive](#14-why-materializing--and--is-expensive)
 - [1.5 Dense arithmetic is still quadratic](#15-dense-arithmetic-is-still-quadratic)
 - [1.6 Memory-efficient exact attention predates FlashAttention](#16-memory-efficient-exact-attention-predates-flashattention)
 
@@ -55,7 +55,7 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 - [3.7 Why more FLOPs can still be faster](#37-why-more-flops-can-still-be-faster)
 
 [4. Architectural Compatibility](#4-architectural-compatibility)
-- [4.1 MHA, MQA, and GQA compatibility](#41-mha-mqa-and-gqa-compatibility)
+- [4.1 MHA, MQA, and GQA compatibility](#41-mha-mqa-and-gqa-compatibility-shared-kv-heads)
 - [4.2 Variable lengths, local attention, and dropout](#42-variable-lengths-local-attention-and-dropout)
 
 [5. FlashAttention Evolution](#5-flashattention-evolution)
@@ -363,7 +363,7 @@ flowchart LR
     PV --> Discard["discard tile"]
 
     classDef boxed fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,font-size:22px
-    classDef plain fill:none,stroke:none,font-size:22px,font-weight:bold
+    classDef plain fill:none,stroke:none,font-size:26px,font-weight:bold
 
     class QK,Softmax,PV boxed
     class Discard plain
@@ -503,13 +503,13 @@ Subtracting $m$ keeps large logits from blowing up. However, it seems to create 
 Keep the running stats around, and **rescale** them when the maximum changes. Say the state after the earlier elements is $(m\_{\text{old}}, \ell\_{\text{old}})$, and the new block's maximum is $m\_b$. Then
 
 $$
-m_{\text{new}} = \max(m_{\text{old}}, m_b).
+m_{\text{new}} = \max(m_{\text{old}}, m_b)
 $$
 
 Anything accumulated under the old max converts to the new one by a single factor:
 
 $$
-\alpha \doteq e^{m_{\text{old}} - m_{\text{new}}}.
+\alpha \doteq e^{m_{\text{old}} - m_{\text{new}}}
 $$
 
 The new block is then evaluated against the same $m\_{\text{new}}$.
@@ -517,7 +517,7 @@ The new block is then evaluated against the same $m\_{\text{new}}$.
 None of this is an approximation. It's just the identity
 
 $$
-e^{x - m_{\text{old}}}\, e^{m_{\text{old}} - m_{\text{new}}} = e^{x - m_{\text{new}}}.
+e^{x - m_{\text{old}}}\, e^{m_{\text{old}} - m_{\text{new}}} = e^{x - m_{\text{new}}}
 $$
 
 >**Mathematical insight.** The running maximum is a change of numerical reference point. When that reference changes, previously accumulated exponentials can be rescaled exactly in real arithmetic rather than recomputed from scratch.
@@ -588,13 +588,13 @@ This matches the full softmax computed in one shot.
 Process scalar logits $x\_1, x\_2, \ldots$ one at a time. Initialize
 
 $$
-m_0 = -\infty, \qquad \ell_0 = 0.
+m_0 = -\infty, \qquad \ell_0 = 0
 $$
 
 After observing $x\_j$:
 
 $$
-m_j = \max(m_{j-1}, x_j), \qquad \ell_j = \ell_{j-1} e^{m_{j-1} - m_j} + e^{x_j - m_j}.
+m_j = \max(m_{j-1}, x_j), \qquad \ell_j = \ell_{j-1} e^{m_{j-1} - m_j} + e^{x_j - m_j}
 $$
 
 Milakov and Gimelshein showed this produces the same stable softmax normalizer as the conventional safe-softmax procedure, just with fewer passes over the input.
@@ -602,19 +602,19 @@ Milakov and Gimelshein showed this produces the same stable softmax normalizer a
 Attention needs a weighted value sum. So we need to maintain a value-weighted, unnormalized accumulator:
 
 $$
-a = \sum_j e^{x_j - m} v_j.
+a = \sum_j e^{x_j - m} v_j
 $$
 
 When the maximum moves from $m$ to $m'$, the accumulated statistics shift to the new reference before anything new gets added:
 
 $$
-a_{\text{old}} \to a_{\text{old}}\, e^{m_{\text{old}} - m_{\text{new}}}, \qquad \ell_j \to \ell_{j-1}\, e^{m_{j-1} - m_j} + e^{x_j - m_j}.
+a_{\text{old}} \to a_{\text{old}}\, e^{m_{\text{old}} - m_{\text{new}}}, \qquad \ell_j \to \ell_{j-1}\, e^{m_{j-1} - m_j} + e^{x_j - m_j}
 $$
 
 Then the new value contributions get folded in. At the end:
 
 $$
-o = \frac{a}{\ell}.
+o = \frac{a}{\ell}
 $$
 
 > For attention, $x\_j$ is not a fixed input vector stored in advance. Each block of logits is generated on demand from a matrix product $QK\_j^T / \sqrt{d}$ plus mask/bias terms. The online recurrence lets the kernel consume that block immediately.
@@ -964,102 +964,57 @@ Three caveats keep the word *exact* precise:
 
 This distinction matters when evaluating numerical tests. A sensible tolerance depends on dtype, accumulation order, sequence length, and backend rather than requiring binary identity. -->
 
-
 ### 3.3 IO Complexity: What the Theorem Actually Says
 
-Let me get more theoretical.
+The original FlashAttention paper works in a two-level memory model: HBM, plus on-chip SRAM of size $M$. The key assumptions are head dimension $d$ and $d \leq M \leq Nd$. In that regime, the two attention types require:
 
-The original FlashAttention paper analyzes a two-level memory model with HBM and on-chip SRAM of size $M$. Under the paper's assumptions, including head dimension $d$ and
+- **Standard materializing attention:** $\Theta(Nd + N^2)$ HBM accesses
+- **FlashAttention:** $\Theta\left(\frac{N^2 d^2}{M}\right)$ HBM accesses
 
-$$
-d \leq M \leq Nd,
-$$
+That second quantity is a **communication-complexity bound.** It counts scalar movement between modeled memory levels, up to asymptotic factors. It is not a byte count, and it is not the arithmetic complexity, dense attention still performs $O(N^2 d)$ work.
 
-standard materializing attention requires approximately
+A few things worth keeping straight:
 
-$$
-\Theta(Nd + N^2)
-$$
+- These IO-complexity results hold for a specific memory model, not every GPU.
+- The bound tracks movement of scalar elements between modeled memory levels, up to asymptotic factors.
+- It is not the arithmetic complexity. Dense attention still performs $O(N^2 d)$ work.
+- More usable on-chip memory $M$ means more reuse and less modeled HBM traffic.
 
-HBM accesses, whereas FlashAttention requires
+The intuition: bigger on-chip memory lets larger working tiles stay resident. Bigger tiles mean more reuse and fewer HBM reloads. In the theorem's regime, that reuse is exactly why the HBM-access bound shrinks as $M$ grows. It's also why GPU architecture matters so much to FlashAttention performance.
 
-$$
-\Theta\left(\frac{N^2 d^2}{M}\right)
-$$
+> A common incorrect summary is "FlashAttention reduces attention IO from $O(N^2)$ to $O(N)$." The linear quantity is the large **auxiliary memory footprint with respect to sequence length,** not the general HBM-access expression above.
 
-HBM accesses under the specified regime.
 
-The exact theorem has assumptions, so do not interpret this as "FlashAttention always moves exactly this many bytes." It is an asymptotic result for a particular memory model that is **communication-complexity bound.**
-
-**Why does larger SRAM help?** Suppose you have more on-chip memory. You can fit larger tiles. Larger tiles mean:
-
-- more data stays resident
-- more reuse
-- fewer HBM reloads
-
-So increasing $M$ can decrease the amount of HBM traffic. This is one reason GPU architecture matters so much to FlashAttention performance.
-
-> The original FlashAttention paper analyzes a two-level memory model with HBM and on-chip SRAM of size $M$. Under the paper's assumptions, including head dimension $d$ and $d \leq M \leq Nd$, standard materializing attention requires $\Theta(Nd + N^2)$ HBM accesses, whereas FlashAttention requires $\Theta(N^2 d^2 / M)$ HBM accesses. The paper also proves an optimality result over a range of SRAM sizes in this model.
-
-Several details matter:
-
-> - These are IO-complexity results in a particular memory model, not a universal byte count for every GPU.
-> - The quantity counts movement of scalar elements/words between the modeled memory levels, up to asymptotic factors.
-> - It is not the arithmetic complexity. Dense attention still performs $O(N^2 d)$ work.
-> - Increasing usable on-chip memory $M$ enables more reuse and reduces modeled HBM traffic.
-
-> A common incorrect summary is "FlashAttention reduces attention IO from $O(N^2)$ to $O(N)$." The linear quantity is the large auxiliary memory footprint with respect to sequence length, not the general HBM-access expression above.
-
-Intuitively, more usable on-chip memory lets larger working tiles stay resident and be reused for more attention work before data must be reloaded from HBM. In the theorem's regime, that increased reuse is why the HBM-access bound decreases as $M$ grows.
 
 ### 3.4 Memory Complexity: Linear Auxiliary State, Not Linear Compute
 
-Another important distinction: linear auxiliary state is not linear compute.
+FlashAttention papers often say memory becomes linear instead of quadratic. That's true, but it's easy to misread, so it's worth being precise about what's linear and what isn't:
 
-A naive attention implementation may create $\mathcal{O}(N^2)$ attention intermediates. FlashAttention does not. Instead it maintains:
+$$
+\text{linear auxiliary state} \neq \text{linear compute.}
+$$
+
+A naive attention implementation creates $O(N^2)$ intermediates. FlashAttention doesn't. It keeps only:
 
 - $Q/K/V$ tiles
 - row-wise $m$
 - row-wise $\ell$
 - output accumulator $a$
 
-The auxiliary attention memory is
+The inputs and output already contain $O(Nd)$ elements on their own. A materializing dense attention implementation additionally creates $O(N^2)$ score and probability state. FlashAttention skips those full matrices and holds only the tiled working state plus row-wise statistics. So the extra memory tied to the attention operation scales as $O(Nd)$, linear in sequence length for a fixed head dimension $d$. But linear memory is not linear compute. The computation is still $O(N^2 d)$.
 
-$$
-\mathcal{O}(Nd).
-$$
+**Example.** For $N = 10{,}000$, there are roughly $10{,}000^2 = 100{,}000{,}000$ Q-K interactions. FlashAttention doesn't make those disappear. It just prevents you from needing a giant intermediate holding all of them at once.
 
-For a fixed head dimension $d$, the auxiliary attention state scales linearly with sequence length $N$, but linear memory is not linear computation. The computation is still
-
-$$
-\mathcal{O}(N^2 d).
-$$
-
-**Example.** For $N = 10{,}000$, there are approximately
-
-$$
-10{,}000^2 = 100{,}000{,}000
-$$
-
-Q-K interactions. FlashAttention does not make those disappear. However, it prevents you from needing a gigantic intermediate containing all of them.
-
-> Why do FlashAttention papers often say memory becomes linear instead of quadratic?
->
-> The inputs and output already contain $O(Nd)$ elements. A materializing dense attention implementation additionally creates $O(N^2)$ score/probability state. FlashAttention avoids storing those full matrices and retains only tiled working state plus row-wise statistics. As a result, the extra memory associated with the attention operation scales linearly with sequence length rather than quadratically.
->
-> For training, the difference is especially important because a straightforward backward pass might otherwise save a full probability matrix $P$. FlashAttention instead saves compact information such as output and row-wise normalization statistics, then recomputes score/probability tiles in backward.
+Training is where this difference bites hardest. A straightforward backward pass would otherwise want the full probability matrix $P$ kept around. FlashAttention stores compact info instead, output plus row-wise normalization stats, and recomputes score and probability tiles during the backward pass.
 
 > **Linear memory does not imply linear runtime.** The number of dense query-key interactions is still quadratic in $N$.
 
-Also avoid claiming that total model memory is $O(N)$. Other Transformer components consume activation memory, and autoregressive serving has KV-cache memory that grows with context length. FlashAttention is specifically changing how the attention computation manages its intermediates.
+Two more things to keep in mind. First, don't claim that total model memory is $O(N)$. Other Transformer components consume activation memory, and autoregressive serving has KV-cache memory that grows with context length. FlashAttention is changing how the attention computation manages its intermediates, not the whole model's memory profile. Second, FlashAttention and activation checkpointing can coexist, since both trade recomputation for reduced stored state, just at different scopes of the training graph.
 
-One reason FlashAttention and activation checkpointing can coexist: both trade recomputation for reduced stored state, but at different scopes of the training graph.
 
 ### 3.5 Causal Masking and Tile Skipping
 
-Consider autoregressive attention. Query token $i$ cannot attend to future key token $j > i$.
-
-The attention matrix looks like
+In autoregressive attention, query token $i$ can't attend to future key token $j > i$. The attention matrix looks like
 
 $$
 \begin{bmatrix}
@@ -1079,7 +1034,7 @@ M = \begin{bmatrix}
 \end{bmatrix}.
 $$
 
-Applying the mask before softmax gives
+Apply the mask before softmax and you get
 
 $$
 \mathrm{softmax}(S') = \begin{bmatrix}
@@ -1089,155 +1044,81 @@ $$
 \end{bmatrix}.
 $$
 
-With tiled attention, we can skip entire tiles:
+A materialized mask is another $N \times N$ object. But a tiled kernel can reason about the geometry of each tile directly:
 
-1. Entire blocks above the diagonal can be entirely skipped.
-2. Blocks below the diagonal are fully valid.
-3. Diagonal blocks require element-level masking.
+- Blocks strictly above the causal boundary are fully masked, so they can be skipped.
+- Blocks strictly below the boundary are fully valid.
+- Only blocks intersecting the diagonal need element-level causal masking.
 
-This is important because we are no longer doing useless work for obviously invalid future positions.
+That's a lot of invalid tiles you never have to compute. FlashAttention-2 explicitly exploits this structure, and current implementations also define alignment rules for unequal query/key lengths.
 
-> In causal self-attention, query position $i$ may not attend to future key positions $j > i$. A materialized mask would be another $N \times N$ object, but an efficient tiled kernel can reason about the geometry of each tile.
->
-> For square self-attention:
->
-> - blocks strictly above the causal boundary are fully masked and need not contribute,
-> - blocks strictly below the boundary are fully valid,
-> - only blocks intersecting the diagonal require element-level causal masking.
+> Mask semantics are an API detail that must not be guessed. For example, current PyTorch SDPA treats a Boolean `attn_mask` value of `True` as a position that *participates* in attention, while other PyTorch mask APIs use different conventions.
 
-This avoids computing many invalid tiles in a causal kernel. FlashAttention-2 explicitly exploits causal structure, while current implementations also define precise alignment rules for unequal query/key lengths.
+**Connection to local attention.** Sliding-window attention works on the same principle. If each token only attends to 128 nearby tokens, most tiles can be skipped the same way. But this is a different move: you've changed the mathematical attention pattern itself. The model is now doing sparse or local attention, and FlashAttention is just the kernel executing that pattern. It's no longer the same problem as unrestricted dense attention.
 
-> Mask semantics are an API detail that must not be guessed. For example, current PyTorch SDPA treats a Boolean `attn_mask` value of True as a position that *participates* in attention, while other PyTorch mask APIs use different conventions.
-
-**Connection to local attention.** Suppose each token can only attend to 128 nearby tokens. Then many tiles can also be skipped. But now we have changed the mathematical attention pattern: that is no longer undistributed dense attention. FlashAttention can be the kernel executing the local pattern, but the model itself is now doing sparse/local attention.
-
-> Local/sliding-window attention can similarly skip tiles outside the permitted window. But once the model intentionally restricts which pairs are attended, the *model's attention pattern* is sparse/local. FlashAttention can be the kernel used to execute that pattern, but it is no longer the same mathematical problem as unrestricted dense attention.
 
 ### 3.6 Backward Pass: Recompute Instead of Save
 
-This is vital for training.
-
-During the forward pass, we do not save the entire $P$ matrix ($N \times N$). We recompute it.
+A naive training implementation saves $P = \mathrm{softmax}(S)$ for the backward pass. That's an $N^2$ tensor sitting in HBM. FlashAttention doesn't keep it. It stores compact row-wise normalization information instead, then recomputes score and probability tiles when gradients are needed.
 
 **Forward:**
 
-1. Store compact info such as:
-   - output
-   - row-wise normalization statistics
-2. Do not store $P \in \mathbb{R}^{N \times N}$.
+- Store the output and row-wise normalization statistics.
+- Do not store $P \in \mathbb{R}^{N \times N}$.
 
 **Backward:**
 
-1. For each tile:
-   - a) Recompute $QK^T$
-   - b) Reconstruct the local probability values
-   - c) Calculate gradients
-   - d) Discard the tile
-2. This trades more computation for less memory traffic/storage.
+- For each tile: recompute $QK^T$, reconstruct the local probabilities, compute gradients, discard the tile.
+- Same trade as before: more arithmetic, less memory traffic.
 
-**Conceptually:**
-- Forward: don't store $P$.
-- Backward: recompute $P$ tile-by-tile.
-
-The gradient rehashing for $P$:
+For
 
 $$
-dV \mathrel{+}= P^T dO
+S = QK^T / \sqrt{d}, \quad P = \mathrm{softmax}(S), \quad O = PV,
 $$
 
-$$
-dP = dO \cdot V^T
-$$
+the backward pass relies on a row-wise identity:
 
 $$
-dS = P \odot (dP - D\_i[:, \text{None}])
+D_i = \sum_r dO_{ir}\, O_{ir} = \sum_j P_{ij}\, dP_{ij}
 $$
 
-Where $D\_i[:, \text{None}]$ is the column/vector broadcast across each row.
-
-
-and then:
+After recomputing a tile of $P$, the local derivatives fall out as
 
 $$
-dQ \mathrel{+}= dS \cdot K / \sqrt{d}
+dV \mathrel{+}= P^T dO, \qquad dP = dO\, V^T, \qquad dS = P \odot (dP - D_i[\text{:}, \text{None}]),
 $$
 
+and then
+
 $$
-dK \mathrel{+}= dS^T \cdot Q / \sqrt{d}
+dQ \mathrel{+}= dS\, K / \sqrt{d}, \qquad dK \mathrel{+}= dS^T\, Q / \sqrt{d}.
 $$
 
-with appropriate masking. 
+Masks contribute zero probability and zero gradient. FA2 stores a row-wise log-sum-exp quantity so the probability tile can be reconstructed stably from recomputed scores.
 
-> A naive training implementation can save $P = \mathrm{softmax}(S)$ for backward. FlashAttention avoids keeping that $N^2$ tensor in HBM. Instead, it stores compact row-wise normalization information and recomputes score/probability tiles when gradients are needed.
->
-> For
->
-> $$
-> S = QK^T / \sqrt{d}, \quad P = \mathrm{softmax}(S), \quad O = PV,
-> $$
->
-> a useful row-wise identity is
->
-> $$
-> D\_i = \sum\_r (dO\_i)\, O\_{ir} = \sum\_j P\_{ij}\, dP\_{ij}.
-> $$
->
-> After recomputing a tile of $P$, the local derivatives can be expressed as
->
-> $$
-> dV \mathrel{+}= P^T dO, \quad dP = dO\, V^T, \quad dS = P \odot (dP - D\_i[\text{:}, \text{None}]),
-> $$
->
-> then
->
-> $$
-> dQ \mathrel{+}= dS\, K / \sqrt{d}, \quad dK \mathrel{+}= dS^T\, Q / \sqrt{d}.
-> $$
->
-> Masks imply zero probability/gradient contribution for masked entries. FA2 stores a row-wise log-sum-exp quantity that allows the probability tile to be reconstructed stably from recomputed scores.
-
-> Backward recomputation is intentional. It spends extra matrix-multiply work to avoid reading and writing a giant probability tensor, which can be a favorable trade on GPUs.
+> Backward recomputation is intentional. It spends extra matrix-multiply work to avoid reading and writing a giant probability tensor, which is a favorable trade on GPUs.
 
 This is the **memory-compute tradeoff** applied to the backward pass.
 
 ### 3.7 Why More FLOPs Can Still Be Faster
 
-This is one of the biggest lessons from FlashAttention.
+This is one of the biggest lessons from FlashAttention. The usual assumption is that fewer FLOPs means faster. On a GPU, that's not always true.
 
-Normally we think: fewer FLOPs $\Rightarrow$ faster. But on GPUs, that's incomplete.
+Different operations run at completely different throughputs. Tensor cores chew through matrix multiplication. Everything else is comparatively expensive: exponentials, reductions, synchronization, shared-memory operations, memory transfers. ***Therefore, doing extra arithmetic can be the right move if it kills expensive memory traffic.***
 
-Different operations have radically different throughput. Tensor cores are exceptionally good at matrix multiplication. Other operations have different performance profiles. These operations include:
+Consider two options:
 
-1. exponentials
-2. reductions
-3. synchronization
-4. shared-memory operations
-5. memory transfers
+- **A:** compute, write huge $P$ to HBM, read $P$ back, compute
+- **B:** compute, discard, recompute later
 
-Therefore, sometimes doing **extra arithmetic** is worthwhile if it eliminates expensive memory traffic.
+**B** does more arithmetic, but it avoids pushing a giant tensor through HBM. On modern accelerators, that trade usually wins.
 
-For example, consider two options:
-
-- **A:** Compute $\to$ write huge $P$ to HBM $\to$ read $P$ $\to$ compute.
-- **B:** Compute $\to$ discard $\to$ recompute later.
-
-Option B performs more arithmetic. But it might be faster because it avoids moving a giant tensor through HBM.
-
-This is a fundamental ML systems principle:
+Every FlashAttention generation is built around this. FA2's goal is partly to reduce non-matmul FLOPs, since those don't have the same throughput as tensor-core GEMMs. It also reworks the work partitioning so more of the GPU is doing useful work at once. FA3 pushes further on Hopper, overlapping matrix multiplication, softmax, and data movement with asynchronous hardware features. FA4 responds to Blackwell, where tensor-core throughput grew faster than other resources. That shift makes exponentials and shared-memory traffic relatively more important, and FA4 is designed around it.
 
 > The cost of a FLOP depends on what hardware executes it and what data movement surrounds it.
 
-> It is tempting to assume that fewer arithmetic operations always imply lower latency. Accelerator performance breaks that intuition regularly.
->
-> Matrix multiplication maps exceptionally well to tensor cores. HBM traffic, synchronization, shared-memory traffic, exponentials, reductions, and kernel launch boundaries can be comparatively expensive.
->
-> FA2 makes this contrast explicit: one of its goals is to reduce non-matmul FLOPs, because those operations do not enjoy the same throughput as tensor-core GEMMs. The paper also improves work partitioning so more of the GPU is occupied.
->
-> FA3 goes further on Hopper by overlapping matrix multiplication, softmax, and data movement using asynchronous hardware features. FA4 responds to Blackwell, where tensor-core throughput increased faster than some other resources, making exponentials and shared-memory traffic relatively more important.
-
-> A better performance question is not merely "How many FLOPs?" but "Which operations, on which units, with what data movement, reuse, parallelism, and synchronization?"
-
-This is the systems lesson that makes FlashAttention important beyond attention itself: hardware efficiency often comes from co-designing mathematical scheduling with the memory/execution hierarchy.
+This is the systems lesson that makes FlashAttention matter beyond attention itself. Hardware efficiency doesn't come from the math alone. It comes from co-designing the math with the memory and execution hierarchy.
 
 ---
 
@@ -1245,46 +1126,33 @@ This is the systems lesson that makes FlashAttention important beyond attention 
 
 ### 4.1 MHA, MQA, and GQA Compatibility (Shared K/V Heads)
 
-FlashAttention is not tied to standard MHA.
-
-Let
+FlashAttention isn't tied to standard [Multi-Head Attention](https://chizkidd.github.io/2026/04/17/transformers/#self-attention--multi-head-attention) (MHA).
 
 $$
 Q \in \mathbb{R}^{B \times N\_q \times H\_q \times d}, \quad K, V \in \mathbb{R}^{B \times N\_k \times H\_{kv} \times d}.
 $$
 
-Three head-sharing regimes:
+Let's look into FlashAttention's compatibility with MHA, [Multi-Query Attention](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa) (MQA), and [Grouped-Query Attention](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa) (GQA). Three head-sharing regimes, distinguished by $H\_q$ versus $H\_{kv}$:
 
-- **MHA:** $H\_q = H\_{kv}$ $\Rightarrow$ every query head has its own K/V head.
-- **MQA:** $H\_{kv} = 1$ $\Rightarrow$ all query heads share 1 K/V head.
-- **GQA:** $1 < H\_{kv} < H\_q$ $\Rightarrow$ several query heads share K/V heads.
+- **MHA:** Every query head has its own K/V head. $$H_q = H_{kv}$$
+- **MQA:** All query heads share a single K/V head. $$H_{kv} = 1$$
+- **GQA:** Several query heads share each K/V head.  $$1 < H_{kv} < H_q$$
 
-Vital distinction:
+Here's the distinction that matters:
 
-1. MHA/MQA/GQA defines the architecture and head sharing.
-2. FlashAttention defines efficient execution of the attention computation.
+1. MQA/GQA defines the architecture. It decides how heads share K/V projections.
+2. RoPE defines the position transform. It decides how position gets baked into Q and K.
+3. FlashAttention defines the execution. It decides how the resulting attention operation gets scheduled and computed efficiently.
 
-Thus MHA/MQA/GQA and FlashAttention can coexist. Current implementations impose shape constraints: the number of query heads must be divisible by the number of KV heads:
+Any combination of these can be used together. A kernel doesn't care how many query heads share a K/V head, or whether the Q/K inputs were RoPE-rotated. It just evaluates attention between each query head and its assigned K/V head. Head sharing changes the architecture and the KV-memory footprint. RoPE changes the input representation. FlashAttention changes how the work gets scheduled on the hardware.
+
+Current implementations do impose one shape constraint, per Dao-AILab kernel requirement. The number of query heads must be divisible by the number of KV heads:
 
 $$
-H\_q \bmod H\_{kv} = 0.
+H_q \bmod H_{kv} = 0
 $$
 
-> FlashAttention does not require every architecture to have the same number of query and key/value heads.
->
-> For ordinary MHA, $H\_q = H\_{kv}$. In MQA, $H\_{kv} = 1$. In GQA, $1 < H\_{kv} < H\_q$. Current Dao-AILab kernels support MQA/GQA by passing fewer KV heads than query heads, with the requirement that the number of query heads be divisible by the number of KV heads.
->
-> The kernel still evaluates attention between each query head and its assigned KV head. Head sharing changes the architecture and KV-memory footprint. FlashAttention changes how the resulting attention operation is executed.
-
-**Orthogonal concepts:**
-
-> - MQA/GQA: how heads share K/V projections,
-> - RoPE: how position transforms Q/K,
-> - FlashAttention: how attention is scheduled and computed efficiently.
->
-> These can be used together.
-
-> Current PyTorch SDPA also exposes `enable_gqa`. Its documentation labels GQA support experimental and imposes backend- and tensor-shape constraints, so production code should follow the exact version's documentation rather than assuming universal fused-kernel support.
+PyTorch SDPA exposes `enable_gqa`, but the docs still flag GQA support as constrained by backend and tensor shape. Production code should follow the exact version's documentation rather than assuming universal fused-kernel support.
 
 ### 4.2 Variable Lengths, Local Attention, and Dropout
 
