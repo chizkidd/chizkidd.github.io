@@ -1089,9 +1089,10 @@ In autoregressive attention, query token $i$ can't attend to future key token $j
 
 $$
 \begin{bmatrix}
-\checkmark & \times & \times \\
-\checkmark & \checkmark & \times \\
-\checkmark & \checkmark & \checkmark
+\checkmark & \times & \times & \times \\
+\checkmark & \checkmark & \times & \times \\
+\checkmark & \checkmark & \checkmark & \times \\
+\checkmark & \checkmark & \checkmark & \checkmark
 \end{bmatrix}
 $$
 
@@ -1099,20 +1100,22 @@ with mask
 
 $$
 M = \begin{bmatrix}
-0 & -\infty & -\infty \\
-0 & 0 & -\infty \\
-0 & 0 & 0
-\end{bmatrix}.
+0 & -\infty & -\infty & -\infty \\
+0 & 0 & -\infty & -\infty \\
+0 & 0 & 0 & -\infty \\
+0 & 0 & 0 & 0 
+\end{bmatrix}
 $$
 
 Apply the mask before softmax and you get
 
 $$
 \mathrm{softmax}(S') = \begin{bmatrix}
-\text{value} & 0 & 0 \\
-\text{value} & \text{value} & 0 \\
-\text{value} & \text{value} & \text{value}
-\end{bmatrix}.
+\text{value} & 0 & 0 & 0 \\
+\text{value} & \text{value} & 0 & 0 \\
+\text{value} & \text{value} & \text{value} & 0 \\
+\text{value} & \text{value} & \text{value} & \text{value} 
+\end{bmatrix}
 $$
 
 A materialized mask is another $N \times N$ object. But a tiled kernel can reason about the geometry of each tile directly:
