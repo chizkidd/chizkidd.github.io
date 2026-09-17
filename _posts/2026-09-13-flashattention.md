@@ -10,6 +10,7 @@ mathjax: true
 ---
 
  _This is Part 1 of a two-part FlashAttention series._
+_This is Part 2 of a two-part FlashAttention series. Check out [Part 1](https://chizkidd.github.io/2026/09/13/flashattention/) next. Part 2 covers the FlashAttention evolution (FA-1/2/3/4)._
 
 ---
 
@@ -209,7 +210,7 @@ For $N = 8192$, instead of an $8192 \times 8192$ intermediate matrix, you proces
 **What changes:** the execution schedule, memory traffic, and stored intermediates.<br>
 **What does not change:** the dense scaled-dot-product attention function being evaluated.
 {% endcapture %}
-{% include callout.html type="note" content=c %}
+{% include callout.html type="note" title="Important Fact" content=c %}
 
 This framing matters. Calling FlashAttention "a faster kind of attention" misses the point. It's better understood as an algorithm and kernel family for **evaluating attention efficiently on accelerators.** A model can use causal masking, RoPE, [MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa), or any other attention feature and still run a FlashAttention kernel underneath it.
 
@@ -426,7 +427,7 @@ This is how a method makes much longer sequences practical without making long c
 {% capture c %}
 If you actually want to reduce the *number* of query-key pairs, you need a different mathematical structure: sparsity, a local pattern, or a different attention formulation. Those choices change model behavior, and they're conceptually separate from dense FlashAttention.
 {% endcapture %}
-{% include callout.html type="note" content=c %}
+{% include callout.html type="note" title="Important Fact" content=c %}
 
 When you report speedups, always separate asymptotic arithmetic from measured runtime. A kernel can run several times faster at the same $O(N^2 d)$ complexity because the **constant factors, occupancy, fusion, and memory traffic change dramatically.**
 
