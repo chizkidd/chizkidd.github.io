@@ -58,7 +58,7 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 - [4.1 MHA, MQA, and GQA compatibility](#41-mha-mqa-and-gqa-compatibility-shared-kv-heads)
 - [4.2 Variable lengths, local attention, and dropout](#42-variable-lengths-local-attention-and-dropout)
 
-[5. FlashAttention Evolution](#5-flashattention-evolution)
+<!-- [5. FlashAttention Evolution](#5-flashattention-evolution)
 - [5.1 FlashAttention-2: what changed](#51-flashattention-2-what-changed)
 - [5.2 FA2 parallelism across sequence tiles](#52-fa2-parallelism-across-sequence-tiles)
 - [5.3 FA2 work partitioning and non-matmul FLOPs](#53-fa2-work-partitioning-and-non-matmul-flops)
@@ -83,7 +83,7 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 
 [9 Practical Engineering](#9-practical-engineering)
 - [9.1 Common implementation mistakes](#91-common-implementation-mistakes)
-- [9.2 Common misconceptions and the practical mental model](#92-common-misconceptions-and-the-practical-mental-model)
+- [9.2 Common misconceptions and the practical mental model](#92-common-misconceptions-and-the-practical-mental-model) -->
 
 
 ## **Appendix**
