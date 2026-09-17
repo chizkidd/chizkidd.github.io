@@ -111,7 +111,7 @@ The lesson I keep coming back to here: FLOP count alone doesn't decide wall-cloc
 {% capture c %}
 Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered. $^{4, 10, 13}$
 {% endcapture %}
-{% include callout.html type="note" title="Core distinction" content=c %
+{% include callout.html type="note" title="Core distinction" content=c %}
 
 The word *exact* is doing real work here. Exactness is a statement about the mathematical function, not about bitwise reproducibility. The kernel is free to reorder floating-point operations. It is not free to change the function being computed.
 
@@ -145,7 +145,12 @@ The practical difference I keep coming back to:
 | large | smaller |
 | off-chip | on-chip |
 
->**System problem:** Where do all those intermediate values $(S, P, O)$ live while the GPU computes them?
+<!-- >**System problem:** Where do all those intermediate values $(S, P, O)$ live while the GPU computes them? -->
+
+{% capture c %}
+Where do all those intermediate values $(S, P, O)$ live while the GPU computes them?
+{% endcapture %}
+{% include callout.html type="note" title="System Problem" content=c %}
 
 That question, not the arithmetic, is what FlashAttention was built to answer.
 
