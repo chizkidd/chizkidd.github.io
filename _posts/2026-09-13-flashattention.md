@@ -9,7 +9,7 @@ mathjax: true
 
 ---
 
- _This is Part 1 of a two-part FlashAttention series. Check out [Part 2]() next. Part 2 covers the FlashAttention evolution (FA-1/2/3/4)._
+ _This is Part 1 of a two-part FlashAttention series. Check out [Part 2](https://chizkidd.github.io/2026/09/17/flashattention-2) next. Part 2 covers the FlashAttention evolution (FA-1/2/3/4)._
 
 ---
 
