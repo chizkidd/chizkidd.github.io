@@ -1,8 +1,8 @@
 ---
 layout: post
 comments: true
-title: "FlashAttention Pt 1: Personal Notes"
-excerpt: "Personal annotations on an exact tiled-attention handbook: GPU memory traffic, online softmax, FlashAttention-1, and architectural compatibility (MHA/MQA/GQA)."
+title: "FlashAttention: Part 1"
+excerpt: "Notes on an exact tiled-attention handbook: GPU memory traffic, online softmax, FlashAttention-1, and architectural compatibility (MHA/MQA/GQA)."
 date: 2026-09-13
 mathjax: true
 ---
@@ -15,9 +15,9 @@ mathjax: true
 
 **How IO-Aware Attention Makes [Transformers](https://chizkidd.github.io/2026/04/17/transformers/) Faster Without Approximating Attention**
 
-The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) of reference for this blogpost was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358). The mechanism, in three words: **Tiling + Online Softmax + Recomputation**. Everything in this handbook is elaboration on that summary. 
+The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) of reference for this blogpost was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention._ 
 
-> A technical handbook on exact tiled attention: GPU memory traffic, online softmax, forward and backward passes, IO complexity, the evolution from FlashAttention-1 through FlashAttention-4, and current framework behavior.
+The mechanism, in three words: **Tiling + Online Softmax + Recomputation**. Everything in this handbook[^15] is elaboration on that summary. The handbook does a technical deep dive on exact tiled attention: _GPU memory traffic, online softmax, forward and backward passes, IO complexity, the evolution from FlashAttention-1 through FlashAttention-4, and current framework behavior._
 
 In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addresses, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
@@ -1314,6 +1314,8 @@ Do not infer feature support from the name "FlashAttention." Check the exact lib
 [^13]: PyTorch. [Reproducibility documentation, including scaled-dot-product attention backend differences](https://docs.pytorch.org/docs/stable/notes/randomness.html). PyTorch Documentation. Accessed September 2026.
 
 [^14]: Woosuk Kwon et al. [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180). SOSP 2023.
+
+[^15]: [Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view). Google Drive PDF 2026.
 
 ### **Citation**
 
