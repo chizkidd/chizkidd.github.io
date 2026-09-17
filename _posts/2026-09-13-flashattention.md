@@ -96,21 +96,20 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 
 ### 0.1 How to Read This Handbook
 
-What stands out to me is the number of round trips to HBM in naive standard attention. Every intermediate value $(S$, $P$, $O)$ has to be written out and read back. That is the problem FlashAttention is solving.
-The handbook itself frames the subject as easiest to understand when three different questions are kept separate:
+What stands out to me is the number of round trips to HBM in naive standard attention. Every intermediate value $(S$, $P$, $O)$ has to be written out and read back. That is the problem FlashAttention is solving. The handbook itself frames the subject as easiest to understand when three different questions are kept separate:
 
-> 1. **What mathematical function is being computed?** For dense attention, the target remains ordinary scaled dot-product attention.
->
-> 2. **How much arithmetic does that function require?** Dense all-pairs query-key scoring remains quadratic in sequence length.
->
-> 3. **How does the implementation move data through the GPU memory hierarchy?** This is where FlashAttention changes the algorithmic execution dramatically.
+1. **What mathematical function is being computed?** For dense attention, the target remains ordinary scaled dot-product attention.
+
+2. **How much arithmetic does that function require?** Dense all-pairs query-key scoring remains quadratic in sequence length.
+
+3. **How does the implementation move data through the GPU memory hierarchy?** This is where FlashAttention changes the algorithmic execution dramatically.
 
 The lesson I keep coming back to here: FLOP count alone doesn't decide wall-clock speed. An algorithm can do essentially the same math, or even recompute intermediates from scratch, and still finish faster just because it shuttles far less data to and from high-bandwidth memory (HBM).
 
 <!-- > **Core distinction.** Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.[^4], [^10], [^13] -->
 
 {% capture c %}
-Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.[^4], [^10], [^13]
+Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.
 {% endcapture %}
 {% include callout.html type="note" title="Core distinction" content=c %}
 
@@ -250,7 +249,7 @@ A computational graph is not a memory schedule. Writing $P = \mathrm{softmax}(QK
 {% endcapture %}
 {% include callout.html type="note" title="Algorithmic lesson" content=c %}
 
-The pattern isn't unique to attention. **Fused kernels, tiling, recomputation, operator scheduling**; they all do the same thing. Spend a little extra arithmetic to avoid dragging huge intermediates through memory. On modern hardware, that's usually a winning bet. Matmul throughput has raced ahead of the rest of the memory hierarchy, so the math is cheap and the data movement is what hurts. FlashAttention-3 (FA3) and FlashAttention-4 (FA4) take this further, and they're upfront about it: the algorithm bends to the hardware, not the other way around.[^6], [^7]
+The pattern isn't unique to attention. **Fused kernels, tiling, recomputation, operator scheduling**; they all do the same thing. Spend a little extra arithmetic to avoid dragging huge intermediates through memory. On modern hardware, that's usually a winning bet. Matmul throughput has raced ahead of the rest of the memory hierarchy, so the math is cheap and the data movement is what hurts. FlashAttention-3 (FA3) and FlashAttention-4 (FA4) take this further, and they're upfront about it: the algorithm bends to the hardware, not the other way around.[^6,] $^,$ [^7]
 
 ### 1.3 GPU Memory Hierarchy and Why IO Matters
 
@@ -1315,7 +1314,7 @@ Do not infer feature support from the name "FlashAttention." Check the exact lib
 
 [^14]: Woosuk Kwon et al. [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180). SOSP 2023.
 
-[^15]: [Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view). Google Drive PDF 2026.
+[^15]: [Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view). Google Drive PDF. Accessed September 2026.
 
 ### **Citation**
 
