@@ -23,13 +23,13 @@ I originally learned this material from Jia-Bin Huang's visual explanation of Mo
 - [Why Mixture of Experts?](#why-mixture-of-experts)
 - [Sparse Mixture of Experts](#sparse-mixture-of-experts)
   - [The Router](#the-router)
-  - [Top-$k$ Routing](#top--routing)
+  - [Top-$k$ Routing](#top-k-routing)
 - [Fine-Grained Experts](#fine-grained-experts)
 - [Shared Experts](#shared-experts)
 - [Expert Capacity & Token Overflow](#expert-capacity--token-overflow)
 - [Dropless MoE](#dropless-moe)
 - [The Load Balancing Problem](#the-load-balancing-problem)
-  - [Noisy Top-$k$ Gating](#noisy-top--gating)
+  - [Noisy Top-$k$ Gating](#noisy-top-k-gating)
   - [Importance vs Load](#importance-vs-load)
   - [Load Balancing Loss](#load-balancing-loss)
   - [Device-Level Load Balancing](#device-level-load-balancing)
@@ -330,7 +330,7 @@ $$
 
 The resulting vector represents the router's preference over the experts.Then we select the top $K$ experts. 
 
-### **Top-$k$ Routing** <a name="#top--routing"></a>
+### **Top-$k$ Routing** <a name="top-k-routing"></a>
 
 We then select only the $k$ experts with the highest routing scores. Let
 
@@ -592,7 +592,7 @@ $$
 
 Eventually, some experts may receive very few tokens. These underused experts become effectively **dead**. This is the **load balancing problem**. The goal is not necessarily to make every expert equally good, but to prevent the router from collapsing onto a small subset of experts by distributing the processing of tokens as evenly as possible among the experts.
 
-### **Noisy Top-$k$ Gating** <a name="noisy-top--gating"></a>
+### **Noisy Top-$k$ Gating** <a name="noisy-top-k-gating"></a>
 
 One early approach is to add **Gaussian noise** to the router logits:
 
