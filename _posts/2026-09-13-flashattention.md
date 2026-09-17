@@ -109,9 +109,9 @@ The lesson I keep coming back to here: FLOP count alone doesn't decide wall-cloc
 <!-- > **Core distinction.** Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.[^4], [^10], [^13] -->
 
 {% capture c %}
-Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered.
+Dense FlashAttention is an *exact* attention algorithm: it does not replace softmax attention with a low-rank, sparse, kernelized, or approximate formula. "Exact" refers to the mathematical attention computation. Floating-point kernels can still differ by small rounding effects because operations are reordered. $^{4, 10, 13}$
 {% endcapture %}
-{% include callout.html type="note" title="Core distinction" content=c %}
+{% include callout.html type="note" title="Core distinction" content=c %
 
 The word *exact* is doing real work here. Exactness is a statement about the mathematical function, not about bitwise reproducibility. The kernel is free to reorder floating-point operations. It is not free to change the function being computed.
 
@@ -249,7 +249,7 @@ A computational graph is not a memory schedule. Writing $P = \mathrm{softmax}(QK
 {% endcapture %}
 {% include callout.html type="note" title="Algorithmic lesson" content=c %}
 
-The pattern isn't unique to attention. **Fused kernels, tiling, recomputation, operator scheduling**; they all do the same thing. Spend a little extra arithmetic to avoid dragging huge intermediates through memory. On modern hardware, that's usually a winning bet. Matmul throughput has raced ahead of the rest of the memory hierarchy, so the math is cheap and the data movement is what hurts. FlashAttention-3 (FA3) and FlashAttention-4 (FA4) take this further, and they're upfront about it: the algorithm bends to the hardware, not the other way around.[^6,] $^,$ [^7]
+The pattern isn't unique to attention. **Fused kernels, tiling, recomputation, operator scheduling**; they all do the same thing. Spend a little extra arithmetic to avoid dragging huge intermediates through memory. On modern hardware, that's usually a winning bet. Matmul throughput has raced ahead of the rest of the memory hierarchy, so the math is cheap and the data movement is what hurts. FlashAttention-3 (FA3) and FlashAttention-4 (FA4) take this further, and they're upfront about it: the algorithm bends to the hardware, not the other way around.[^6] $^,$ [^7]
 
 ### 1.3 GPU Memory Hierarchy and Why IO Matters
 
@@ -406,7 +406,7 @@ This matters most during training, where naive autograd would want those large i
 
 FlashAttention changes the memory schedule, not the math. The function itself is still dense attention. That means forming all query-key scores for $N$ tokens with head dimension $d$ still costs work proportional to $N^2 d$. There's no way around that.
 
-Here's the thing about multiplying probabilities by values: it's another dense pairwise matrix multiplication of the same broad order. FlashAttention reshuffles these operations, but it doesn't skip the dense set of query-key interactions. Those still happen.[^4], [^5]
+Here's the thing about multiplying probabilities by values: it's another dense pairwise matrix multiplication of the same broad order. FlashAttention reshuffles these operations, but it doesn't skip the dense set of query-key interactions. Those still happen.[^4] [^,] [^5]
 
 So three things must not get conflated:
 
