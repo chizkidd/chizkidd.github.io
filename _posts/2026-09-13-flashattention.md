@@ -1419,7 +1419,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026FlashAttentionPt1,
-  title   = "FlashAttention: Pt 1",
+  title   = "FlashAttention: Pt. 1",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
