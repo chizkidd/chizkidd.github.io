@@ -650,6 +650,7 @@ Think of FlashAttention as a **streaming matrix computation with exact streaming
 \end{array}
 $$ -->
 
+<!-- 
 <table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
   <tr>
     <td style="border: none;"></td>
@@ -682,6 +683,7 @@ $$ -->
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
   </tr>
 </table>
+-->
 
 Picture the full attention matrix, $Q$ on the $y$-axis and $K$ on the $x$-axis. It's a big grid. A naive implementation would calculate the entire grid and store it. FlashAttention does something different.
 
@@ -835,8 +837,8 @@ Implementation support changes faster than the mathematics. For deployed systems
 If you found this blog post helpful, please consider citing it:
 
 ```bibtex
-@article{obasi2026understandingFlashAttention,
-  title   = "Understanding FlashAttention: Personal Notes",
+@article{obasi2026FlashAttentionPt2,
+  title   = "FlashAttention: Pt. 2",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
