@@ -54,10 +54,10 @@ In this blog post, we continue the story through the evolution of the FlashAtten
 
 [6. Conclusion](#6-conclusion)
 - [6.1 The mental model to have](#61-the-mental-model-to-have)
-- [6.2 Summary](#62-summary)
+- [6.2 FlashAttention Core Idea Summary](#62-flashattention-core-idea-summary)
 
 ## **Appendix**
-- [Reference map: what to read for which question](#reference-map-what-to-read-for-which-question)
+- [Reference map](#reference-map)
 - [References](#references)
 - [Citation](#citation)
 
@@ -712,7 +712,7 @@ Think of FlashAttention as a streaming matrix computation with exact streaming s
 {% endcapture %}
 {% include callout.html type="note" title="The mental model" content=c %}
 
-### 6.2 Summary
+### 6.2 FlashAttention Core Idea Summary
 
 Let's walk the whole FlashAttention story in one derivation, and hit the key things to remember.
 
