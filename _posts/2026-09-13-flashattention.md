@@ -1221,7 +1221,7 @@ This is the systems lesson that makes FlashAttention matter beyond attention its
 FlashAttention isn't tied to standard [Multi-Head Attention](https://chizkidd.github.io/2026/04/17/transformers/#self-attention--multi-head-attention) (MHA).
 
 $$
-Q \in \mathbb{R}^{B \times N\_q \times H\_q \times d}, \quad K, V \in \mathbb{R}^{B \times N\_k \times H\_{kv} \times d}.
+Q \in \mathbb{R}^{B \times N_q \times H_q \times d}, \quad K, V \in \mathbb{R}^{B \times N_k \times H_{kv} \times d}.
 $$
 
 Let's look into FlashAttention's compatibility with MHA, [Multi-Query Attention](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa) (MQA), and [Grouped-Query Attention](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa) (GQA). Three head-sharing regimes, distinguished by $H\_q$ versus $H\_{kv}$:
