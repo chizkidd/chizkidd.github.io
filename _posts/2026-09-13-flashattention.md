@@ -58,6 +58,8 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 - [4.1 MHA, MQA, and GQA compatibility](#41-mha-mqa-and-gqa-compatibility-shared-kv-heads)
 - [4.2 Variable lengths, local attention, and dropout](#42-variable-lengths-local-attention-and-dropout)
 
+[5. Summary](#5-summary)
+
 <!-- [5. FlashAttention Evolution](#5-flashattention-evolution)
 - [5.1 FlashAttention-2: what changed](#51-flashattention-2-what-changed)
 - [5.2 FA2 parallelism across sequence tiles](#52-fa2-parallelism-across-sequence-tiles)
@@ -87,6 +89,7 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 
 
 ## **Appendix**
+- [Reference Map](#reference-map)
 - [References](#references)
 - [Citation](#citation)
 
@@ -1278,6 +1281,72 @@ Do not infer feature support from the name "FlashAttention." Check the exact lib
 {% endcapture %}
 {% include callout.html type="note" title="Important Fact" content=c %}
 
+## 5. Summary
+
+Let's walk the whole FlashAttention story in one derivation, and hit the key things to remember.
+
+**Ordinary attention:**
+
+$$
+O = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}}\right) V.
+$$
+
+**The problem.** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.
+
+**Naive execution:**
+
+$$
+QK^T \to \text{store } N \times N \text{ scores} \to \text{softmax} \to \text{store } N \times N \text{ probabilities} \to \text{multiply by } V
+$$
+
+This leads to huge memory traffic.
+
+**FlashAttention idea.** Tiling. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
+
+$$
+S\_{ij} = \frac{Q\_i K\_j^T}{\sqrt{d}}.
+$$
+
+**The problem with tiling.** Softmax needs the maximum and the denominator over the whole row.
+
+**The solution: online softmax.**
+
+1. Maintain $(m, \ell, a)$ where:
+   - $m$ = running maximum
+   - $\ell$ = running normalized exponential sum
+   - $a$ = running unnormalized value-weighted sum (accumulator)
+
+2. When a new block has a larger maximum, calculate a rescaling factor:
+
+$$
+\alpha = e^{m - m'},
+$$
+
+and rescale the old state.
+
+Therefore, we can process the full FlashAttention pipeline without ever materializing the $N \times N$ matrix:
+
+$$
+\text{tile} \to \text{score} \to \text{online softmax} \to V \text{ accumulation} \to \text{discard tile}.
+$$
+
+**Result.** The same exact dense attention mathematics, but much better memory behavior: less HBM traffic, much smaller intermediates. Arithmetic remains $O(N^2 d)$.
+
+**FlashAttention in one table:**
+
+| Property | Complexity / Formulation |
+|---|---|
+| Memory complexity | $O(Nd)$ auxiliary attention storage |
+| Compute complexity | $O(N^2 d)$ dense attention compute |
+| Attention formulation | Exact dense softmax attention |
+
+{% capture c %}
+**Same exact dense attention mathematics, but much better memory behavior.** Less HBM traffic, much smaller intermediates, arithmetic unchanged at $O(N^2 d)$.<br><br>
+{% endcapture %}
+{% include callout.html type="note" title="The one-line summary" content=c %}
+
+---
+
 ## **Appendix**
 
 <!-- | Source § | Hierarchical |
@@ -1291,6 +1360,26 @@ Do not infer feature support from the name "FlashAttention." Check the exact lib
 | 33-34 | 7.1-7.2 |
 | 35 | 8.1 |
 | 36-37 | 9.1-9.2 | -->
+
+### Reference Map
+
+| Question | Best starting source |
+|---|---|
+| What is the original IO-aware algorithm? | FlashAttention-1 paper [^4] |
+| Why does online normalization work? | Milakov & Gimelshein [^2] |
+| Was exact subquadratic-memory attention known earlier? | Rabe & Staats [^3] |
+| What specifically changed in FA2? | FlashAttention-2 paper [^5] |
+| What is Hopper-specific in FA3? | FlashAttention-3 paper [^6] |
+| What changes on Blackwell in FA4? | FlashAttention-4 paper [^7] |
+| What does the current official package support? | Dao-AILab repository [^8] |
+| How does current PyTorch select SDPA kernels? | PyTorch SDPA and `sdpa_kernel` docs [^10] $^,$ [^11] |
+| Why can exact backends differ numerically? | PyTorch reproducibility notes [^13] |
+| How is PagedAttention different? | Kwon et al. [^14] |
+
+{% capture c %}
+Implementation support changes faster than the mathematics. For deployed systems, treat the installed framework's documentation and the exact kernel repository/release as authoritative for supported devices, dtypes, head dimensions, masks, dropout, and GQA behavior.
+{% endcapture %}
+{% include callout.html type="note" title="A note on how to use this map" content=c %}
 
 ### **References**
 
@@ -1329,8 +1418,8 @@ Do not infer feature support from the name "FlashAttention." Check the exact lib
 If you found this blog post helpful, please consider citing it:
 
 ```bibtex
-@article{obasi2026understandingFlashAttention,
-  title   = "Understanding FlashAttention: Personal Notes",
+@article{obasi2026FlashAttentionPt1,
+  title   = "FlashAttention: Pt 1",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
