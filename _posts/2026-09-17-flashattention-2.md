@@ -268,26 +268,31 @@ An algorithm can be exact in its mathematical formulation while a particular low
 
 ### 1.7 FlashAttention-4: The Blackwell Generation
 
-FA4 continues the same pattern: hardware-aware redesign, this time for NVIDIA Blackwell.
+In FA4, the core pattern of hardware-aware redesign continues; in this case for NVIDIA Blackwell.
 
-Blackwell exhibits **asymmetric hardware scaling**. Tensor-core throughput increased substantially relative to Hopper, but several other resources didn't scale at the same rate. Shared-memory bandwidth and exponential throughput, in particular, lag behind.
+Blackwell exhibits **asymmetric hardware scaling**. Tensor-core throughput increased substantially relative to Hopper, but several other resources didn't scale at the same rate. Shared-memory bandwidth and exponential throughput, in particular, lag behind.[^7]
 
-This changes which stage is the bottleneck. Imagine a bar chart with tensor-core throughput on one side and softmax/exponential throughput on the other:
+This changes which stage is the bottleneck. See the illustration below:
+
+```text
+Tensor cores GEMM   [  |  |  |  |  |  |  |  |  |  ]
+Softmax/exponential [  |  ]
+```
+
+The matrix multiplication has become extremely fast. Now the secondary softmax/exponential becomes relatively expensive, and as such the bottleneck. When one subsystem becomes much faster than the others, operations that used to be secondary can become the bottleneck.[^15]
 
 - On Hopper, tensor cores were fast, but the gap to softmax and shared-memory bandwidth was narrower.
-- On Blackwell, the matrix-multiplication bar gets much taller, and the softmax/exponential bar stays roughly the same length.
+- On Blackwell, the matrix-multiplication bar gets much longer, and the softmax/exponential bar stays roughly the same length as shown in the illustration above.
 
-When one subsystem becomes much faster than the others, operations that used to be secondary can become the bottleneck. Matrix multiplication is now extremely fast. The previously secondary softmax work is now comparatively expensive.
+FA4 redesigns both the forward and backward pipelines rather than just reusing the Hopper schedule. The major improvement techniques include:
 
-FA4 redesigns both the forward and backward pipelines rather than just reusing the Hopper schedule. The paper's major techniques:
+- **Fully asynchronous MMA pipelines** and larger tiles.
+- **Software-emulated exponential plus conditional online-softmax rescaling** in the forward pass.
+- **Tensor Memory (TMEM) and 2-CTA MMA techniques** to reduce shared-memory traffic and atomic additions in the backward pass.
 
-- Fully asynchronous MMA pipelines and larger tiles.
-- Software-emulated exponential plus conditional online-softmax rescaling in the forward pass.
-- Tensor Memory and 2-CTA MMA techniques to reduce shared-memory traffic and atomic additions in the backward pass.
+On B200 with BF16, the paper reports up to **1.3x speedup** over cuDNN 9.13 and **2.7x** over its Triton comparison, reaching 1613 TFLOPs/s (71% utilization) under the evaluated configurations.[^7]
 
-On B200 with BF16, the paper reports up to 1.3x speedup over cuDNN 9.13 and 2.7x over its Triton comparison, reaching 1613 TFLOPs/s (71% utilization) under the evaluated configurations.
-
-None of this changes the big-O complexity of dense attention. FA4 attacks the new bottlenecks created by a GPU generation whose compute, memory, and function-unit balance differs from Hopper's.
+<!-- None of this changes the big-O arithemtic complexity of dense attention. FA4 attacks the new bottlenecks created by a GPU generation whose compute, memory, and function-unit balance differs from Hopper's. -->
 
 {% capture c %}
 FA4 does not change the big-O arithmetic of dense attention. It attacks the new bottlenecks created by a GPU generation whose compute, memory, and function-unit balance differs from Hopper.
@@ -296,7 +301,7 @@ FA4 does not change the big-O arithmetic of dense attention. It attacks the new 
 
 ### 1.8 FA4 and Asymmetric Hardware Scaling
 
-The FlashAttention lineage is a case study in why kernels can't be optimized once and assumed optimal forever. Let's look at two hypothetical GPU generations:
+The FlashAttention lineage is a case study in why kernels can't be optimized once and assumed optimal forever.[^15] This section contains a broader systems lesson. Let's look at two hypothetical GPU generations:
 
 | Unit | GPU A | GPU B |
 |---|---|---|
@@ -304,23 +309,17 @@ The FlashAttention lineage is a case study in why kernels can't be optimized onc
 | Softmax | 50 | 50 |
 | Memory | 50 | 50 |
 
-GPU B makes GEMM 2x faster. But the overall system doesn't become 2x faster automatically. Now that GEMM is less of a bottleneck, the relative cost of everything else goes up. Softmax and memory traffic, which were already on the critical path, are now even more clearly on it.
+GPU B makes GEMM 2x faster. But the overall system **doesn't** become 2x faster automatically. Now that GEMM is less of a bottleneck, the relative cost of everything else goes up. Softmax and memory traffic, which were already on the critical path, are now even more clearly on it. This is **asymmetric hardware scaling.** The ratio between subsystems changes, and the optimal algorithm changes with it.
 
-This is **asymmetric scaling.** The ratio between subsystems changes, and the optimal algorithm changes with it.
+>Asymmetric hardware scaling is one of the major systems principles behind the FA1 → FA4 evolution.
 
-On Blackwell, matrix multiplication became fast enough that the forward pass can be constrained by softmax and exponential work rather than by GEMM. FA4 responds by using a software-emulated exponential and by skipping the online-softmax rescaling step when the running maximum doesn't actually require it. Both moves reduce pressure on the now-relatively-slower function units.
+Blackwell is a case of this. Tensor-core throughput outran softmax and exponential throughput. So the forward pass becomes constrained by softmax and exponential work rather than GEMM. FA4 responds with a software-emulated exponential and by skipping online-softmax rescaling when the running maximum doesn't need it. Both moves take pressure off the now-slower non-matmul units.
 
-The backward pass has a different bottleneck. FA4 uses Blackwell's Tensor Memory (TMEM) and 2-CTA MMA mode to reduce shared-memory traffic and atomic accumulation overhead.
+The backward pass has a different bottleneck. FA4 uses Blackwell's Tensor Memory (TMEM) and 2-CTA MMA mode to cut shared-memory traffic and atomic accumulation overhead.
 
-The underlying principle is general:
+This is why "FA4 is just a faster FA3" misses the point. The algorithm and kernel pipeline are co-designed around the new asymmetries, which is reflected in the paper title: *Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling.*[^7]
 
-> A kernel is balanced against a particular hardware ratio. If tensor-core throughput improves faster than memory bandwidth or special-function throughput, the optimal algorithmic pipeline can change even when the mathematical function is identical.
-
-This is why "FlashAttention-4 is just a faster FA3" misses the interesting part. The algorithm and the kernel pipeline are co-designed around the new asymmetries. The FA4 paper title makes that explicit: *Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling.*
-
-It also explains why performance numbers should always name the GPU generation. A speedup on B200 is not evidence for the same ratio on H100, A100, or a non-NVIDIA accelerator. The whole point is that the ratios change.
-
-Asymmetric scaling is one of the major systems principles behind the FA1 → FA4 evolution.
+And hence why performance numbers should always name the GPU generation. A speedup on B200 doesn't reveal anything about H100, A100, or a non-NVIDIA accelerator. The ratios are the whole story.
 
 {% capture c %}
 **A kernel is balanced against a particular hardware ratio.** If tensor-core throughput improves faster than memory bandwidth or special-function throughput, the optimal algorithmic pipeline can change even when the mathematical function is identical.
