@@ -391,8 +391,7 @@ torch.nn.functional.scaled_dot_product_attention(
 )
 ```
 
-Conceptually, this function computes $\mathrm{softmax}(QK^T / \sqrt{d})V$. Internally, PyTorch selects an optimized backend based on the inputs.
-CUDA SDPA picks an optimized implementation based on the inputs. The main API docs cover FlashAttention-2, a memory-efficient attention implementation, and the C++ math implementation. To restrict which backend runs, use `torch.nn.attention.sdpa_kernel`:[^11]
+Conceptually, this function computes $\mathrm{softmax}(QK^T / \sqrt{d})V$. Internally, PyTorch picks an optimized implementation based on the inputs. The main API docs cover FlashAttention-2, a memory-efficient attention implementation, and the C++ math implementation. To restrict which backend runs, use `torch.nn.attention.sdpa_kernel`:[^11]
 
 ```python
 from torch.nn.attention import SDPBackend, sdpa_kernel
@@ -402,10 +401,7 @@ with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
     y = F.scaled_dot_product_attention(q, k, v, is_causal=True)
 ```
 
-If a requested fused kernel can't run for the given inputs, PyTorch can warn with reasons when fallbacks are disabled. Backend selection and eligibility depends on device, dtype, shape, mask, and other arguments.[^11]
-
-The `torch.nn.attention` docs also expose registration and activation hooks for newer implementations, including FA3 and FA4. This surface moves fast, so treat the installed PyTorch version's docs as the source of truth.[^12]
-
+If a requested fused kernel can't run for the given inputs, PyTorch can warn with reasons when fallbacks are disabled. Backend selection and eligibility depend on **device, dtype, shape, mask, and other arguments.**[^11] The `torch.nn.attention` docs also expose registration and activation hooks for newer implementations, including FA3 and FA4. This surface moves fast, so treat the installed PyTorch version's docs as the source of truth.[^12]
 
 {% capture c %}
 - Calling the high-level API does not necessarily mean _"I know exactly which kernel executed."_<br>
@@ -415,9 +411,7 @@ The `torch.nn.attention` docs also expose registration and activation hooks for 
 
 ### 2.2 Exactness Is Not Bitwise Identity
 
-Suppose two implementations compute the same dense SDPA definition. You should still expect small numerical differences.
-
-The reason is straightforward. **Floating-point addition is not associative:**
+Suppose two implementations, a math kernel and a FlashAttention kernel, compute the same dense SDPA definition. There'll still be small numerical differences. The reason is straightforward. **Floating-point addition is not associative:**
 
 $$
 (a + b) + c \neq a + (b + c)
@@ -425,13 +419,20 @@ $$
 
 in finite precision, for some values. Tiling changes the reduction order. Fusion can change when values are rounded. Accumulation precision can differ.
 
-Concretely, imagine implementation A sums a row in order 1, 2, 3, 4, and implementation B sums the same row in order 3, 1, 4, 2. Both compute the same mathematical function. Both return slightly different floating-point bits.
+Consider a simple example:
 
-PyTorch's reproducibility documentation explicitly notes that SDPA backends can produce different results because they perform floating-point accumulation in different orders.
+$$
+f(Q, K, V) = g(Q, K, V) = a + b + c + d
+$$
 
-So the same mathematical function is not necessarily the same floating-point bits. Numerical validation should use appropriate tolerances rather than bitwise equality.
+But:
 
-The expected tolerance depends on:
+- Implementation A sums in order 1, 2, 3, 4: $(((a + b) + c) + d)$
+- Implementation B sums in order 3, 1, 4, 2: $(((c + a) + d) + b)$
+
+Same mathematical function, slightly different floating-point bits.
+
+PyTorch's reproducibility docs note this directly: SDPA backends can produce different results because they accumulate floating-point values in different orders.[^13] So the same mathematical function is not necessarily the same floating-point bits. Validation should use numerical tolerances, and those tolerances depend on:
 
 - FP32 vs. BF16/FP16/FP8
 - accumulation precision
@@ -439,16 +440,15 @@ The expected tolerance depends on:
 - hardware and backend
 - dropout and randomness
 
-**Exact algorithm** means no deliberate mathematical approximation of dense attention. **Bitwise identical implementation** means every finite-precision operation lands on exactly the same bits. FlashAttention promises the first idea, not the second across arbitrary kernels.
+>Bitwise equality shouldn't be used as the definition of exactness.
 
-Determinism is another separate question. Current libraries expose backend- and version-specific controls for deterministic behavior, which can carry performance or memory costs.
-
-Bitwise equality shouldn't be used as the definition of exactness.
+Determinism is a separate question from exactness. Libraries expose backend- and version-specific controls for it, and those controls can carry performance or memory costs.[^8] $^,$ [^13]
 
 {% capture c %}
 **Exact algorithm** means no deliberate mathematical approximation of dense attention. **Bitwise identical implementation** means every finite-precision operation lands on exactly the same bits. FlashAttention promises the first idea, not the second across arbitrary kernels.
 {% endcapture %}
-{% include callout.html type="note" title="Two definitions of exactness" content=c %}
+{% include callout.html type="note" title="Exactness vs Bitwise identity" content=c %}
+
 
 ---
 
@@ -460,20 +460,23 @@ The names sound related, but they solve fundamentally different problems.
 
 | | FlashAttention | PagedAttention |
 |---|---|---|
-| **Primary problem** | Efficient attention computation | KV-cache memory management |
+| **Main Problem** | Efficient attention computation | KV-cache memory management |
 | **Main setting** | Attention execution | LLM serving |
-| **Mechanism** | Tiling, online softmax, fused/hardware-aware kernels | Paging-inspired KV-block allocation and mapping |
+| **Mechanism** | Tiling, online softmax, fused/hardware-aware kernels | Paging KV cache |
 | **Main state** | Attention tiles and row-wise normalization/output state | Persistent per-request KV cache |
 | **Changes dense attention formula?** | No for dense FlashAttention | No, primarily changes cache memory management |
+| **Specific task to tackle** | $N^2$ score/probability intermediates | fragmented per-request KV-cache allocation |
+<!-- | **"$N^2$ score/probability intermediates"** issue should use ... | Yes | - |
+| **"fragmented per-request KV-cache allocation"** issue should use ... | - | Yes | -->
 
 Two different questions, really:
 
-- **FlashAttention:** how do I efficiently compute $QK^T$, softmax, and $PV$?
-- **PagedAttention:** how do I efficiently store and retrieve the growing KV cache for many serving requests?
+- **FlashAttention:** How do I efficiently compute $QK^T$, softmax, and $PV$?
+- **PagedAttention:** How do I efficiently store and retrieve the growing KV cache for many serving requests?
 
-PagedAttention was introduced with vLLM to reduce KV-cache waste from fragmentation and duplication in high-throughput serving. FlashAttention is about how an attention operation consumes $Q/K/V$ and leaves out the persistent KV state across requests. They can coexist in the same serving stack.
+PagedAttention was introduced with vLLM to reduce KV-cache waste from fragmentation and duplication in high-throughput serving.[^14] FlashAttention is about how an attention operation consumes $Q/K/V$ and leaves out the persistent KV state across requests. **They can coexist in the same serving stack.**
 
-The current Dao-AILab repository even exposes a KV-cache-oriented FlashAttention interface with optional block tables, illustrating that kernel execution and cache paging are composable concerns rather than mutually exclusive ones.
+The current Dao-AILab repository even exposes a KV-cache-oriented FlashAttention interface with optional block tables, illustrating that **kernel execution** and **cache paging** are composable concerns rather than mutually exclusive ones.[^15]
 
 In practice, the stack looks like this:
 
@@ -481,13 +484,14 @@ In practice, the stack looks like this:
 Paged KV cache → FlashAttention-style kernel → Attention output
 ```
 
-A quick decision rule:
+<!-- A quick decision rule:
 
 - If the problem statement contains $N^2$ score/probability intermediates, think **FlashAttention.**
-- If it contains fragmented per-request KV-cache allocation, think **PagedAttention.**
+- If it contains fragmented per-request KV-cache allocation, think **PagedAttention.** -->
 
 {% capture c %}
-If the problem statement contains "$N^2$ score/probability intermediates," think **FlashAttention.** If it contains "fragmented per-request KV-cache allocation," think **PagedAttention.**
+- If the problem statement contains "$N^2$ score/probability intermediates," think **FlashAttention.**<br> 
+- If it contains "fragmented per-request KV-cache allocation," think **PagedAttention.**
 {% endcapture %}
 {% include callout.html type="note" title="Which one to reach for" content=c %}
 
@@ -512,9 +516,7 @@ The phrase "memory-efficient attention" is too broad to identify a method by its
 
 The first question separates dense FlashAttention from sparse/linear approaches. The second separates FlashAttention from methods that change the number of interactions.
 
-The original FlashAttention paper explicitly contrasted its dense exact algorithm with approximate methods, and separately explored block-sparse FlashAttention as an approximate/sparse extension.
-
-This is why "FlashAttention makes attention linear" is wrong. If a system shows near-linear scaling because it uses a local window or another sparse pattern, the sparsity is what changed the number of interactions. FlashAttention may still be the kernel underneath.
+The original FlashAttention paper explicitly contrasted its dense exact algorithm with approximate methods, and separately explored block-sparse FlashAttention as an approximate/sparse extension.[^4]
 
 **In summary:**
 
