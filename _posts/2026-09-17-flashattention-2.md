@@ -15,11 +15,11 @@ mathjax: true
 
 **From FA1 to FA4: The Evolution of FlashAttention**
 
-The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) of reference for this blogpost was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention._[^15]
+The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) of reference for this blogpost was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes [Transformers](https://chizkidd.github.io/2026/04/17/transformers/) Faster Without Approximating Attention._[^15]
 
 In Part 1, we covered the fundamental problem FlashAttention-1 (FA1) addresses, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
-In this blog post, we continue the story through the evolution of the FlashAttention family (FA2, FA3, FA4), its relationship to other efficient attention techniques (PagedAttention, sparse, linear), the training vs. inference distinction, current PyTorch integration, and the practical mental model to walk away with.
+In this blog post, we continue the story through the evolution of the FlashAttention family (FA2, FA3, FA4), its relationship to other efficient attention techniques (PagedAttention, [sparse](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#deepseek-sparse-attention-dsa), linear), the training vs. inference distinction, current PyTorch integration, and the practical mental model to walk away with.
 
 ---
 
@@ -67,45 +67,34 @@ In this blog post, we continue the story through the evolution of the FlashAtten
 
 ### 1.1 FlashAttention-2: What Changed
 
-FA2 didn't change the goal. It still computes exact attention without materializing quadratic intermediates. What changed was how well it uses the GPU.
-
-The FA2 paper identifies three main changes:
+FA2 didn't change the goal. It still computes exact attention without materializing quadratic intermediates. However, it did ensure the GPU was utilised better.[^5] The FA2 paper identifies three main changes:
 
 1. Reduce the number of non-matmul FLOPs.
 2. Parallelize attention across sequence tiles, even for a single head, to improve occupancy.
 3. Repartition work among warps within a thread block to reduce shared-memory communication.
 
-On A100, these changes produced roughly 2x speedup over FA1 in the paper's experiments, reaching 50-73% of theoretical maximum FLOPs/s. End-to-end GPT-style training reached up to 225 TFLOPs/s under the reported setup.
+The ~2x speedup over FA1 by FA2 on A100 in the original paper's experiments is real,[^5] but it's a benchmark-specific, GPU-specific number dependent on dtype, shapes, causal mode and software versions. It is not a universal speed guarantee. 
 
-Those numbers aren't universal speed guarantees. They depend on GPU, shapes, dtype, causal mode, software version, and benchmark methodology.
+<!-- On A100, these changes produced roughly 2x speedup over FA1 in the paper's experiments, reaching 50-73% of theoretical maximum FLOPs/s. End-to-end GPT-style training reached up to 225 TFLOPs/s under the reported setup.
 
-The bigger picture: FA1's breakthrough was making exact attention IO-aware. FA2's contribution was better parallelism and work partitioning around the same algorithmic idea. Every generation since has followed the same pattern. Keep the semantics, adapt the kernel pipeline to whatever the hardware provides.
+The bigger picture: FA1's breakthrough was making exact attention IO-aware. FA2's contribution was better parallelism and work partitioning around the same algorithmic idea. Every generation since has followed the same pattern. Keep the semantics, adapt the kernel pipeline to whatever the hardware provides. -->
 
 My breakdown of what each generation was actually doing:
 
 - **FA1:** make exact attention IO-aware.
-- **FA2:** reduce non-matmul FLOPs, parallelize across sequence tiles, improve warp-level work partitioning.
+- **FA2:** reduce non-matmul FLOPs, parallelize better across sequence tiles, improve warp-level work partitioning.
 
-The question FA2 is really asking: *"How can we utilise the GPU more effectively?"*
+Every generation since has followed the same pattern. Keep the semantics, adapt the kernel pipeline to whatever the hardware provides.
 
-The 2x speedup over FA1 on A100 is real, but it's a benchmark-specific, GPU-specific number. Not a universal guarantee.
+>The question FA2 is really asking: *"How can we utilise the GPU more effectively?"*
 
 {% capture c %}
-**Important wording.** FA1's breakthrough was IO-aware tiled exact attention. FA2's breakthrough was better parallelism and work partitioning around the same high-level algorithmic idea.
-
-This pattern will repeat: later generations keep the semantics but adapt the kernel pipeline to the resources and bottlenecks of newer GPU architectures.
+- FA1's breakthrough was IO-aware tiled exact attention.<br> 
+- FA2's breakthrough was better parallelism and work partitioning around the same high-level algorithmic idea.
 {% endcapture %}
 {% include callout.html type="note" title="The pattern across generations" content=c %}
 
 ### 1.2 FA2 Parallelism Across Sequence Tiles
-
-A GPU needs enough independent work to keep its streaming multiprocessors busy. In FA1, the natural unit of parallelism was roughly batch times head. If batch size and head count were small, that could leave the hardware under-occupied even when the sequence itself was long.
-
-FA2 adds parallelism along the sequence dimension. Different thread blocks can work on different query-row tiles for the same attention head. Query rows are independent until their own key/value reductions are complete, so this exposes more parallel work without changing attention semantics.
-
-A simplified mental picture: query rows get split into blocks (block 0, block 1, ..., block 5), and each block gets assigned to a CTA. A CTA is a Cooperative Thread Array, a logical grouping of threads that execute together on a single SM.
-
-The important point isn't the exact block assignment, which is kernel-specific. It's that long sequence length itself becomes a source of parallelism.
 
 The practical scenario where this matters:
 
@@ -113,129 +102,142 @@ The practical scenario where this matters:
 - number of heads is small,
 - sequence length is huge.
 
-In that case FA1 might not expose enough independent work. A GPU has many processing units. If you only parallelize over batch times heads, some of those units sit idle. FA2 adds parallelism along the sequence dimension, so different query-row tiles can be processed independently. That gives the GPU more work to schedule.
+In that case, FA1 might not expose enough independent work. A GPU has many processing clusters known as streaming multiprocessors (SMs) that need enough independent work to be kept busy. If we only parallelize over batch times heads, some of those units sit idle. FA2 adds parallelism along the sequence dimension, so different query-row tiles can be processed independently. That gives the GPU more work to schedule, and more resident blockes means more available parallel work.
 
-Key insight: **long sequence length itself can become a source of parallelism.**
+Let's consider a simplified mental picture below: 
 
-More parallel blocks doesn't automatically mean better. You still have constraints: occupancy, registers, shared memory, tile size, data reuse. Kernel design is an optimization problem over hardware resources, not just a request for maximum thread count.
+```text
+Q rows [ block 0 | block 1 | block 2 | block 3 | block 4 | block 5 ]
+           ↓                   ↓                   ↓
+          CTA                 CTA                 CTA
+```
+
+- Query rows get split into blocks (block 0, block 1, ..., block 5), and each block gets assigned to a CTA. 
+- A CTA is a **Cooperative Thread Array**, a logical grouping of threads that execute together on a single SM.
+
+More parallel blocks doesn't automatically mean better. We still have constraints: **occupancy, registers, shared memory, tile size, data reuse.** Kernel design is an optimization problem over hardware resources, not just a request for maximum thread count.[^15]
 
 {% capture c %}
-**More parallel blocks are not automatically better.** Tile size, occupancy, registers, shared memory, and data reuse interact. Kernel design is an optimization problem over hardware resources, not just a request for maximum thread count.
+**Long sequence length itself can become a source of parallelism.**
 {% endcapture %}
-{% include callout.html type="note" title="Optimization is not just thread count" content=c %}
+{% include callout.html type="note" title="Key insight" content=c %}
+
 
 ### 1.3 FA2 Work Partitioning and Non-Matmul FLOPs
 
-FA2 also changes how work inside each thread block is divided.
+FA2 also changes how work is divided among warps in a thread block. In FA1, warp partitioning could require partial results to be written to shared memory and then combined.[^5] That creates communication overhead. Picture it: warp writes partial result to shared memory, another warp reads it, combines it, writes again. Every round trip through shared memory costs cycles and becomes expensive.
 
-In FA1, warp partitioning could require partial results to be written to shared memory and then combined. That creates communication overhead. Picture it: warp writes partial result to shared memory, another warp reads it, combines it, writes again. Every round trip through shared memory costs cycles.
+```text
+[warp 0] --> shared memory --> [warp 1] --> shared memory --> ...
+```
 
-FA2 repartitions the work so warps cooperate in a way that cuts those shared-memory reads and writes.
+FA2 repartitions the work so warps cooperate in a manner that cuts down those shared-memory reads and writes, thereby reducing communication. It also reduces non-matmul operations via algebraic manipulation around softmax rescaling and backward computations.[^5] This matters because:
+- A FLOP isn't a universal unit of performance across all operation types.
+- Matrix multiply-accumulate (MMA) has a significantly higher throughput than exponentials, scalar reductions, conversions, and shared-memory synchronization
+- A tensor-core matmul and an exponential aren't equivalent from a hardware-throughput perspective.
 
-It also reduces operations that are expensive relative to tensor-core matrix multiplication. This includes algebraic restructuring around softmax rescaling and backward computations so fewer non-matmul FLOPs are performed.
-
-Why does this matter? Because "one FLOP" isn't a useful performance currency across all operation types. Tensor cores execute matrix multiply-accumulate at enormous throughput. Exponentials, scalar reductions, conversions, and shared-memory synchronization all have very different limits. A tensor-core matmul and an exponential aren't equivalent from a hardware-throughput perspective.
-
-This leads to a useful optimization principle: **after fixing one bottleneck, another bottleneck emerges.**
+We can track the bottlenecks addressed by each FlashAttention generation so far:
 
 - FA1 attacked HBM traffic.
-- FA2 exposed the following as the next important bottlenecks: occupancy, warp communication, non-matmul operations.
+- FA2 exposed the following as the next important bottlenecks: **occupancy, warp communication, non-matmul operations.**
 
-FA2 also refines what's saved for backward, keeping compact row-wise log-sum-exp information and recomputing tiles instead of materializing probabilities. That preserves the linear-memory character while improving the kernel's work distribution.
+FA2 also changes what gets saved for backward. Instead of keeping probabilities around, it stores compact row-wise log-sum-exp information and recomputes the tiles, thereby yielding the same linear-memory character and better kernel work distribution.
 
 {% capture c %}
-**FA2 is a reminder that after IO is improved, the next bottleneck may be occupancy, warp communication, or non-matmul work.** Optimization moves the bottleneck rather than making hardware constraints disappear.
+A useful optimization principle from the FlashAttention evolution so far: **after fixing one bottleneck, another bottleneck emerges.**
 {% endcapture %}
 {% include callout.html type="note" title="Bottlenecks shift" content=c %}
 
+
 ### 1.4 FlashAttention-3: The Hopper Generation
 
-Hopper GPUs introduced hardware features that changed the best way to schedule attention. FA3 was designed specifically to exploit those capabilities.
+<u>Why does FA3 exists at all?</u> GPU hardware changed. Hopper introduced capabilities that changed the best way to schedule attention, and FA2 didn't fully exploit what H100 could do. Its measurements showed only around 35% utilization, which leaves a lot of headroom.
 
-FA2 achieved only about 35% utilization on H100 in its measurements. That leaves a lot of headroom. FA3 attacks that gap with three broad ideas:
-
-1. Overlap computation and data movement using asynchrony and warp specialization.
-2. Interleave matrix multiplication and softmax so different execution units stay busy.
-3. Exploit FP8 hardware with quantization techniques designed to control numerical error.
-
-On H100, the NeurIPS 2024 publication reports 1.5 to 2.0x speedup over FA2 in its benchmark suite. BF16 throughput reaches up to 840 TFLOPs/s (85% utilization), and FP8 reaches 1.3 PFLOPs/s. Again, these are hardware- and benchmark-specific empirical results, not promises for arbitrary models.
-
-Why FA3 exists at all: GPU hardware changed. FA2 didn't fully exploit what H100 could do, based on the reported measurements (around 35% utilization).
-
-FA3 introduces:
+FA3 was designed around NVIDIA Hopper GPUS and attacks that utilization gap with four broad ideas:
 
 1. Asynchronous computation and data movement.
 2. Warp specialization.
-3. Overlapping GEMM and softmax.
+3. Interleaving GEMM (General Matrix-to-Matrix Multiplication) and softmax work.
 4. FP8 support.
 
-The important point: **the mathematical algorithm didn't suddenly change.**
+><u>The important point:</u> **the mathematical algorithm didn't suddenly change,** the execution workflow changed to exploit Hopper hardware architecture.
 
-FA3's BF16 path still preserves the exact-attention goal. The FP8 path intentionally introduces lower-precision arithmetic, so it needs its own numerical-accuracy discussion. That's a different mode of operation, not a different algorithm.
+<!-- FA3's BF16 path still preserves the exact-attention goal. The FP8 path intentionally introduces lower-precision arithmetic, so it needs its own numerical-accuracy discussion. That's a different mode of operation, not a different algorithm.[^15] -->
+
+On H100, the NeurIPS 2024 publication reports 1.5 to 2.0x speedup over FA2 in its benchmark suite. BF16 throughput reaches up to 840 TFLOPs/s (85% utilization), and FP8 reaches 1.3 PFLOPs/s.[^6] Like earlier, these are hardware- and benchmark-specific empirical results, not universal across any/all models.
 
 {% capture c %}
 **FA3 is not "a more approximate FlashAttention."** The FP16/BF16 path preserves the exact-attention algorithmic goal. The FP8 path intentionally introduces lower-precision arithmetic and therefore needs its own numerical-accuracy discussion.
 {% endcapture %}
 {% include callout.html type="note" title="Exactness vs. precision" content=c %}
 
-In FA3, what changed was the execution pipeline, tuned to exploit Hopper hardware.
-
 ### 1.5 FA3 Asynchrony: Overlap Data Movement, GEMM, and Softmax
 
 Picture a naive pipeline:
 
 ```
-load → GEMM → softmax → PV GEMM → load next tile
+load tile → GEMM → softmax → PV GEMM → load next tile
 ```
 
-Each stage waits for the previous one. That leaves periods where some hardware resources sit idle while others work. Tensor cores go quiet during softmax. Memory buses go quiet during GEMM.
+Each stage waits for the previous one. That leaves periods where some hardware resources sit idle while others work. Tensor cores go quiet during softmax. Memory buses go quiet during GEMM. FA3 builds a more overlapping pipeline:
 
-FA3 builds a more overlapping pipeline:
-
-```
+<!-- ```
 load next tile || QK^T GEMM || softmax/update || PV GEMM
 ```
 
-The `||` means the stages are intentionally overlapped where dependencies permit. They're not mathematically independent, but the hardware can be kept busy across stage boundaries.
+The `||` means the stages are intentionally overlapped where dependencies permit. They're not mathematically independent, but the hardware can be kept busy across stage boundaries. -->
 
-Two Hopper capabilities make this possible:
+```
+Load K/V tile 1
+       Compute tile 1
+              Load K/V tile 2
+                     Compute tile 2
+                            Load K/V tile 3
+                                   Compute tile 3
+```
+
+and more explicitly:
+
+```
+Load K/V tile 1
+         QK^T GEMM
+            softmax/update
+                     PV GEMM
+                          Load K/V tile 2
+                                  QK^T GEMM
+                                     softmax/update
+                                              PV GEMM
+```
+
+The exact implementation is more sophisticated than the toy depictions above, but the architectural intuition is what matters. Two Hopper capabilities make this overlapping possible:
 
 - **Tensor Memory Accelerator (TMA)**, which moves data asynchronously.
 - **Asynchronous warp-group matrix-multiply-accumulate (WGMMA)**, which lets tensor-core work proceed without blocking the issuing warp.
 
-FA3 also uses **warp specialization**. Different warps take responsibility for different stages of the pipeline: some handle data movement, some issue GEMMs, some handle softmax and update. That way a warp that's waiting on a memory transfer doesn't stall the whole block.
+FA3 also uses **warp specialization** to allow data movement and communication to overlap.[^6] Different warps take responsibility for different stages of the pipeline: some handle data movement, some issue GEMMs, some handle softmax and update. That way a warp that's waiting on a memory transfer doesn't stall the whole block.
 
-FA3 also uses a **ping-pong style schedule** to interleave block matrix multiplication and softmax. The point is to avoid leaving tensor cores idle while scalar and special-function work is performed, and vice versa.
+FA3 also uses a **ping-pong style schedule** to interleave block matrix multiplication and softmax. The goal is to avoid leaving tensor cores idle while non-matmul operations (scalar and special-function work) are performed, and vice versa.[^6]
 
-The online-softmax recurrence itself hasn't changed. The normalization and value-accumulation stages still do what Part 1 describes. What changed is the hardware pipeline used to execute them.
+The online-softmax recurrence itself hasn't changed. The normalization and value-accumulation stages still do what [Part 1](https://chizkidd.github.io/2026/09/13/flashattention/) describes in FlashAttention-1. What changed is the hardware pipeline used to execute them.
 
-This is a good moment to look at the whole progression:
+<!-- This is a good moment to look at the whole progression:
 
 - **FA1:** how do we avoid HBM traffic?
 - **FA2:** how do we partition the work better?
 - **FA3:** how do we overlap distinct execution resources on Hopper?
 
-Each question follows from the previous answer exposing a new bottleneck.
+Each question follows from the previous answer exposing a new bottleneck. -->
 
 {% capture c %}
-FA1 asks "How do we avoid HBM traffic?" FA2 asks "How do we partition the work better?" FA3 asks "How do we overlap distinct execution resources on Hopper?"
-
-The online-softmax recurrence is still present conceptually. What changes is the hardware pipeline used to execute the score, normalization, and value-accumulation stages.
+- FA1 asks "How do we tackle HBM traffic?"<br> 
+- FA2 asks "How do we partition & parallelize the work better?"<br> 
+- FA3 asks "How do we maximize the use of distinct execution resources on Hopper?"
 {% endcapture %}
-{% include callout.html type="note" title="Three questions, three generations" content=c %}
+{% include callout.html type="note" title="Progression: What bottleneck is being addressed?" content=c %}
 
 ### 1.6 FA3 FP8: Performance Without Pretending Precision Is Free
 
-Hopper gives you very high tensor-core throughput for FP8. That's tempting, but it isn't free. Simply converting every attention operand to FP8 produces unacceptable numerical error, because attention combines dot products, exponentials, normalization, and value accumulation over dynamic ranges that vary by tile.
-
-FA3 introduces an FP8 path with two techniques to control the error:
-
-- **Block quantization**, which scales values relative to their local tile rather than globally.
-- **Incoherent processing**, which spreads out the effective range of the values being quantized.
-
-In the final NeurIPS 2024 publication, FA3 reaches 1.3 PFLOPs/s on H100 with this path, and reports **2.6x lower numerical error** than the baseline FP8 attention method used for comparison.
-
-Now the precision question. Attention contains a chain of operations:
+<u>Now let's focus on precision.</u> Hopper gives extremely high tensor-core throughput for FP8. That's tempting, but it isn't free. Simply converting every attention operand to FP8 produces unacceptable numerical error.[^15] Attention contains a chain of operations:
 
 $$
 QK^T \rightarrow e^{x} \rightarrow \frac{e^{x}}{\sum e^{x}} \rightarrow PV.
@@ -243,23 +245,26 @@ $$
 
 These operations have different numerical sensitivities. Dot products tolerate some loss. The exponential is much more sensitive. Normalization involves division. The value accumulation sums over long sequences. Each stage has its own error profile.
 
-So low precision doesn't automatically buy you free performance. It shifts error into specific parts of the pipeline, and you have to design around that shift.
+FA3 introduces an FP8 path with two techniques to control that error:
 
-This is where two meanings of "exact" have to be kept separate.
+- **Block quantization**, which scales values relative to their local tile rather than globally.
+- **Incoherent processing**, which spreads out the effective range of the values being quantized.
+
+In the final NeurIPS 2024 publication, FA3 reaches 1.3 PFLOPs/s on H100 with this path, and reports **2.6x lower numerical error** than the baseline FP8 attention method used for comparison.[^6]
+
+So low precision doesn't automatically buy you free performance. It shifts error into specific parts of the pipeline, and you have to design around that shift. This is exactly where "exact" starts to mean two different things:
 
 - **Algorithmic exactness.** The algorithm still represents $\mathrm{softmax}(QK^T)V$. No pairs are skipped, no low-rank approximation is made.
 - **Numerical precision.** The actual calculation may use FP8, and therefore experiences quantization and rounding error.
 
-An algorithm can be exact in its mathematical formulation while a particular low-precision implementation of that algorithm is numerically less accurate. Both things are true at once, and neither cancels the other.
+An algorithm can be exact in its mathematical formulation while a particular low-precision implementation of that algorithm is numerically less accurate. Both things are true at once, and neither cancels the other. A model's acceptable precision depends on the full training and inference setup. FP8 support is a hardware-and-numerics feature layered onto the FlashAttention execution strategy, not proof that FP8 is universally interchangeable with BF16 or FP16.[^15]
 
-A model's acceptable precision depends on the full training and inference setup. FP8 support is a hardware-and-numerics feature layered onto the FlashAttention execution strategy, not proof that FP8 is universally interchangeable with BF16 or FP16.
+<u>One more scope note</u>: ***FA3's FP8 path is Hopper-specific.*** The official repository still separates FA3's implementation from other backends, so these aren't universal features of "FlashAttention."[^8]
 
-{% capture c %}
+<!-- {% capture c %}
 **Do not conflate two meanings of "exact."** FlashAttention's tiling and online-softmax algorithm can be exact with respect to the dense attention formula, while performing that formula in a lower-precision numeric format still introduces quantization and rounding error.
-
-The official repository continues to separate FA3's Hopper-specific implementation from other backends, which is another reason not to state FA3 capabilities as generic properties of "FlashAttention."
 {% endcapture %}
-{% include callout.html type="note" title="Algorithmic exactness vs. numerical precision" content=c %}
+{% include callout.html type="note" title="Algorithmic exactness vs. numerical precision" content=c %} -->
 
 ### 1.7 FlashAttention-4: The Blackwell Generation
 
