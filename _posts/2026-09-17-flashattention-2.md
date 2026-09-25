@@ -328,28 +328,16 @@ And hence why performance numbers should always name the GPU generation. A speed
 
 ### 1.9 FA4 Implementation and Current Status
 
-The current official Dao-AILab repository exposes FlashAttention-4 as a CuTeDSL implementation, optimized for Hopper and Blackwell GPUs such as H100 and B200.
+FlashAttention-4 is a CuTeDSL implementation, optimized for Hopper and Blackwell GPUs such as H100 and B200 via the `flash-attn-4` package installation.[^8] CuTeDSL stands for **CUDA Tensor Domain Specific Language**. It's a Python-based programming framework developed by NVIDIA for writing highly optimized, low-level, state-of-the-art GPU kernels.
 
-CuTeDSL stands for **CUDA Tensor Domain Specific Language**. It's a Python-based programming framework developed by NVIDIA for writing highly optimized, low-level, SOTA GPU kernels.
+One engineering motivation behind the FA4 choice is **compile-time productivity**. The FA4 paper reports substantially faster compilation, roughly 20 to 30 times, compared with the traditional C++ template-based approach used in its comparison, while still retaining the required low-level expressivity.[^7] As of September 2026, PyPI classifies `flash-attn-4` as: `Development Status :: 3 - Alpha`.[^9]
 
-One engineering motivation behind the FA4 choice is **compile-time productivity**. The FA4 paper reports substantially faster compilation, roughly 20 to 30 times, compared with the traditional C++ template-based approach used in its comparison, while still retaining the required low-level expressivity.
+That's the caveat. **Current implementation status is not the same thing as an evergreen property of FlashAttention.** Packages, GPU support, CUDA compatibility, PyTorch, hardware and framework integration all evolve quickly.
 
-As of September 2026, PyPI classifies `flash-attn-4` as:
-
-```
-Development Status :: 3 - Alpha
-```
-
-That's the caveat. Current implementation status is not the same thing as an evergreen property of FlashAttention. Packages, GPU support, CUDA compatibility, and framework integration all evolve quickly.
-
-The durable lesson is the algorithmic progression. The current library support layer changes much faster than the underlying ideas. Algorithmic knowledge evolves slowly. Library support can change overnight.
-
-When deploying FlashAttention, it's worth separating the two. The algorithm tells you what should be possible. The current library tells you what's actually available on your specific GPU, CUDA version, and framework.
+The durable lesson is the algorithmic progression. **The current library support layer changes much faster than the underlying algorithmic ideas.** Algorithmic knowledge evolves slowly. Library support can change overnight. When deploying FlashAttention, it's worth separating the two. The algorithm tells you what should be possible. The current library tells you what's actually available on your specific GPU, CUDA version, and framework.
 
 {% capture c %}
-Treat this as a current implementation snapshot, not an evergreen property. "FA4 exists in the official repository" and "every production environment should replace FA2 with FA4" are very different claims.
-
-Hardware, CUDA, PyTorch, feature, and packaging requirements evolve quickly. The durable lesson is the algorithmic progression, while exact installation and support claims should always be checked against the current official repository before deployment.
+Treat this as a current implementation snapshot, not an evergreen property. _"FA4 exists in the official repository"_ and _"every production environment should replace FA2 with FA4"_ are very different claims.
 {% endcapture %}
 {% include callout.html type="note" title="Implementation snapshot" content=c %}
 
@@ -359,30 +347,30 @@ Here's the whole evolution on one page:
 
 | Version | Main Problem | Main Solution |
 |---|---|---|
-| **FA1** | Excessive memory traffic | Tiling + online softmax + fused exact attention + IO awareness |
+| **FA1** | Excessive memory (IO/HBM) traffic | Tiling + online softmax + fused exact attention + IO awareness |
 | **FA2** | GPU underutilization | More sequence-level parallelism + better warp-level work partitioning + fewer non-matmul FLOPs |
 | **FA3** | Hopper execution imbalance | Asynchronous TMA/WGMMA pipeline + GEMM-softmax overlap + warp specialization + FP8 path |
 | **FA4** | Blackwell hardware asymmetry | Fully async MMA pipeline + larger tiles + optimized non-matmul work (software exp / conditional online-softmax rescale, TMEM, 2-CTA backward techniques) |
 
-And here's the same content in the source handbook's format, with the numbers:
+<!-- And here's the same content in the source handbook's format, with the numbers:
 
 | | Main target | Core kernel / algorithmic emphasis | Selected paper-reported results |
 |---|---|---|---|
 | **FA1** | IO / HBM traffic | Tiling, online softmax, fused exact attention, IO analysis | NeurIPS 2022 paper reports substantial training speedups vs. then-current baselines |
 | **FA2** | GPU utilization | More sequence-level parallelism, fewer non-matmul FLOPs, improved warp work partitioning | About 2x over FA1 and 50-73% theoretical max FLOPs/s on A100 in paper |
 | **FA3** | Hopper | Warp specialization, asynchronous TMA/WGMMA pipeline, GEMM-softmax overlap, FP8 path | 1.5-2.0x over FA2 on H100 in paper, BF16 up to 840 TFLOPs/s |
-| **FA4** | Blackwell-era asymmetry | Fully async MMA pipelines, larger tiles, software exp / conditional rescale, TMEM and 2-CTA backward techniques | Up to 1613 TFLOPs/s BF16 on B200, 1.3x vs. cuDNN 9.13 in paper |
+| **FA4** | Blackwell-era asymmetry | Fully async MMA pipelines, larger tiles, software exp / conditional rescale, TMEM and 2-CTA backward techniques | Up to 1613 TFLOPs/s BF16 on B200, 1.3x vs. cuDNN 9.13 in paper | -->
 
 A few things to hold onto when reading those numbers:
 
-- The version number should not be interpreted as a sequence of different attention definitions. The family preserves the central goal of efficient attention evaluation while adapting the scheduling and numerical paths to newer hardware.
-- The exact feature matrix differs across implementations. FA3 is strongly associated with Hopper-specific optimization, while the current FA4 repository targets both Hopper and Blackwell through its CuTeDSL path.
+<!-- - The version number should not be interpreted as a sequence of different attention definitions. The family preserves the central goal of efficient attention evaluation while adapting the scheduling and numerical paths to newer hardware. -->
 - These are four successive generations of efficient implementations of attention, not four different attention mechanisms. The mathematical target remains fundamentally the same for dense attention.
+- The exact feature matrix differs across implementations. FA3 is strongly associated with Hopper-specific optimization, while the current FA4 repository targets both Hopper and Blackwell through its CuTeDSL path.[^8]
 
-{% capture c %}
+<!-- {% capture c %}
 The version number should not be interpreted as a sequence of different attention definitions. The family preserves the central goal of efficient attention evaluation while adapting the scheduling and numerical paths to newer hardware.
 {% endcapture %}
-{% include callout.html type="note" title="Successive generations, not different mechanisms" content=c %}
+{% include callout.html type="note" title="Successive generations, not different mechanisms" content=c %} -->
 
 ---
 
@@ -390,7 +378,7 @@ The version number should not be interpreted as a sequence of different attentio
 
 ### 2.1 PyTorch Scaled-Dot-Product Attention Today
 
-Modern PyTorch provides a high-level API:
+Modern PyTorch provides a high-level API:[^10]
 
 ```python
 torch.nn.functional.scaled_dot_product_attention(
@@ -404,10 +392,7 @@ torch.nn.functional.scaled_dot_product_attention(
 ```
 
 Conceptually, this function computes $\mathrm{softmax}(QK^T / \sqrt{d})V$. Internally, PyTorch selects an optimized backend based on the inputs.
-
-The current PyTorch documentation says CUDA SDPA can automatically select optimized implementations based on the inputs. The main API documentation explicitly discusses FlashAttention-2, a memory-efficient attention implementation, and the C++ math implementation. The preferred mechanism for restricting the backend is `torch.nn.attention.sdpa_kernel`.
-
-For example:
+CUDA SDPA picks an optimized implementation based on the inputs. The main API docs cover FlashAttention-2, a memory-efficient attention implementation, and the C++ math implementation. To restrict which backend runs, use `torch.nn.attention.sdpa_kernel`:[^11]
 
 ```python
 from torch.nn.attention import SDPBackend, sdpa_kernel
@@ -417,26 +402,14 @@ with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
     y = F.scaled_dot_product_attention(q, k, v, is_causal=True)
 ```
 
-If a requested fused kernel can't run for the supplied inputs, PyTorch can warn with reasons when other fallbacks are disabled. Backend eligibility depends on device, dtype, shape, mask, and other arguments.
+If a requested fused kernel can't run for the given inputs, PyTorch can warn with reasons when fallbacks are disabled. Backend selection and eligibility depends on device, dtype, shape, mask, and other arguments.[^11]
 
-Current `torch.nn.attention` documentation also exposes registration and activation hooks for newer FlashAttention implementations, including identifiers such as FA3 and FA4. This is a fast-moving integration surface, so use the installed PyTorch version's documentation as authority.
+The `torch.nn.attention` docs also expose registration and activation hooks for newer implementations, including FA3 and FA4. This surface moves fast, so treat the installed PyTorch version's docs as the source of truth.[^12]
 
-The practical point: calling the high-level API doesn't necessarily mean "I know exactly which kernel executed."
-
-Backend selection and eligibility depend on:
-
-- device
-- dtype
-- shape
-- mask
-- other arguments
-
-PyTorch does expose mechanisms for restricting backend selection when needed. That's important for production and benchmarking. Always verify what actually ran.
 
 {% capture c %}
-Calling the high-level API does not necessarily mean "I know exactly which kernel executed."
-
-If you need to know which backend is running, restrict it explicitly with `sdpa_kernel` or check the PyTorch version's registration APIs. In production and benchmarking, verify rather than assume.
+- Calling the high-level API does not necessarily mean _"I know exactly which kernel executed."_<br>
+- If you need to know which backend is running, restrict it explicitly with `sdpa_kernel` or check the PyTorch version's registration APIs. In production and benchmarking, verify rather than assume.
 {% endcapture %}
 {% include callout.html type="note" title="Which kernel actually ran" content=c %}
 
