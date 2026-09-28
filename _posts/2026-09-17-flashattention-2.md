@@ -427,8 +427,8 @@ $$
 
 But:
 
-- Implementation A sums in order 1, 2, 3, 4: $(((a + b) + c) + d)$
-- Implementation B sums in order 3, 1, 4, 2: $(((c + a) + d) + b)$
+- Implementation A sums in order $1, 2, 3, 4$: $(((a + b) + c) + d)$
+- Implementation B sums in order $3, 1, 4, 2$: $(((c + a) + d) + b)$
 
 Same mathematical function, slightly different floating-point bits.
 
