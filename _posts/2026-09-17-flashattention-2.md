@@ -466,6 +466,7 @@ The names sound related, but they solve fundamentally different problems.
 | **Main state** | Attention tiles and row-wise normalization/output state | Persistent per-request KV cache |
 | **Changes dense attention formula?** | No for dense FlashAttention | No, primarily changes cache memory management |
 | **Specific task to tackle** | $N^2$ score/probability intermediates | fragmented per-request KV-cache allocation |
+
 <!-- | **"$N^2$ score/probability intermediates"** issue should use ... | Yes | - |
 | **"fragmented per-request KV-cache allocation"** issue should use ... | - | Yes | -->
 
