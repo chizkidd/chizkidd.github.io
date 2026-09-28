@@ -704,7 +704,7 @@ The mathematical interactions remain. The physical representation of the interme
 The evolution from FA1 to FA4, in one line each:
 
 - **FA1** → "Reduce expensive HBM movement."
-- **FA2** → "Now use the GPU more effectively."
+- **FA2** → "Now use the GPU more effectively via better parallelism."
 - **FA3** → "Now overlap communication and memory movement on Hopper."
 - **FA4** → "Now redesign the pipeline for Blackwell's new hardware balance."
 
