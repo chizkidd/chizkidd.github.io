@@ -15,7 +15,7 @@ mathjax: true
 
 **From FA1 to FA4: The Evolution of FlashAttention**
 
-The reference [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) for this blog post was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes [Transformers](https://chizkidd.github.io/2026/04/17/transformers/) Faster Without Approximating Attention._[^15]
+The reference [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) for this blog post was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes [Transformers](https://chizkidd.github.io/2026/04/17/transformers/) Faster Without Approximating Attention._
  
 In Part 1, we covered the fundamental problem FlashAttention-1 (FA1) addresses, the mathematical tricks it uses, the GPU implementation of those tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
@@ -73,22 +73,21 @@ FA2 didn't change the goal. It still computes exact attention without materializ
 2. Parallelize attention across sequence tiles, even for a single head, to improve occupancy.
 3. Repartition work among warps within a thread block to reduce shared-memory communication.
 
-The ~2x speedup over FA1 by FA2 on A100 in the original paper's experiments is real,[^5] but it's a benchmark- and GPU-specific number that depends on dtype, shapes, causal mode, and software versions. It is not a universal speed guarantee.
+The roughly 2x speedup of FA2 over FA1 on A100 in the original paper's experiments is real,[^5] but it's a benchmark- and GPU-specific number that depends on dtype, shapes, causal mode, and software versions. It is not a universal speed guarantee.
 
-My breakdown of what each generation was actually doing:
+<!-- My breakdown of what each generation was actually doing:
 
 - **FA1:** make exact attention IO-aware.
-- **FA2:** reduce non-matmul FLOPs, parallelize better across sequence tiles, improve warp-level work partitioning.
-
-Every generation since has followed the same pattern: keep the semantics, and adapt the kernel pipeline to whatever the hardware provides.
+- **FA2:** reduce non-matmul FLOPs, parallelize better across sequence tiles, improve warp-level work partitioning. -->
  
 >**The question FA2 is really asking: *"How can we utilize the GPU more effectively?"***
 
 {% capture c %}
 - FA1's breakthrough was IO-aware tiled exact attention.<br> 
-- FA2's breakthrough was better parallelism and work partitioning around the same high-level algorithmic idea.
+- FA2's breakthrough was better parallelism and work partitioning around the same high-level algorithmic idea.<br>
+Every subsequent FlashAttention evolution since has followed the same pattern: keep the semantics, and adapt the kernel pipeline to the resources and bottlenecks of newer GPU architectures.
 {% endcapture %}
-{% include callout.html type="note" title="The pattern across generations" content=c %}
+{% include callout.html type="note" title="The FlashAttention pattern across generations" content=c %}
 
 ### 1.2 FA2 Parallelism Across Sequence Tiles
 
@@ -722,6 +721,14 @@ $$
 ---
 
 ## **Appendix**
+
+<!-- | Source § | Hierarchical |
+|---|---|
+| 21-30 | 1.1-1.10 |
+| 31-32 | 2.1-2.2 |
+| 33-34 | 3.1-3.2 |
+| 35 | 4.1 |
+| 36-37 | 5.1-5.2 | -->
 
 ### Reference Map
 

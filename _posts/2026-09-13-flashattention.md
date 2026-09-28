@@ -15,11 +15,11 @@ mathjax: true
 
 **How IO-Aware Attention Makes [Transformers](https://chizkidd.github.io/2026/04/17/transformers/) Faster Without Approximating Attention**
 
-The [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) of reference for this blogpost was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention._ 
+The reference [handbook](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view) for this blog post was inspired by this [tweet](https://x.com/techNmak/status/2098057360908685358) and is titled: _Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention._ 
 
 The mechanism, in three words: **Tiling + Online Softmax + Recomputation**. Everything in this handbook[^15] is elaboration on that summary. The handbook does a technical deep dive on exact tiled attention: _GPU memory traffic, online softmax, forward and backward passes, IO complexity, the evolution from FlashAttention-1 through FlashAttention-4, and current framework behavior._
 
-In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addresses, the mathematical tricks utilised, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
+In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addresses, the mathematical tricks utilized, the GPU implementation of these math tricks, and the architectural compatibility ([MHA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-head-attention)/[MQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#multi-query-attention-mqa)/[GQA](https://chizkidd.github.io/2026/08/05/attention-efficient-scalable/#grouped-query-attention-gqa)) of FlashAttention.
 
 ---
 
@@ -28,7 +28,7 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 [0. Introduction](#0-introduction)
 <!-- - [0.1 Standard Naive Attention Implementation](#0-introduction) -->
 - [0.1 How to Read This Handbook](#01-how-to-read-this-handbook)
-- [0.1 Notation](#02-notation)
+- [0.2 Notation](#02-notation)
 
 [1. The Fundamental Problem](#1-the-fundamental-problem)
 - [1.1 What FlashAttention actually optimizes](#11-what-flashattention-actually-optimizes)
@@ -59,34 +59,6 @@ In this blog post, we cover the fundamental problem FlashAttention-1 (FA1) addre
 - [4.2 Variable lengths, local attention, and dropout](#42-variable-lengths-local-attention-and-dropout)
 
 [5. Summary](#5-summary)
-
-<!-- [5. FlashAttention Evolution](#5-flashattention-evolution)
-- [5.1 FlashAttention-2: what changed](#51-flashattention-2-what-changed)
-- [5.2 FA2 parallelism across sequence tiles](#52-fa2-parallelism-across-sequence-tiles)
-- [5.3 FA2 work partitioning and non-matmul FLOPs](#53-fa2-work-partitioning-and-non-matmul-flops)
-- [5.4 FlashAttention-3: the Hopper generation](#54-flashattention-3-the-hopper-generation)
-- [5.5 FA3 asynchrony: overlap data movement, GEMM, and softmax](#55-fa3-asynchrony-overlap-data-movement-gemm-and-softmax)
-- [5.6 FA3 FP8: performance without pretending precision is free](#56-fa3-fp8-performance-without-pretending-precision-is-free)
-- [5.7 FlashAttention-4: the Blackwell generation](#57-flashattention-4-the-blackwell-generation)
-- [5.8 FA4 and asymmetric hardware scaling](#58-fa4-and-asymmetric-hardware-scaling)
-- [5.9 FA4 implementation and current status](#59-fa4-implementation-and-current-status)
-- [5.10 FlashAttention-1 through -4 compared](#510-flashattention-1-through-4-compared)
-
-[6. Using FlashAttention in Frameworks](#6-using-flashattention-in-frameworks)
-- [6.1 PyTorch scaled-dot-product attention today](#61-pytorch-scaled-dot-product-attention-today)
-- [6.2 Exactness is not bitwise identity](#62-exactness-is-not-bitwise-identity)
-
-[7. FlashAttention vs. Other Techniques](#7-flashattention-vs-other-techniques)
-- [7.1 FlashAttention vs. PagedAttention](#71-flashattention-vs-pagedattention)
-- [7.2 FlashAttention vs. sparse and linear attention](#72-flashattention-vs-sparse-and-linear-attention)
-
-[8. Training vs. Inference](#8-training-vs-inference)
-- [8.1 Training, prefill, and decode are different regimes](#81-training-prefill-and-decode-are-different-regimes)
-
-[9 Practical Engineering](#9-practical-engineering)
-- [9.1 Common implementation mistakes](#91-common-implementation-mistakes)
-- [9.2 Common misconceptions and the practical mental model](#92-common-misconceptions-and-the-practical-mental-model) -->
-
 
 ## **Appendix**
 - [Reference Map](#reference-map)
@@ -335,7 +307,7 @@ $$
 \text{batch} &= 1 \\
 d_h &= 32 \\
 N &= 8192 \\
-\text{dtype } &= \text{FP1/BF16} \\
+\text{dtype } &= \text{FP16/BF16} \\
 \text{tensor shape } &= [1, 32, 8192, 8192] \\
 2 & \text{ bytes/element} \\
 \end{aligned}
@@ -519,7 +491,7 @@ FlashAttention's key contribution was to bring together the techniques below int
 
 - **Softmax is harder** because every element depends on the entire row. If we process the first block, we do not know the eventual denominator. Even worse, numerical stability requires knowing the maximum.
 
-- For kernel executions, we choose tile shapes and loop order based on: **on-chip capacity, head dimension, GPU generation, causal structure, and work partitioning.** FA1 uses tile sizes derived from SRAM capacity $M$.[^4]
+- In the kernel, we choose tile shapes and loop order based on **on-chip capacity, head dimension, GPU generation, causal structure, and work partitioning.** FA1 uses tile sizes derived from SRAM capacity $M$.[^4]
 
 <!-- > Tiling alone is not enough. Matrix multiplication tiles compose naturally because sums can be accumulated. Softmax couples every score in a row through a shared maximum and denominator, so we need a way to merge blocks without seeing the full row at once. -->
 
@@ -577,7 +549,7 @@ $$
 x &= [1000, 999], \quad \text{Directly computing $e^{1000}$ overflows}\\
 m &= 1000 \\
 x - m &= [1000 - 1000, \; 999 - 1000] = [0, -1] \\
-e^[0, -1] &\approx [1, 0.368] \\
+e^{[0, -1]} &\approx [1, 0.368] \\
 \end{aligned}
 $$
 
@@ -620,7 +592,7 @@ $$
 \text{Block 1 normalized output} &: \frac{[e^{0}, e^{-1}]}{(1 + e^{-1})} \\
 \text{Block 2 running normalizer} &: \ell_{\text{new}} = \alpha\, \ell_{\text{old}} + \sum_{j \in \text{Block 2}} e^{x_j - m_{\text{new}}} = e^{-2}(1 + e^{-1}) + e^{0} + e^{-1} \\
 \text{Block 2 unnormalized accumulator} &: a = [\alpha e^{0}, \alpha e^{-1}, e^{0}, e^{-1}] = [e^{-2}, e^{-3}, e^{0}, e^{-1}] \\
-\text{Block 1 normalized output} &: \frac{[e^{-2}, e^{-3}, e^{0}, e^{-1}]}{(e^{-2} + e^{-3} + 1 + e^{-1})} \
+\text{Combined result} &: \frac{[e^{-2}, e^{-3}, e^{0}, e^{-1}]}{(e^{-2} + e^{-3} + 1 + e^{-1})} \\
 \end{aligned}
 $$
 
@@ -780,13 +752,13 @@ Now run it through in two blocks, the way a tiled kernel would: $[2, 1]$ and $[4
 **Block 1: $s = [2, 1]$.** Running max $m\_1 = 2$, stable exponentials $[e^{0}, e^{-1}] = [1, e^{-1}]$. So
 
 $$
-\ell\_1 = 1 + e^{-1} \approx 1.36788,
+\ell_1 = 1 + e^{-1} \approx 1.36788,
 $$
 
 and the value accumulator comes out to
 
 $$
-a\_1 = 1 \cdot [1, 0] + e^{-1} \cdot [0, 1] = [1, e^{-1}].
+a_1 = 1 \cdot [1, 0] + e^{-1} \cdot [0, 1] = [1, e^{-1}].
 $$
 
 **Block 2: $s = [4, 3]$.** The block max is $m\_b = 4$, beating the running max, so $m' = \max(2, 4) = 4$. The rescale factor:
@@ -798,19 +770,19 @@ $$
 Then
 
 $$
-\ell\_2 = \alpha \ell\_1 + e^{0} + e^{-1} = e^{-2}(1 + e^{-1}) + 1 + e^{-1} = e^{-2} + e^{-3} + 1 + e^{-1} \approx 1.553,
+\ell_2 = \alpha \ell_1 + e^{0} + e^{-1} = e^{-2}(1 + e^{-1}) + 1 + e^{-1} = e^{-2} + e^{-3} + 1 + e^{-1} \approx 1.553,
 $$
 
 and
 
 $$
-a\_2 = e^{-2} \cdot [1, e^{-1}] + [2 e^{0}, 2 e^{-1}] = [2 + e^{-2}, 2 e^{-1} + e^{-3}] \approx [2.135, 0.7855].
+a_2 = e^{-2} \cdot [1, e^{-1}] + [2 e^{0}, 2 e^{-1}] = [2 + e^{-2}, 2 e^{-1} + e^{-3}] \approx [2.135, 0.7855].
 $$
 
 **Output:**
 
 $$
-O\_2 = a\_2 / \ell\_2 \approx [1.375, 0.506],
+O_2 = a_2 / \ell_2 \approx [1.375, 0.506],
 $$
 
 matching the full-row computation.
@@ -1281,56 +1253,50 @@ Do not infer feature support from the name "FlashAttention." Check the exact lib
 {% endcapture %}
 {% include callout.html type="note" title="Important Fact" content=c %}
 
-## 5. Summary
+## **5. Summary**
 
-Let's walk the whole FlashAttention story in one derivation, and hit the key things to remember.
+Let's walk through the whole FlashAttention story in one derivation, and hit the key points to remember.
 
-**Ordinary attention:**
+**Ordinary attention:** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.[^1]
 
 $$
 O = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}}\right) V.
 $$
 
-**The problem.** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.
-
-**Naive execution:**
+**Naive execution:** This creates huge memory traffic.
 
 $$
 QK^T \to \text{store } N \times N \text{ scores} \to \text{softmax} \to \text{store } N \times N \text{ probabilities} \to \text{multiply by } V
 $$
 
-This leads to huge memory traffic.
-
-**FlashAttention idea.** Tiling. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
+**FlashAttention:** Tiling is used. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
 
 $$
-S\_{ij} = \frac{Q\_i K\_j^T}{\sqrt{d}}.
+S_{ij} = \frac{Q_i K_j^T}{\sqrt{d}}.
 $$
 
-**The problem with tiling.** Softmax needs the maximum and the denominator over the whole row.
+- <u>The problem with tiling</u>: Softmax needs the maximum and the denominator over the ***whole row.***
 
-**The solution: online softmax.**
+- <u>The solution</u>: online softmax
 
-1. Maintain $(m, \ell, a)$ where:
-   - $m$ = running maximum
-   - $\ell$ = running normalized exponential sum
-   - $a$ = running unnormalized value-weighted sum (accumulator)
+  1. Maintain $(m, \ell, a)$ where:
+    - $m$ = running maximum
+    - $\ell$ = running sum of exponentials (the softmax denominator)
+    - $a$ = running unnormalized value-weighted sum (accumulator)
 
-2. When a new block has a larger maximum, calculate a rescaling factor:
+  2. When a new block has a larger maximum $m'$, calculate a rescaling factor $\alpha$ and rescale the old state ($\ell$ and $a$) by it:
 
-$$
-\alpha = e^{m - m'},
-$$
+  $$
+  \alpha = e^{m - m'}
+  $$
 
-and rescale the old state.
+- Therefore, we can process the full FlashAttention pipeline without ever materializing the $N \times N$ matrix:
 
-Therefore, we can process the full FlashAttention pipeline without ever materializing the $N \times N$ matrix:
+  $$
+  \text{tile} \to \text{score} \to \text{online softmax} \to V \text{ accumulation} \to \text{discard tile}.
+  $$
 
-$$
-\text{tile} \to \text{score} \to \text{online softmax} \to V \text{ accumulation} \to \text{discard tile}.
-$$
-
-**Result.** The same exact dense attention mathematics, but much better memory behavior: less HBM traffic, much smaller intermediates. Arithmetic remains $O(N^2 d)$.
+- <u>Result</u>: The same exact dense attention mathematics, but much better memory behavior: ***less HBM traffic, much smaller intermediates.*** Arithmetic remains $O(N^2 d)$.
 
 **FlashAttention in one table:**
 
@@ -1341,9 +1307,10 @@ $$
 | Attention formulation | Exact dense softmax attention |
 
 {% capture c %}
-**Same exact dense attention mathematics, but much better memory behavior.** Less HBM traffic, much smaller intermediates, arithmetic unchanged at $O(N^2 d)$.<br><br>
+**Same exact dense attention mathematics, but much better memory behavior.** Less HBM traffic, much smaller intermediates, arithmetic unchanged at $O(N^2 d)$.
 {% endcapture %}
-{% include callout.html type="note" title="The one-line summary" content=c %}
+{% include callout.html type="note" title="Key takeaway" content=c %}
+
 
 ---
 
@@ -1354,16 +1321,13 @@ $$
 | 1-6 | 1.1-1.6 |
 | 7-11 | 2.1-2.5 |
 | 12-18 | 3.1-3.7 |
-| 19-20 | 4.1-4.2 |
-| 21-30 | 5.1-5.10 |
-| 31-32 | 6.1-6.2 |
-| 33-34 | 7.1-7.2 |
-| 35 | 8.1 |
-| 36-37 | 9.1-9.2 | -->
+| 19-20 | 4.1-4.2 | -->
 
 ### Reference Map
 
-| Question | Best starting source |
+The table below shows what paper to refer to for each question.[^15]
+
+| Question| Best starting source |
 |---|---|
 | What is the original IO-aware algorithm? | FlashAttention-1 paper [^4] |
 | Why does online normalization work? | Milakov & Gimelshein [^2] |
@@ -1419,11 +1383,11 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026FlashAttentionPt1,
-  title   = "FlashAttention: Pt. 1",
+  title   = "FlashAttention: Part 1",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
   month   = "Sep",
-  url     = "https://chizkidd.github.io/2026/09/11/understanding-flashattention/"
+  url     = "https://chizkidd.github.io/2026/09/13/flashattention/"
 }
 ```
