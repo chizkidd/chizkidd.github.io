@@ -159,7 +159,7 @@ FA3 was designed around NVIDIA Hopper GPUs and attacks that utilization gap with
 3. Interleaving GEMM (General Matrix Multiplication) and softmax work.
 4. FP8 support.
 
-><u>The important point:</u> **The mathematical algorithm didn't suddenly change,** the execution workflow changed to exploit Hopper hardware architecture.
+><u>The important point:</u> **The mathematical algorithm didn't suddenly change.** The execution workflow did, to exploit Hopper's hardware architecture.
 
 On H100, the NeurIPS 2024 publication reports a 1.5 to 2.0x speedup over FA2 in its benchmark suite. BF16 throughput reaches up to 840 TFLOPs/s (85% utilization), and FP8 reaches 1.3 PFLOPs/s.[^6] (The earlier arXiv preprint reported 740 TFLOPs/s and close to 1.2 PFLOPs/s; the figures here are from the final NeurIPS version.) As before, these are hardware- and benchmark-specific empirical results, not universal across all models.
 
@@ -277,7 +277,7 @@ FA4 does not change the big-O arithmetic of dense attention. It attacks the new 
 
 ### 1.8 FA4 and Asymmetric Hardware Scaling
 
-The FlashAttention lineage is a case study in why kernels can't be optimized once and assumed optimal forever.[^15] This section contains a broader systems lesson. Let's look at two hypothetical GPU generation (throughput in FLOP/s):
+The FlashAttention lineage is a case study in why kernels can't be optimized once and assumed optimal forever.[^15] This section contains a broader systems lesson. Let's look at two hypothetical GPU generations (throughput in FLOP/s):
 
 | FLOP/s | GPU A | GPU B |
 |---|---|---|
@@ -587,7 +587,7 @@ $$
 \end{array}
 $$
 
-<!-- 
+
 <table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
   <tr>
     <td style="border: none;"></td>
@@ -620,7 +620,7 @@ $$
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
   </tr>
 </table>
--->
+
 
 * **<u>Naive attention:</u>**
   - Calculate the entire matrix grid and store it. 
