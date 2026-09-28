@@ -689,9 +689,9 @@ $$
 </table>
 -->
 
-* <u>**Naive attention:**</u> 
+* **<u>Naive attention:</u>**
   - Calculate the entire matrix grid and store it. 
-* <u>**Flash attention:**</u> 
+* **<u>Flash attention:</u>**
   - Bring one small region of the matrix grid close to the compute units. Calculate that region, normalize it using running statistics, immediately use the result to accumulate the output, then discard the region. Then move on to the next region.
   - The mathematical interactions remain. The physical representation of the intermediate computation does not. That's the central insight.
 
@@ -717,10 +717,10 @@ The final practical mental model, in four moves:
 - immediately consume probabilities for each tile into the $V$ accumulation, and
 - avoid sending the full $N^2$ attention matrix through HBM.
 
-{% capture c %}
+<!-- {% capture c %}
 Think of FlashAttention as a streaming matrix computation with exact streaming softmax. The mathematical interactions remain, but the physical representation of the intermediate computation does not. That is the central insight.
 {% endcapture %}
-{% include callout.html type="note" title="The mental model" content=c %}
+{% include callout.html type="note" title="The mental model" content=c %} -->
 
 ### 6.2 FlashAttention Core Idea Summary
 
