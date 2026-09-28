@@ -513,7 +513,7 @@ Three very different strategies, grouped together because they all make attentio
 
 **Sparse / local attention** 
 * only computes a selected subset of $Q$-$K$ interactions.
-* $i \rightarrow j$ only if $|i-j| \leq w$ where $w$ is the window size.
+* $i \rightarrow j$ only if $\lvert i-j \rvert \leq w$ where $w$ is the window size.
 * fewer $Q$-$K$  interactions, and the model's attention pattern changes.
 
 **Linear-attention**
