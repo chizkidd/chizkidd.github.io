@@ -577,7 +577,7 @@ A list of things people say that aren't quite right about FlashAttention, and wh
 
 Think of FlashAttention as a **streaming matrix computation with exact streaming softmax**. Picture the full attention matrix, $Q$ on the $y$-axis and $K$ on the $x$-axis. It's a big grid.
 
-$$
+<!-- $$
 \begin{array}{|c|c|c|c|}
 \hline
  & & & \\ \hline
@@ -585,23 +585,33 @@ $$
  & & & \\ \hline
  & & & \\ \hline
 \end{array}
-$$
+$$ -->
 
+$$
+Q \quad
+\begin{array}{|c|c|c|c|}
+\hline
+ & & & \\ \hline
+ & & & \\ \hline
+ & & & \\ \hline
+ & & & \\ \hline
+\end{array} \\
+\qquad \quad K 
+$$
 
 <table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
   <tr>
-    <td style="border: none;"></td>
+    <td style="width: 34px; border: none;"></td>
     <td colspan="4" style="text-align: center; border: none;">K</td>
   </tr>
   <tr>
-    <td style="border: none;"></td>
+    <td rowspan="4" style="width: 34px; border: none; vertical-align: middle; text-align: center;">Q</td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
   </tr>
   <tr>
-    <td rowspan="3" style="padding-right: 6px; border: none; vertical-align: middle;">Q</td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
