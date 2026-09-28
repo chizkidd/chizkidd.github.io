@@ -552,32 +552,37 @@ The original FlashAttention paper makes this line explicit. It contrasts its den
 
 ### 4.1 Training, Prefill, and Decode Are Different Regimes
 
-FlashAttention is most naturally powerful when both query and key sequence dimensions are substantial, as in training or long-prompt prefill. There are many query rows, so avoiding the materialized attention matrix and exploiting tiled GEMMs provides large benefits.
-
-**Training.** Suppose $N\_q = N\_k = N$. There are many query rows. FlashAttention can exploit large GEMMs, tiling, massive parallelism, and avoid $N^2$ intermediates. This is a very favorable regime.
-
-**Prefill.** Suppose the user sends a prompt of 8000 tokens. The model processes those tokens together. Again $N\_q \approx N\_k$, so dense attention is substantial. FlashAttention can be very useful here. Prefill is compute-bound.
-
-**Decode.** Now suppose the model has already generated 8000 tokens and wants to generate token 8001. The new query might have $N\_q = 1$ while $N\_k = 8000$. So the computation is now $1 \times 8000$, not $8000 \times 8000$. Decode is memory-bound.
+<!-- FlashAttention is most naturally powerful when both query and key sequence dimensions are substantial, as in training or long-prompt prefill. There are many query rows, so avoiding the materialized attention matrix and exploiting tiled GEMMs provides large benefits.
 
 Autoregressive decode is different. For a single new token, $N\_q$ may be one while $N\_k$ is the accumulated context length. The operation reads a large KV cache but produces only one new query row per sequence. In that regime, KV-cache bandwidth and serving/batching behavior can dominate, and specialized decode kernels matter.
 
-The official repository exposes `flash_attn_with_kvcache`, which can update and attend to the cache in one kernel and supports features such as MQA/GQA and optional RoPE handling.
+The official repository exposes `flash_attn_with_kvcache`, which can update and attend to the cache in one kernel and supports features such as MQA/GQA and optional RoPE handling.[^8]
 
-The bottleneck changes. Decode is heavily interacting with the existing KV cache. The system's behavior is now driven by how fast it can read that cache, not by how much arithmetic it can do.
+This does not mean FlashAttention is irrelevant to inference. Prefill is an attention-heavy dense regime, and decode can still use specialized kernels from the same implementation family. It means "FlashAttention speeds up LLM inference" is incomplete unless you say which phase and bottleneck. -->
+
+FlashAttention shines when both query and key sequence dimensions are large. Plenty of query rows means avoiding the materialized attention matrix actually pays off, and tiled GEMMs have real work to do.
+
+**Training.** Suppose $N\_q = N\_k = N$. There are many query and key rows. FlashAttention can exploit large GEMMs, tiling, massive parallelism, and avoid $N^2$ intermediates. This is a very favorable regime.
+
+**Prefill.** Suppose the user sends a prompt of $8000$ tokens. The model processes those tokens together. Again $N\_q \approx N\_k$, so dense attention is substantial. FlashAttention can be very useful here. Prefill is compute-bound.
+
+**Decode.** Now suppose the model has already generated $8000$ tokens and wants to generate token $8001$. The new query might have $N\_q = 1$ while $N\_k = 8000$. So the computation is now:
+
+$$1 \times 8000 \text{, not } 8000 \times 8000$$
+
+The bottleneck changes. Decode is heavily interacting with the existing KV cache. The system's behavior is now driven by how fast it can read that cache, not by how much arithmetic it can do. Decode is memory-bound. Serving and batching behavior matter here too.[^15] The official repository exposes `flash_attn_with_kvcache`, which updates and attends to the cache in one kernel and supports MQA/GQA and optional RoPE handling.[^8]
 
 The key distinction in one line:
 
 - **Prefill:** many query rows → large attention computation.
 - **Decode:** one query row → large KV-cache memory access.
 
-This does not mean FlashAttention is irrelevant to inference. Prefill is an attention-heavy dense regime, and decode can still use specialized kernels from the same implementation family. It means "FlashAttention speeds up LLM inference" is incomplete unless you say which phase and bottleneck.
-
-FlashAttention also cannot eliminate other costs. MLP layers, communication in tensor parallelism, KV-cache capacity, model-weight bandwidth, sampling, and scheduler overhead remain separate concerns.
+FlashAttention also cannot eliminate other costs. MLP layers, communication in tensor parallelism, KV-cache capacity, model-weight bandwidth, sampling, and scheduler overhead remain separate concerns.[^15]
 
 So when someone says "FlashAttention makes LLM inference faster," ask:
 
 - Prefill or decode?
+- Compute-bound or memory-bound?
 - Sequence length?
 - Batch size?
 - KV cache?
@@ -585,7 +590,7 @@ So when someone says "FlashAttention makes LLM inference faster," ask:
 - Which kernel?
 
 {% capture c %}
-This does not mean FlashAttention is irrelevant to inference. Prefill is an attention-heavy dense regime, and decode can still use specialized kernels from the same implementation family. It means "FlashAttention speeds up LLM inference" is incomplete unless you say which phase and bottleneck.
+This does not mean FlashAttention is irrelevant to inference. Prefill is an attention-heavy dense regime, and decode can still use specialized kernels from the same implementation family. It means _"FlashAttention speeds up LLM inference"_ is incomplete unless you say which **phase** and **bottleneck**.
 {% endcapture %}
 {% include callout.html type="note" title="Phase and bottleneck matter" content=c %}
 
