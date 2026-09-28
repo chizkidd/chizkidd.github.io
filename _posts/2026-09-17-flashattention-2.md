@@ -86,7 +86,7 @@ My breakdown of what each generation was actually doing:
 
 Every generation since has followed the same pattern. Keep the semantics, adapt the kernel pipeline to whatever the hardware provides.
 
->The question FA2 is really asking: *"How can we utilise the GPU more effectively?"*
+>**The question FA2 is really asking: *"How can we utilise the GPU more effectively?"***
 
 {% capture c %}
 - FA1's breakthrough was IO-aware tiled exact attention.<br> 
@@ -113,7 +113,7 @@ Q rows [ block 0 | block 1 | block 2 | block 3 | block 4 | block 5 ]
 ```
 
 - Query rows get split into blocks (block 0, block 1, ..., block 5), and each block gets assigned to a CTA. 
-- A CTA is a **Cooperative Thread Array**, a logical grouping of threads that execute together on a single SM.
+- A CTA, **Cooperative Thread Array** also known as a thread block, is a logical grouping of threads that execute together on a single SM.
 
 More parallel blocks doesn't automatically mean better. We still have constraints: **occupancy, registers, shared memory, tile size, data reuse.** Kernel design is an optimization problem over hardware resources, not just a request for maximum thread count.[^15]
 
@@ -160,7 +160,7 @@ FA3 was designed around NVIDIA Hopper GPUS and attacks that utilization gap with
 3. Interleaving GEMM (General Matrix-to-Matrix Multiplication) and softmax work.
 4. FP8 support.
 
-><u>The important point:</u> **the mathematical algorithm didn't suddenly change,** the execution workflow changed to exploit Hopper hardware architecture.
+><u>The important point:</u> **The mathematical algorithm didn't suddenly change,** the execution workflow changed to exploit Hopper hardware architecture.
 
 <!-- FA3's BF16 path still preserves the exact-attention goal. The FP8 path intentionally introduces lower-precision arithmetic, so it needs its own numerical-accuracy discussion. That's a different mode of operation, not a different algorithm.[^15] -->
 
@@ -311,7 +311,7 @@ The FlashAttention lineage is a case study in why kernels can't be optimized onc
 
 GPU B makes GEMM 2x faster. But the overall system **doesn't** become 2x faster automatically. Now that GEMM is less of a bottleneck, the relative cost of everything else goes up. Softmax and memory traffic, which were already on the critical path, are now even more clearly on it. This is **asymmetric hardware scaling.** The ratio between subsystems changes, and the optimal algorithm changes with it.
 
->Asymmetric hardware scaling is one of the major systems principles behind the FA1 → FA4 evolution.
+>**Asymmetric hardware scaling is one of the major systems principles behind the FA1 → FA4 evolution.**
 
 Blackwell is a case of this. Tensor-core throughput outran softmax and exponential throughput. So the forward pass becomes constrained by softmax and exponential work rather than GEMM. FA4 responds with a software-emulated exponential and by skipping online-softmax rescaling when the running maximum doesn't need it. Both moves take pressure off the now-slower non-matmul units.
 
@@ -440,7 +440,7 @@ PyTorch's reproducibility docs note this directly: SDPA backends can produce dif
 - hardware and backend
 - dropout and randomness
 
->Bitwise equality shouldn't be used as the definition of exactness.
+>**Bitwise equality shouldn't be used as the definition of exactness.**
 
 Determinism is a separate question from exactness. Libraries expose backend- and version-specific controls for it, and those controls can carry performance or memory costs.[^8] $^,$ [^13]
 
@@ -456,11 +456,14 @@ Determinism is a separate question from exactness. Libraries expose backend- and
 
 ### 3.1 FlashAttention vs. PagedAttention
 
-The names sound related, but they solve fundamentally different problems.
+The names sound related. They're not. FlashAttention and PagedAttention answer two completely different questions:
+
+- **FlashAttention:** how do I compute $QK^T$, softmax, and $PV$ efficiently?
+- **PagedAttention:** how do I store and retrieve the growing KV cache for many serving requests?
 
 | | FlashAttention | PagedAttention |
 |---|---|---|
-| **Main Problem** | Efficient attention computation | KV-cache memory management |
+| **Main problem** | Efficient attention computation | KV-cache memory management |
 | **Main setting** | Attention execution | LLM serving |
 | **Mechanism** | Tiling, online softmax, fused/hardware-aware kernels | Paging KV cache |
 | **Main state** | Attention tiles and row-wise normalization/output state | Persistent per-request KV cache |
@@ -470,14 +473,12 @@ The names sound related, but they solve fundamentally different problems.
 <!-- | **"$N^2$ score/probability intermediates"** issue should use ... | Yes | - |
 | **"fragmented per-request KV-cache allocation"** issue should use ... | - | Yes | -->
 
-Two different questions, really:
+<!-- Two different questions, really:
 
 - **FlashAttention:** How do I efficiently compute $QK^T$, softmax, and $PV$?
-- **PagedAttention:** How do I efficiently store and retrieve the growing KV cache for many serving requests?
+- **PagedAttention:** How do I efficiently store and retrieve the growing KV cache for many serving requests? -->
 
-PagedAttention was introduced with vLLM to reduce KV-cache waste from fragmentation and duplication in high-throughput serving.[^14] FlashAttention is about how an attention operation consumes $Q/K/V$ and leaves out the persistent KV state across requests. **They can coexist in the same serving stack.**
-
-The current Dao-AILab repository even exposes a KV-cache-oriented FlashAttention interface with optional block tables, illustrating that **kernel execution** and **cache paging** are composable concerns rather than mutually exclusive ones.[^15]
+PagedAttention shipped with vLLM to cut KV-cache waste from fragmentation and duplication in high-throughput serving.[^14] FlashAttention doesn't manage KV cache allocation. It handles how the attention operation consumes $Q/K/V$. How systems access the persistent KV state that lives across requests is a separate concern handled by PagedAttention. **That separation is why they can coexist in the same serving stack without stepping on each other.** Dao-AILab even ships a KV-cache-oriented FlashAttention interface with optional block tables. Kernel execution and cache paging are two modular concerns that play nicely together.[^15]
 
 In practice, the stack looks like this:
 
@@ -491,10 +492,10 @@ Paged KV cache → FlashAttention-style kernel → Attention output
 - If it contains fragmented per-request KV-cache allocation, think **PagedAttention.** -->
 
 {% capture c %}
-- If the problem statement contains "$N^2$ score/probability intermediates," think **FlashAttention.**<br> 
+- If the problem statement contains "$N^2$ score/probability intermediates," think **FlashAttention.**<br>
 - If it contains "fragmented per-request KV-cache allocation," think **PagedAttention.**
 {% endcapture %}
-{% include callout.html type="note" title="Which one to reach for" content=c %}
+{% include callout.html type="note" title="When to use" content=c %}
 
 ### 3.2 FlashAttention vs. Sparse and Linear Attention
 
