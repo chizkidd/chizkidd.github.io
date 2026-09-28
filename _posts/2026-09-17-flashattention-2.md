@@ -54,7 +54,7 @@ In this blog post, we continue the story through the evolution of the FlashAtten
 
 [6. Conclusion](#6-conclusion)
 - [6.1 The mental model to have](#61-the-mental-model-to-have)
-- [6.2 FlashAttention Core Idea Summary](#62-flashattention-core-idea-summary)
+- [6.2 FlashAttention Summary](#62-flashattention-summary)
 
 ## **Appendix**
 - [Reference map](#reference-map15)
@@ -98,9 +98,9 @@ The practical scenario where this matters:
 - number of heads is small,
 - sequence length is huge.
 
-In that case, FA1 might not expose enough independent work. A GPU has many processing clusters known as streaming multiprocessors (SMs) that need enough independent work to be kept busy. If we only parallelize over batch times heads, some of those units sit idle. FA2 adds parallelism along the sequence dimension, so different query-row tiles can be processed independently. That gives the GPU more work to schedule, and more resident blocks means more available parallel work.
+In that case, FA1 might not expose enough independent work. A GPU has many processing clusters known as streaming multiprocessors (SMs) that need enough independent work to be kept busy. If we only parallelize over batch times heads, some of those units sit idle. FA2 adds parallelism along the sequence dimension, so different query-row tiles can be processed independently. That gives the GPU more work to schedule, since more resident blocks means more available parallel work.
 
-Let's consider a simplified mental picture below: 
+Let's consider a simplified mental picture: 
 
 ```text
 Q rows [ block 0 | block 1 | block 2 | block 3 | block 4 | block 5 ]
@@ -111,7 +111,7 @@ Q rows [ block 0 | block 1 | block 2 | block 3 | block 4 | block 5 ]
 - Query rows get split into blocks (block 0, block 1, ..., block 5), and each block gets assigned to a CTA. 
 - A CTA, **Cooperative Thread Array** also known as a thread block, is a logical grouping of threads that execute together on a single SM.
 
-More parallel blocks doesn't automatically mean better. We still have constraints: **occupancy, registers, shared memory, tile size, data reuse.** Kernel design is an optimization problem over hardware resources, not just a request for maximum thread count.[^15]
+More parallel blocks don't automatically mean better performance. We still have constraints: **occupancy, registers, shared memory, tile size, data reuse.** Kernel design is an optimization problem over hardware resources, not just a request for maximum thread count.[^15]
 
 {% capture c %}
 **Long sequence length itself can become a source of parallelism.**
@@ -121,15 +121,18 @@ More parallel blocks doesn't automatically mean better. We still have constraint
 
 ### 1.3 FA2 Work Partitioning and Non-Matmul FLOPs
 
-FA2 also changes how work is divided among warps in a thread block. In FA1, warp partitioning could require partial results to be written to shared memory and then combined.[^5] That creates communication overhead. Picture it: warp writes partial result to shared memory, another warp reads it, combines it, writes again. Every round trip through shared memory costs cycles and becomes expensive.
+FA2 also changes how work is divided among warps in a thread block. In FA1, warp partitioning could require partial results to be written to shared memory and then combined.[^5] That creates communication overhead. 
+
+**Picture it:** a warp writes a partial result to shared memory, another warp reads it, combines it, and writes again. Every round trip through shared memory costs cycles.
 
 ```text
 [warp 0] --> shared memory --> [warp 1] --> shared memory --> ...
 ```
 
-FA2 repartitions the work so warps cooperate in a manner that cuts down those shared-memory reads and writes, thereby reducing communication. It also reduces non-matmul operations via algebraic manipulation around softmax rescaling and backward computations.[^5] This matters because:
+FA2 repartitions the work so warps cooperate in a way that cuts down those shared-memory reads and writes, thereby reducing communication. It also reduces non-matmul operations via algebraic manipulation around softmax rescaling and backward computations.[^5] This matters because:
+
 - A FLOP isn't a universal unit of performance across all operation types.
-- Matrix multiply-accumulate (MMA) has a significantly higher throughput than exponentials, scalar reductions, conversions, and shared-memory synchronization
+- Matrix multiply-accumulate (MMA) has significantly higher throughput than exponentials, scalar reductions, conversions, and shared-memory synchronization.
 - A tensor-core matmul and an exponential aren't equivalent from a hardware-throughput perspective.
 
 We can track the bottlenecks addressed by each FlashAttention generation so far:
@@ -137,7 +140,7 @@ We can track the bottlenecks addressed by each FlashAttention generation so far:
 - FA1 attacked HBM traffic.
 - FA2 exposed the following as the next important bottlenecks: **occupancy, warp communication, non-matmul operations.**
 
-FA2 also changes what gets saved for backward. Instead of keeping probabilities around, it stores compact row-wise log-sum-exp information and recomputes the tiles, which yields the same linear-memory character and better kernel work distribution.
+FA2 also simplifies what gets saved for backward. Instead of keeping probabilities around, it stores a single row-wise log-sum-exp value per query row and recomputes the tiles, keeping the same linear-memory footprint.
 
 {% capture c %}
 A useful optimization principle from the FlashAttention evolution so far: **after fixing one bottleneck, another bottleneck emerges.**
@@ -147,18 +150,18 @@ A useful optimization principle from the FlashAttention evolution so far: **afte
 
 ### 1.4 FlashAttention-3: The Hopper Generation
 
-<u>Why does FA3 exists at all?</u> GPU hardware changed. Hopper introduced capabilities that changed the best way to schedule attention, and FA2 didn't fully exploit what H100 could do. Its measurements showed only around 35% utilization, which leaves a lot of headroom.
+<u>Why does FA3 exist at all?</u> GPU hardware changed. Hopper introduced capabilities that changed the best way to schedule attention, and FA2 didn't fully exploit what the H100 could do. The FA3 paper measured FA2 at only around 35% utilization on H100, which leaves a lot of headroom.
 
 FA3 was designed around NVIDIA Hopper GPUs and attacks that utilization gap with four broad ideas:
 
 1. Asynchronous computation and data movement.
 2. Warp specialization.
-3. Interleaving GEMM (General Matrix-to-Matrix Multiplication) and softmax work.
+3. Interleaving GEMM (General Matrix Multiplication) and softmax work.
 4. FP8 support.
 
 ><u>The important point:</u> **The mathematical algorithm didn't suddenly change,** the execution workflow changed to exploit Hopper hardware architecture.
 
-On H100, the NeurIPS 2024 publication reports 1.5 to 2.0x speedup over FA2 in its benchmark suite. BF16 throughput reaches up to 840 TFLOPs/s (85% utilization), and FP8 reaches 1.3 PFLOPs/s.[^6] Like earlier, these are hardware- and benchmark-specific empirical results, not universal across any/all models.
+On H100, the NeurIPS 2024 publication reports a 1.5 to 2.0x speedup over FA2 in its benchmark suite. BF16 throughput reaches up to 840 TFLOPs/s (85% utilization), and FP8 reaches 1.3 PFLOPs/s.[^6] (The earlier arXiv preprint reported 740 TFLOPs/s and close to 1.2 PFLOPs/s; the figures here are from the final NeurIPS version.) As before, these are hardware- and benchmark-specific empirical results, not universal across all models.
 
 {% capture c %}
 **FA3 is not "a more approximate FlashAttention."** The FP16/BF16 path preserves the exact-attention algorithmic goal. The FP8 path intentionally introduces lower-precision arithmetic and therefore needs its own numerical-accuracy discussion.
@@ -202,7 +205,7 @@ The exact implementation is more sophisticated than the toy depictions above, bu
 - **Tensor Memory Accelerator (TMA)**, which moves data asynchronously.
 - **Asynchronous warp-group matrix-multiply-accumulate (WGMMA)**, which lets tensor-core work proceed without blocking the issuing warp.
 
-FA3 also uses **warp specialization** to allow data movement and communication to overlap.[^6] Different warps take responsibility for different stages of the pipeline: some handle data movement, some issue GEMMs, some handle softmax and update. That way a warp that's waiting on a memory transfer doesn't stall the whole block.
+FA3 also uses **warp specialization** to allow data movement and computation to overlap.[^6] Different warps take responsibility for different stages of the pipeline: some handle data movement, some issue GEMMs, some handle softmax and update. That way a warp that's waiting on a memory transfer doesn't stall the whole block.
 
 FA3 also uses a **ping-pong style schedule** to interleave block matrix multiplication and softmax. The goal is to avoid leaving tensor cores idle while non-matmul operations (scalar and special-function work) are performed, and vice versa.[^6]
 
@@ -228,11 +231,11 @@ These operations have different numerical sensitivities. Dot products tolerate s
 FA3 introduces an FP8 path with two techniques to control that error:
 
 - **Block quantization**, which scales values relative to their local tile rather than globally.
-- **Incoherent processing**, which spreads out the effective range of the values being quantized.
+- **Incoherent processing**, which multiplies Q and K by a random orthogonal matrix to spread outlier values across dimensions before quantization.
 
 In the final NeurIPS 2024 publication, FA3 reaches 1.3 PFLOPs/s on H100 with this path, and reports **2.6x lower numerical error** than the baseline FP8 attention method used for comparison.[^6]
 
-So low precision doesn't automatically buy you free performance. It shifts error into specific parts of the pipeline, and you have to design around that shift. This is exactly where "exact" starts to mean two different things:
+So low precision doesn't automatically buy free performance. It shifts error into specific parts of the pipeline, therefore we have to design around that shift. This is exactly where "exact" starts to mean two different things:
 
 - **Algorithmic exactness.** The algorithm still represents $\mathrm{softmax}(QK^T)V$. No pairs are skipped, no low-rank approximation is made.
 - **Numerical precision.** The actual calculation may use FP8, and therefore experiences quantization and rounding error.
@@ -245,7 +248,7 @@ An algorithm can be exact in its mathematical formulation while a particular low
 
 In FA4, the core pattern of hardware-aware redesign continues, this time for NVIDIA Blackwell.
 
-Blackwell exhibits **asymmetric hardware scaling**. Tensor-core throughput increased substantially relative to Hopper, but several other resources didn't scale at the same rate. Shared-memory bandwidth and exponential throughput, in particular, lag behind.[^7]
+Blackwell exhibits **asymmetric hardware scaling**. Tensor-core throughput roughly doubled relative to Hopper, but several other resources didn't scale at the same rate. Shared-memory bandwidth and exponential throughput, in particular, lag behind.[^7]
 
 This changes which stage is the bottleneck. See the illustration below:
 
@@ -254,10 +257,10 @@ Tensor cores GEMM   [  |  |  |  |  |  |  |  |  |  ]
 Softmax/exponential [  |  ]
 ```
 
-The matrix multiplication has become extremely fast. Now the secondary softmax/exponential becomes relatively expensive, and as such the bottleneck. When one subsystem becomes much faster than the others, operations that used to be secondary can become the bottleneck.[^15]
+The matrix multiplication has become extremely fast. Now the secondary softmax/exponential work becomes relatively expensive, and as such becomes the bottleneck. When one subsystem becomes much faster than the others, operations that used to be secondary can become the bottleneck.[^15]
 
 - On Hopper, tensor cores were fast, but the gap to softmax and shared-memory bandwidth was narrower.
-- On Blackwell, the matrix-multiplication bar gets much longer, and the softmax/exponential bar stays roughly the same length as shown in the illustration above.
+- On Blackwell, the matrix-multiplication bar gets much longer, and the softmax/exponential bar stays roughly the same length, as shown in the illustration above.
 
 FA4 redesigns both the forward and backward pipelines rather than just reusing the Hopper schedule. The major improvement techniques include:
 
@@ -268,15 +271,15 @@ FA4 redesigns both the forward and backward pipelines rather than just reusing t
 On B200 with BF16, the paper reports up to **1.3x speedup** over cuDNN 9.13 and **2.7x** over its Triton comparison, reaching 1613 TFLOPs/s (71% utilization) under the evaluated configurations.[^7]
 
 {% capture c %}
-FA4 does not change the big-O arithmetic of dense attention. It attacks the new bottlenecks created by a GPU generation whose compute, memory, and function-unit balance differs from Hopper.
+FA4 does not change the big-O arithmetic of dense attention. It attacks the new bottlenecks created by a GPU generation whose compute, memory, and function-unit balance differs from Hopper's.
 {% endcapture %}
 {% include callout.html type="note" title="Same algorithm, different balance" content=c %}
 
 ### 1.8 FA4 and Asymmetric Hardware Scaling
 
-The FlashAttention lineage is a case study in why kernels can't be optimized once and assumed optimal forever.[^15] This section contains a broader systems lesson. Let's look at two hypothetical GPU generations:
+The FlashAttention lineage is a case study in why kernels can't be optimized once and assumed optimal forever.[^15] This section contains a broader systems lesson. Let's look at two hypothetical GPU generation (throughput in FLOP/s):
 
-| Unit | GPU A | GPU B |
+| FLOP/s | GPU A | GPU B |
 |---|---|---|
 | GEMM | 100 | 200 |
 | Softmax | 50 | 50 |
@@ -286,13 +289,13 @@ GPU B makes GEMM 2x faster. But the overall system **doesn't** become 2x faster 
 
 >**Asymmetric hardware scaling is one of the major systems principles behind the FA1 → FA4 evolution.**
 
-Blackwell is a case of this. Tensor-core throughput outran softmax and exponential throughput. So the forward pass becomes constrained by softmax and exponential work rather than GEMM. FA4 responds with a software-emulated exponential and by skipping online-softmax rescaling when the running maximum doesn't need it. Both moves take pressure off the now-slower special-function units.
+Blackwell is a case of this. Tensor-core throughput outran softmax and exponential throughput. So the forward pass becomes constrained by softmax and exponential work rather than GEMM. FA4 responds with a software-emulated exponential and by skipping online-softmax rescaling when the running maximum doesn't need it. Both moves take pressure off the relatively slower non-matmul units.
 
 The backward pass has a different bottleneck. FA4 uses Blackwell's Tensor Memory (TMEM) and 2-CTA MMA mode to cut shared-memory traffic and atomic accumulation overhead.
 
 This is why "FA4 is just a faster FA3" misses the point. The algorithm and kernel pipeline are co-designed around the new asymmetries, which is reflected in the paper title: *Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling.*[^7]
 
-And hence why performance numbers should always name the GPU generation. A speedup on B200 doesn't reveal anything about H100, A100, or a non-NVIDIA accelerator. The ratios are the whole story.
+That is also why performance numbers should always name the GPU generation. A speedup on B200 doesn't reveal anything about H100, A100, or a non-NVIDIA accelerator. The ratios are the whole story.
 
 {% capture c %}
 **A kernel is balanced against a particular hardware ratio.** If tensor-core throughput improves faster than memory bandwidth or special-function throughput, the optimal algorithmic pipeline can change even when the mathematical function is identical.
@@ -301,13 +304,15 @@ And hence why performance numbers should always name the GPU generation. A speed
 
 ### 1.9 FA4 Implementation and Current Status
 
-FlashAttention-4 is a ***CuTeDSL*** implementation, optimized for Hopper and Blackwell GPUs such as H100 and B200 via the `flash-attn-4` package installation.[^8] CuTeDSL stands for **CUDA Tensor Domain-Specific Language**. It's a Python-based programming framework developed by NVIDIA for writing highly optimized, low-level, state-of-the-art GPU kernels.
+<!-- FlashAttention-4 is a ***CuTeDSL*** implementation, optimized for Hopper and Blackwell GPUs such as H100 and B200 via the `flash-attn-4` package installation.[^8] CuTeDSL stands for **CUDA Tensor Domain-Specific Language**. It's a Python-based programming framework developed by NVIDIA for writing highly optimized, low-level, state-of-the-art GPU kernels. -->
 
-One engineering motivation behind the FA4 choice is **compile-time productivity**. The FA4 paper reports substantially faster compilation, roughly 20 to 30 times, compared with the traditional C++ template-based approach used in its comparison, while still retaining the required low-level expressivity.[^7] As of September 2026, PyPI classifies `flash-attn-4` as: `Development Status :: 3 - Alpha`.[^9]
+FlashAttention-4 is a **CuTe DSL** implementation, optimized for Hopper and Blackwell GPUs such as the H100 and B200, and installed via the `flash-attn-4` package.[^8] CuTe DSL is a Python-based domain-specific language from NVIDIA's CUTLASS for writing and just-in-time compiling high-performance GPU kernels.
 
-That's the caveat. **Current implementation status is not the same thing as an evergreen property of FlashAttention.** Packages, GPU support, CUDA compatibility, PyTorch, hardware and framework integration all evolve quickly.
+One engineering motivation behind the FA4 choice is **compile-time productivity**. The FA4 paper reports substantially faster compilation, roughly 20 to 30 times, compared with the traditional C++ template-based approach used in its comparison, while still retaining the required low-level expressivity.[^7] As of September 2026, PyPI classifies `flash-attn-4` as `Development Status :: 3 - Alpha`, and its latest release (4.0.0b32, uploaded September 23, 2026) is a pre-release.[^9]
 
-The durable lesson is the algorithmic progression. **The current library support layer changes much faster than the underlying algorithmic ideas.** Algorithmic knowledge evolves slowly. Library support can change overnight. When deploying FlashAttention, it's worth separating the two. The algorithm tells you what should be possible. The current library tells you what's actually available on your specific GPU, CUDA version, and framework.
+That's the caveat. **Current implementation status is not the same thing as an evergreen property of FlashAttention.** Packages, GPU support, CUDA compatibility, PyTorch, hardware, and framework integration all evolve quickly.
+
+The durable lesson is the algorithmic progression. **The current library support layer changes much faster than the underlying algorithmic ideas.** Algorithmic knowledge evolves slowly. Library support can change overnight. When deploying FlashAttention, it's worth separating the two. The algorithm tells us what should be possible. The current library tells us what's actually available on your specific GPU, CUDA version, and framework.
 
 {% capture c %}
 Treat this as a current implementation snapshot, not an evergreen property. _"FA4 exists in the official repository"_ and _"every production environment should replace FA2 with FA4"_ are very different claims.
@@ -328,7 +333,7 @@ Here's the whole evolution on one page:
 A few things to hold onto when reading those numbers:
 
 - These are four successive generations of efficient implementations of attention, not four different attention mechanisms. The mathematical target remains fundamentally the same for dense attention.
-- The exact feature matrix differs across implementations. FA3 is strongly associated with Hopper-specific optimization, while the current FA4 repository targets both Hopper and Blackwell through its CuTeDSL path.[^8]
+- The exact feature matrix differs across implementations. FA3 is strongly associated with Hopper-specific optimization, while the current FA4 repository targets both Hopper and Blackwell through its CuTe DSL path.[^8]
 
 ---
 
@@ -349,7 +354,7 @@ torch.nn.functional.scaled_dot_product_attention(
 )
 ```
 
-Conceptually, this function computes $\mathrm{softmax}(QK^T / \sqrt{d})V$. Internally, PyTorch picks an optimized implementation based on the inputs. The main API docs cover FlashAttention-2, a memory-efficient attention implementation, and the C++ math implementation. To restrict which backend runs, use `torch.nn.attention.sdpa_kernel`:[^11]
+Conceptually, this function computes $\mathrm{softmax}(QK^T / \sqrt{d})V$. Internally, PyTorch picks an optimized implementation based on the inputs. The available backends include FlashAttention-2, a memory-efficient attention implementation, cuDNN attention, and the C++ math implementation. To restrict which backend runs, use `torch.nn.attention.sdpa_kernel`:[^11]
 
 ```python
 from torch.nn.attention import SDPBackend, sdpa_kernel
@@ -363,13 +368,13 @@ If a requested fused kernel can't run for the given inputs, PyTorch can warn wit
 
 {% capture c %}
 - Calling the high-level API does not necessarily mean _"I know exactly which kernel executed."_<br>
-- If you need to know which backend is running, restrict it explicitly with `sdpa_kernel` or check the PyTorch version's registration APIs. In production and benchmarking, verify rather than assume.
+- If we need to know which backend is running, restrict it explicitly with `sdpa_kernel` or check the PyTorch version's registration APIs. In production and benchmarking, verify rather than assume.
 {% endcapture %}
 {% include callout.html type="note" title="Which kernel actually ran" content=c %}
 
 ### 2.2 Exactness Is Not Bitwise Identity
 
-Suppose two implementations, a math kernel and a FlashAttention kernel, compute the same dense SDPA definition. There'll still be small numerical differences. The reason is straightforward. **Floating-point addition is not associative:**
+Suppose two implementations, a math kernel and a FlashAttention kernel, compute the same dense SDPA definition. There will still be small numerical differences. The reason is straightforward. **Floating-point addition is not associative:**
 
 $$
 (a + b) + c \neq a + (b + c)
@@ -459,9 +464,9 @@ Three very different strategies, grouped together because they all make attentio
 **Sparse / local attention** 
 * only computes a selected subset of $Q$-$K$ interactions.
 * $i \rightarrow j$ only if $\lvert i-j \rvert \leq w$ where $w$ is the window size.
-* fewer $Q$-$K$  interactions, and the model's attention pattern changes.
+* fewer $Q$-$K$ interactions, and the model's attention pattern changes.
 
-**Linear-attention**
+**Linear attention**
 * changes the mathematical formula itself.
 * usually rearranges the attention computation with feature maps or associativity, avoiding an explicit dense softmax score matrix.
 
@@ -485,7 +490,7 @@ The original FlashAttention paper makes this line explicit. It contrasts its den
 {% capture c %}
 **"FlashAttention makes attention linear" is wrong.** If a system shows near-linear scaling because it uses a local window or another sparse pattern, the sparsity is what changed the number of interactions. FlashAttention may still be the kernel underneath.
 {% endcapture %}
-{% include callout.html type="note" title="FlashAttention doesn't make attention linear !!!" content=c %}
+{% include callout.html type="note" title="FlashAttention doesn't make attention linear" content=c %}
 
 ---
 
@@ -495,15 +500,15 @@ The original FlashAttention paper makes this line explicit. It contrasts its den
 
 FlashAttention shines when both query and key sequence dimensions are large. Plenty of query rows means avoiding the materialized attention matrix actually pays off, and tiled GEMMs have real work to do.
 
-**Training.** Suppose $N\_q = N\_k = N$. There are many query and key rows. FlashAttention can exploit large GEMMs, tiling, massive parallelism, and avoid $N^2$ intermediates. This is a very favorable regime.
+**Training.** Suppose $N\_q = N\_k = N$. There are many query and key rows. FlashAttention can exploit large GEMMs, tiling, and massive parallelism, and it avoids $N^2$ intermediates. This is a very favorable regime.
 
-**Prefill.** Suppose the user sends a prompt of $8000$ tokens. The model processes those tokens together. Again $N\_q \approx N\_k$, so dense attention is substantial. FlashAttention can be very useful here. Prefill is compute-bound.
+**Prefill.** Suppose the user sends a prompt of $8000$ tokens. The model processes those tokens together. Again $N\_q \approx N\_k$, so dense attention is substantial. FlashAttention can be very useful here. Prefill is typically compute-bound.
 
 **Decode.** Now suppose the model has already generated $8000$ tokens and wants to generate token $8001$. The new query might have $N\_q = 1$ while $N\_k = 8000$. So the computation is now:
 
 $$1 \times 8000 \text{, not } 8000 \times 8000$$
 
-The bottleneck changes. Decode is heavily interacting with the existing KV cache. The system's behavior is now driven by how fast it can read that cache, not by how much arithmetic it can do. Decode is memory-bound. Serving and batching behavior matter here too.[^15] The official repository exposes `flash_attn_with_kvcache`, which updates and attends to the cache in one kernel and supports MQA/GQA and optional RoPE handling.[^8]
+The bottleneck changes. Decode is heavily interacting with the existing KV cache. The system's behavior is now driven by how fast it can read that cache, not by how much arithmetic it can do. Decode is typically memory-bound. Serving and batching behavior matter here too.[^15] The official repository exposes `flash_attn_with_kvcache`, which updates and attends to the cache in one kernel and supports MQA/GQA and optional RoPE handling.[^8]
 
 The key distinction in one line:
 
@@ -560,7 +565,7 @@ A list of things people say that aren't quite right about FlashAttention, and wh
 
 5. **"Exact means bitwise identical."** <br>No. Floating-point operation order can change rounding. Two exact implementations of the same function can produce slightly different bits, and that's expected.
 
-6. **"Long context becomes free."** <br>No. Dense pairwise arithmetic is still quadratic, and KV-cache and other model costs remain. What FlashAttention gives you is a smaller memory footprint and less HBM traffic, not a free lunch.
+6. **"Long context becomes free."** <br>No. Dense pairwise arithmetic is still quadratic, and KV-cache and other model costs remain. What FlashAttention gives us is a smaller memory footprint and less HBM traffic, not a free lunch.
 
 7. **"FA1, FA2, FA3, and FA4 are different attention architectures."** <br>No. They are successive generations of efficient kernels and algorithms, shaped by different hardware bottlenecks. The mathematical target is fundamentally the same for dense attention.
 
@@ -638,11 +643,11 @@ The final practical mental model:
 - immediately consume probabilities for each tile into the $V$ accumulation, and
 - avoid sending the full $N^2$ attention matrix through HBM.
 
-### 6.2 FlashAttention Core Idea Summary
+### 6.2 FlashAttention Summary
 
-Let's walk the whole FlashAttention story in one derivation, and hit the key things to remember.
+Let's walk through the whole FlashAttention story in one derivation, and hit the key points to remember.
 
-**Ordinary attention:** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.
+**Ordinary attention:** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.[^1]
 
 $$
 O = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}}\right) V.
@@ -650,18 +655,15 @@ $$
 
 **Naive execution:** This creates huge memory traffic.
 
-```
+<!-- ```
 QK^T → store N x N scores → softmax → store N x N probabilities → multiply by V
+``` -->
 
-```
-
-<!-- $$
+$$
 QK^T \to \text{store } N \times N \text{ scores} \to \text{softmax} \to \text{store } N \times N \text{ probabilities} \to \text{multiply by } V
 $$
 
-This leads to huge memory traffic. -->
-
-**FlashAttention:** Tiling is implemented. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
+**FlashAttention:** Tiling is used. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
 
 $$
 S_{ij} = \frac{Q_i K_j^T}{\sqrt{d}}.
@@ -673,25 +675,24 @@ $$
 
   1. Maintain $(m, \ell, a)$ where:
     - $m$ = running maximum
-    - $\ell$ = running normalized exponential sum
+    - $\ell$ = running sum of exponentials (the softmax denominator)
     - $a$ = running unnormalized value-weighted sum (accumulator)
 
-  2. When a new block has a larger maximum, calculate a rescaling factor, $\alpha$ and rescale the old state:
+  2. When a new block has a larger maximum $m'$, calculate a rescaling factor $\alpha$ and rescale the old state ($\ell$ and $a$) by it:
 
   $$
-  \alpha = e^{m - m'},
+  \alpha = e^{m - m'}
   $$
 
 - Therefore, we can process the full FlashAttention pipeline without ever materializing the $N \times N$ matrix:
 
-  ```
+  <!-- ```
   tile → score → online softmax → V accumulation → discard tile
+  ``` -->
 
-  ```
-
-  <!-- $$
+  $$
   \text{tile} \to \text{score} \to \text{online softmax} \to V \text{ accumulation} \to \text{discard tile}.
-  $$ -->
+  $$
 
 - <u>Result</u>: The same exact dense attention mathematics, but much better memory behavior: ***less HBM traffic, much smaller intermediates.*** Arithmetic remains $O(N^2 d)$.
 
@@ -706,7 +707,7 @@ $$
 {% capture c %}
 **Same exact dense attention mathematics, but much better memory behavior.** Less HBM traffic, much smaller intermediates, arithmetic unchanged at $O(N^2 d)$.
 {% endcapture %}
-{% include callout.html type="note" title="The one-line summary" content=c %}
+{% include callout.html type="note" title="Key takeaway" content=c %}
 
 ---
 
