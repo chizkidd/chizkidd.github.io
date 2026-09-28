@@ -35,7 +35,7 @@ In this blog post, we continue the story through the evolution of the FlashAtten
 - [1.7 FlashAttention-4: the Blackwell generation](#17-flashattention-4-the-blackwell-generation)
 - [1.8 FA4 and asymmetric hardware scaling](#18-fa4-and-asymmetric-hardware-scaling)
 - [1.9 FA4 implementation and current status](#19-fa4-implementation-and-current-status)
-- [1.10 FlashAttention-1 through -4 compared](#110-flashattention-1-through-4-compared)
+- [1.10 FlashAttention-1 through FA-4 compared](#110-flashattention-1-through-fa-4-compared)
 
 [2. Using FlashAttention in Frameworks](#2-using-flashattention-in-frameworks)
 - [2.1 PyTorch scaled-dot-product attention today](#21-pytorch-scaled-dot-product-attention-today)
@@ -49,15 +49,15 @@ In this blog post, we continue the story through the evolution of the FlashAtten
 - [4.1 Training, prefill, and decode are different regimes](#41-training-prefill-and-decode-are-different-regimes)
 
 [5. Practical Engineering for FlashAttention](#5-practical-engineering-for-flashattention)
-- [5.1 Common implementation mistakes](#51-common-implementation-mistakes15)
-- [5.2 Common Misconceptions](#52-common-misconceptions15)
+- [5.1 Common implementation mistakes](#51-common-implementation-mistakes)
+- [5.2 Common Misconceptions](#52-common-misconceptions)
 
 [6. Conclusion](#6-conclusion)
 - [6.1 The mental model to have](#61-the-mental-model-to-have)
 - [6.2 FlashAttention Summary](#62-flashattention-summary)
 
 ## **Appendix**
-- [Reference map](#reference-map15)
+- [Reference map](#reference-map)
 - [References](#references)
 - [Citation](#citation)
 
@@ -319,7 +319,7 @@ Treat this as a current implementation snapshot, not an evergreen property. _"FA
 {% endcapture %}
 {% include callout.html type="note" title="Implementation snapshot" content=c %}
 
-### 1.10 FlashAttention-1 Through -4 Compared
+### 1.10 FlashAttention-1 Through FA-4 Compared
 
 Here's the whole evolution on one page:
 
@@ -536,9 +536,9 @@ This does not mean FlashAttention is irrelevant to inference. Prefill is an atte
 
 ## **5. Practical Engineering for FlashAttention**
 
-### 5.1 Common Implementation Mistakes[^15]
+### 5.1 Common Implementation Mistakes
 
-A running list of things that bite people in practice:
+A running list of things that bite people in practice:[^15]
 
 1. **Assuming the flash backend always ran.** High-level frameworks may fall back when dtype, device, shape, or mask is unsupported. Use backend controls and profiling when it matters.
 2. **Leaving dropout on during evaluation.** PyTorch SDPA applies `dropout_p` exactly as supplied, so pass `0.0` when evaluation requires no dropout.
@@ -551,9 +551,9 @@ A running list of things that bite people in practice:
 9. **Confusing prefill with decode.** The shapes and bottlenecks are different.
 10. **Assuming the newest generation is always deployable.** Current FA4 package metadata is alpha, and hardware/software compatibility must be checked.
 
-### 5.2 Common Misconceptions[^15]
+### 5.2 Common Misconceptions
 
-A list of things people say that aren't quite right about FlashAttention, and what's actually true.
+A list of things people say that aren't quite right about FlashAttention, and what's actually true.[^15]
 
 1. **"FlashAttention approximates softmax."** <br>No. Dense FlashAttention evaluates the dense softmax-attention function using tiled online normalization. Nothing is thrown away, nothing is approximated.
 
@@ -723,9 +723,11 @@ $$
 
 ## **Appendix**
 
-### Reference Map[^15]
+### Reference Map
 
-| Question | Best starting source |
+The table below shows what paper to refer to for each question.[^15]
+
+| Question| Best starting source |
 |---|---|
 | What is the original IO-aware algorithm? | FlashAttention-1 paper [^4] |
 | Why does online normalization work? | Milakov & Gimelshein [^2] |
