@@ -598,7 +598,7 @@ This does not mean FlashAttention is irrelevant to inference. Prefill is an atte
 
 ## **5. Practical Engineering**
 
-### 5.1 Common Implementation Mistakes
+### 5.1 Common Implementation Mistakes[^15]
 
 A running list of things that bite people in practice:
 
