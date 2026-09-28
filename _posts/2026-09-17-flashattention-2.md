@@ -196,7 +196,7 @@ Load K/V tile 1
                                    Compute tile 3
 ```
 
-and more explicitly:
+More explicitly:
 
 ```
 Load K/V tile 1
