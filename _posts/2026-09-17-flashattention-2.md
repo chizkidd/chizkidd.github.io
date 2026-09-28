@@ -49,8 +49,8 @@ In this blog post, we continue the story through the evolution of the FlashAtten
 - [4.1 Training, prefill, and decode are different regimes](#41-training-prefill-and-decode-are-different-regimes)
 
 [5. Practical Engineering](#5-practical-engineering)
-- [5.1 Common implementation mistakes](#51-common-implementation-mistakes)
-- [5.2 Common misconceptions and the practical mental model](#52-common-misconceptions-and-the-practical-mental-model)
+- [5.1 Common implementation mistakes](#51-common-implementation-mistakes15)
+- [5.2 Common Misconceptions of FlashAttention](#52-common-misconceptions-of-flashattention15)
 
 [6. Conclusion](#6-conclusion)
 - [6.1 The mental model to have](#61-the-mental-model-to-have)
@@ -613,23 +613,28 @@ A running list of things that bite people in practice:
 9. **Confusing prefill with decode.** The shapes and bottlenecks are different.
 10. **Assuming the newest generation is always deployable.** Current FA4 package metadata is alpha, and hardware/software compatibility must be checked.
 
-### 5.2 Common Misconceptions and the Practical Mental Model
+### 5.2 Common Misconceptions of FlashAttention[^15]
 
 A list of things people say that aren't quite right, and what's actually true.
 
-1. **"FlashAttention approximates softmax."** No. Dense FlashAttention evaluates the dense softmax-attention function using tiled online normalization. Nothing is thrown away, nothing is approximated.
+1. **"FlashAttention approximates softmax."** <br>No. Dense FlashAttention evaluates the dense softmax-attention function using tiled online normalization. Nothing is thrown away, nothing is approximated.
 
-2. **"FlashAttention makes attention $O(N)$."** No. Dense arithmetic remains $O(N^2 d)$. What becomes linear is the large auxiliary attention-memory footprint with respect to sequence length. HBM traffic is reduced, but the underlying number of query-key interactions is unchanged.
+2. **"FlashAttention makes attention $O(N)$."** <br>No. Dense arithmetic remains $O(N^2 d)$. What becomes linear is the large auxiliary attention-memory footprint with respect to sequence length. HBM traffic is reduced, but the underlying number of query-key interactions is unchanged.
 
-3. **"It is just kernel fusion."** Fusion is part of the implementation story. But online-softmax tiling and IO-aware scheduling are algorithmic, not merely concatenating existing kernels. Fusion alone wouldn't produce the same memory profile or the same IO complexity bound.
+3. **"It is just kernel fusion."** <br>Fusion is part of the implementation story. But online-softmax tiling and IO-aware scheduling are algorithmic, not merely concatenating existing kernels. Fusion alone wouldn't produce the same memory profile or the same IO complexity bound.
 
-4. **"It is the same as PagedAttention."** No. PagedAttention manages KV-cache allocation for serving. FlashAttention manages how the attention operation itself is executed. Different problems, different solutions.
+4. **"It is the same as PagedAttention."** <br>No. PagedAttention manages KV-cache allocation for serving. FlashAttention manages how the attention operation itself is executed. Different problems, different solutions.
 
-5. **"Exact means bitwise identical."** No. Floating-point operation order can change rounding. Two exact implementations of the same function can produce slightly different bits, and that's expected.
+5. **"Exact means bitwise identical."** <br>No. Floating-point operation order can change rounding. Two exact implementations of the same function can produce slightly different bits, and that's expected.
 
-6. **"Long context becomes free."** No. Dense pairwise arithmetic is still quadratic, and KV-cache and other model costs remain. What FlashAttention gives you is a smaller memory footprint and less HBM traffic, not a free lunch.
+6. **"Long context becomes free."** <br>No. Dense pairwise arithmetic is still quadratic, and KV-cache and other model costs remain. What FlashAttention gives you is a smaller memory footprint and less HBM traffic, not a free lunch.
 
-7. **"FA1, FA2, FA3, and FA4 are different attention architectures."** No. They are successive generations of efficient kernels and algorithms, shaped by different hardware bottlenecks. The mathematical target is fundamentally the same for dense attention.
+7. **"FA1, FA2, FA3, and FA4 are different attention architectures."** <br>No. They are successive generations of efficient kernels and algorithms, shaped by different hardware bottlenecks. The mathematical target is fundamentally the same for dense attention.
+
+<!-- {% capture c %}
+FlashAttention keeps score tiles close to the compute units, carries only the row statistics needed to merge softmax blocks exactly, consumes each probability tile immediately into the $V$ accumulation, and avoids round-tripping a full $^N2$ attention matrix through HBM.
+{% endcapture %}
+{% include callout.html type="note" title="Practical mental model" content=c %} -->
 
 ---
 
@@ -637,9 +642,9 @@ A list of things people say that aren't quite right, and what's actually true.
 
 ### 6.1 The Mental Model to Have
 
-Think of FlashAttention as a **streaming matrix computation with exact streaming softmax**.
+Think of FlashAttention as a **streaming matrix computation with exact streaming softmax**. Picture the full attention matrix, $Q$ on the $y$-axis and $K$ on the $x$-axis. It's a big grid.
 
-<!-- $$
+$$
 \begin{array}{|c|c|c|c|}
 \hline
  & & & \\ \hline
@@ -647,7 +652,7 @@ Think of FlashAttention as a **streaming matrix computation with exact streaming
  & & & \\ \hline
  & & & \\ \hline
 \end{array}
-$$ -->
+$$
 
 <!-- 
 <table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
@@ -684,11 +689,17 @@ $$ -->
 </table>
 -->
 
-Picture the full attention matrix, $Q$ on the $y$-axis and $K$ on the $x$-axis. It's a big grid. A naive implementation would calculate the entire grid and store it. FlashAttention does something different.
+* <u>**Naive attention:**</u> 
+  - Calculate the entire matrix grid and store it. 
+* <u>**Flash attention:**</u> 
+  - Bring one small region of the matrix grid close to the compute units. Calculate that region, normalize it using running statistics, immediately use the result to accumulate the output, then discard the region. Then move on to the next region.
+  - The mathematical interactions remain. The physical representation of the intermediate computation does not. That's the central insight.
+
+<!-- Picture the full attention matrix, $Q$ on the $y$-axis and $K$ on the $x$-axis. It's a big grid. A naive implementation would calculate the entire grid and store it. FlashAttention does something different.
 
 It brings one small region of the grid close to the compute units. It calculates that region, normalizes it using running statistics, immediately uses the result to accumulate the output, then discards the region. Then it moves on to the next region.
 
-The mathematical interactions remain. The physical representation of the intermediate computation does not. That's the central insight.
+The mathematical interactions remain. The physical representation of the intermediate computation does not. That's the central insight. -->
 
 The evolution from FA1 to FA4, in one line each:
 
@@ -703,7 +714,7 @@ The final practical mental model, in four moves:
 
 - keep score tiles near compute,
 - carry only the row statistics needed to merge softmax blocks,
-- immediately consume probabilities into the $V$ accumulation, and
+- immediately consume probabilities for each tile into the $V$ accumulation, and
 - avoid sending the full $N^2$ attention matrix through HBM.
 
 {% capture c %}
