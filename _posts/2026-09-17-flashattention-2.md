@@ -596,10 +596,10 @@ Q \quad
  & & & \\ \hline
  & & & \\ \hline
 \end{array} \\
-\qquad \quad K 
 $$
+$$\qquad K$$
 
-<table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
+<!-- <table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
   <tr>
     <td style="width: 34px; border: none;"></td>
     <td colspan="4" style="text-align: center; border: none;">K</td>
@@ -629,7 +629,7 @@ $$
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
     <td style="width: 22px; height: 22px; border: 1px solid #888;"></td>
   </tr>
-</table>
+</table> -->
 
 
 * **<u>Naive attention:</u>**
