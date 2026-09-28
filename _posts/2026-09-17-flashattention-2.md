@@ -478,7 +478,7 @@ The names sound related. They're not. FlashAttention and PagedAttention answer t
 - **FlashAttention:** How do I efficiently compute $QK^T$, softmax, and $PV$?
 - **PagedAttention:** How do I efficiently store and retrieve the growing KV cache for many serving requests? -->
 
-PagedAttention shipped with vLLM to cut KV-cache waste from fragmentation and duplication in high-throughput serving.[^14] FlashAttention doesn't manage KV cache allocation. It handles how the attention operation consumes $Q/K/V$. How systems access the persistent KV state that lives across requests is a separate concern handled by PagedAttention. **That separation is why they can coexist in the same serving stack without stepping on each other.** Dao-AILab even ships a KV-cache-oriented FlashAttention interface with optional block tables. Kernel execution and cache paging are two modular concerns that play nicely together.[^15]
+PagedAttention shipped with vLLM to cut KV-cache waste from fragmentation and duplication in high-throughput serving.[^14] FlashAttention doesn't manage KV cache allocation. It handles how the attention operation consumes $Q/K/V$. How systems access the persistent KV state that lives across requests is a separate concern handled by PagedAttention. **That separation is why they can coexist in the same serving stack without stepping on each other.** Dao-AILab even ships a KV-cache-oriented FlashAttention interface with optional block tables. Kernel execution and cache paging are two modular concerns that play nicely together.[^8]
 
 In practice, the stack looks like this:
 
@@ -499,7 +499,7 @@ Paged KV cache → FlashAttention-style kernel → Attention output
 
 ### 3.2 FlashAttention vs. Sparse and Linear Attention
 
-Three very different strategies often get grouped together because all three can make attention cheaper in some regime. They are not the same kind of change.
+Three very different strategies, grouped together because they all make attention cheaper in some regime. They are not the same kind of change.
 
 | | Dense FlashAttention | Sparse Attention | Linear Attention |
 |---|---|---|---|
@@ -507,18 +507,33 @@ Three very different strategies often get grouped together because all three can
 | **Attention pattern** | Dense (all pairs) | Sparse or local | Rearranged via feature maps or associativity |
 | **Scaling** | Still $O(N^2 d)$ | Can fall below full $N^2$ work | Can fall below full $N^2$ work |
 
-- **Dense FlashAttention** keeps the dense softmax-attention function and changes how it is executed.
-- **Sparse / local attention** deliberately computes only a subset of query-key interactions. If each query attends to only a window or selected blocks, arithmetic can fall well below full dense $N^2$ work, but the model's attention pattern has changed.
-- **Linear-attention families** change the mathematical formulation, often using feature maps or associativity so attention can be rearranged without an explicit dense softmax score matrix. Their semantics and approximation/exactness properties depend on the specific method.
+**Dense FlashAttention**
+* computes $\text{softmax}(QK^T)V$ for all required Q-K pairs.
+* changes the execution of dense attention, not the mathematical function.
 
-The phrase "memory-efficient attention" is too broad to identify a method by itself. Ask two questions instead:
+**Sparse / local attention** 
+* only computes a selected subset of $Q$-$K$ interactions.
+* $i \rightarrow j$ only if $|i-j| \leq w$ where $w$ is the window size.
+* fewer $Q$-$K$  interactions, and the model's attention pattern changes.
+
+**Linear-attention**
+* changes the mathematical formula itself.
+* usually rearranges the attention computation with feature maps or associativity, avoiding an explicit dense softmax score matrix.
+
+<!-- - **Dense FlashAttention** keeps the dense softmax-attention function and changes how it is executed.
+- **Sparse / local attention** deliberately computes only a subset of query-key interactions. If each query attends to only a window or selected blocks, arithmetic can fall well below full dense $N^2$ work, but the model's attention pattern has changed.
+- **Linear-attention families** change the mathematical formulation, often using feature maps or associativity so attention can be rearranged without an explicit dense softmax score matrix. Their semantics and approximation/exactness properties depend on the specific method. -->
+
+The phrase "memory-efficient attention" is too broad to identify a method by itself. Ask two questions instead:[^15]
 
 1. Does it compute the same dense softmax attention?
 2. Does it reduce arithmetic pairs, or mostly memory traffic/intermediate storage?
 
-The first question separates dense FlashAttention from sparse/linear approaches. The second separates FlashAttention from methods that change the number of interactions.
+The first question splits dense FlashAttention from sparse and linear approaches. The second separates FlashAttention from methods that change the number of interactions that get computed.
 
-The original FlashAttention paper explicitly contrasted its dense exact algorithm with approximate methods, and separately explored block-sparse FlashAttention as an approximate/sparse extension.[^4]
+The original FlashAttention paper makes this line explicit. It contrasts its dense exact algorithm with approximate methods on one side, and explores block-sparse FlashAttention as an approximate/sparse extension on the other.[^4] 
+
+>**FlashAttention reduces memory requirements and IO, but dense attention remains quadratic.**
 
 **In summary:**
 
@@ -526,12 +541,10 @@ The original FlashAttention paper explicitly contrasted its dense exact algorith
 - **Sparse attention**: fewer interactions, different attention pattern.
 - **Linear attention**: different mathematical formulation.
 
-FlashAttention reduces memory requirements and IO, but dense attention remains quadratic.
-
 {% capture c %}
 "FlashAttention makes attention linear" is wrong. If a system shows near-linear scaling because it uses a local window or another sparse pattern, the sparsity is what changed the number of interactions. FlashAttention may still be the kernel underneath.
 {% endcapture %}
-{% include callout.html type="note" title="Common mix-up" content=c %}
+{% include callout.html type="note" title="FlashAttention doesn't make attention linear !!!" content=c %}
 
 ---
 
