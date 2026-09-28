@@ -542,7 +542,7 @@ The original FlashAttention paper makes this line explicit. It contrasts its den
 - **Linear attention**: different mathematical formulation.
 
 {% capture c %}
-"FlashAttention makes attention linear" is wrong. If a system shows near-linear scaling because it uses a local window or another sparse pattern, the sparsity is what changed the number of interactions. FlashAttention may still be the kernel underneath.
+**"FlashAttention makes attention linear" is wrong.** If a system shows near-linear scaling because it uses a local window or another sparse pattern, the sparsity is what changed the number of interactions. FlashAttention may still be the kernel underneath.
 {% endcapture %}
 {% include callout.html type="note" title="FlashAttention doesn't make attention linear !!!" content=c %}
 
