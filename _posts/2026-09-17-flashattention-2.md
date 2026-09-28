@@ -508,7 +508,7 @@ Three very different strategies, grouped together because they all make attentio
 | **Scaling** | Still $O(N^2 d)$ | Can fall below full $N^2$ work | Can fall below full $N^2$ work |
 
 **Dense FlashAttention**
-* computes $\text{softmax}(QK^T)V$ for all required Q-K pairs.
+* computes $\mathrm{softmax}(QK^T)V$ for all required Q-K pairs.
 * changes the execution of dense attention, not the mathematical function.
 
 **Sparse / local attention** 
@@ -726,52 +726,54 @@ Think of FlashAttention as a streaming matrix computation with exact streaming s
 
 Let's walk the whole FlashAttention story in one derivation, and hit the key things to remember.
 
-**Ordinary attention:**
+**Ordinary attention:** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.
 
 $$
 O = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d}}\right) V.
 $$
 
-**The problem.** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix.
+<!-- **The problem.** $QK^T \in \mathbb{R}^{N \times N}$. Materializing it creates an enormous intermediate matrix. -->
 
-**Naive execution:**
+**Naive execution:** This creates huge memory traffic.
 
-$$
+```
+QK^T → store N x N scores → softmax → store N x N probabilities → multiply by V
+```
+
+<!-- $$
 QK^T \to \text{store } N \times N \text{ scores} \to \text{softmax} \to \text{store } N \times N \text{ probabilities} \to \text{multiply by } V
 $$
 
-This leads to huge memory traffic.
+This leads to huge memory traffic. -->
 
-**FlashAttention idea.** Tiling. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
-
-$$
-S\_{ij} = \frac{Q\_i K\_j^T}{\sqrt{d}}.
-$$
-
-**The problem with tiling.** Softmax needs the maximum and the denominator over the whole row.
-
-**The solution: online softmax.**
-
-1. Maintain $(m, \ell, a)$ where:
-   - $m$ = running maximum
-   - $\ell$ = running normalized exponential sum
-   - $a$ = running unnormalized value-weighted sum (accumulator)
-
-2. When a new block has a larger maximum, calculate a rescaling factor:
+**FlashAttention:** Tiling is implemented. Split $Q \to Q\_i$ and $K, V \to K\_j, V\_j$, then calculate the score tile:
 
 $$
-\alpha = e^{m - m'},
+S_{ij} = \frac{Q_i K_j^T}{\sqrt{d}}.
 $$
 
-and rescale the old state.
+- <u>The problem with tiling</u>: Softmax needs the maximum and the denominator over the **whole row.***
 
-Therefore, we can process the full FlashAttention pipeline without ever materializing the $N \times N$ matrix:
+- <u>The solution</u>: online softmax
 
-$$
-\text{tile} \to \text{score} \to \text{online softmax} \to V \text{ accumulation} \to \text{discard tile}.
-$$
+  1. Maintain $(m, \ell, a)$ where:
+    - $m$ = running maximum
+    - $\ell$ = running normalized exponential sum
+    - $a$ = running unnormalized value-weighted sum (accumulator)
 
-**Result.** The same exact dense attention mathematics, but much better memory behavior: less HBM traffic, much smaller intermediates. Arithmetic remains $O(N^2 d)$.
+  2. When a new block has a larger maximum, calculate a rescaling factor, $\alpha$ and rescale the old state:
+
+  $$
+  \alpha = e^{m - m'},
+  $$
+
+- Therefore, we can process the full FlashAttention pipeline without ever materializing the $N \times N$ matrix:
+
+  $$
+  \text{tile} \to \text{score} \to \text{online softmax} \to V \text{ accumulation} \to \text{discard tile}.
+  $$
+
+- <u>Result</u>: The same exact dense attention mathematics, but much better memory behavior: ***less HBM traffic, much smaller intermediates.*** Arithmetic remains $O(N^2 d)$.
 
 **FlashAttention in one table:**
 
