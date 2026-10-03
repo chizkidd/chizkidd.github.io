@@ -77,7 +77,9 @@ jobs:
       - name: Swap in the shared site header
         run: |
           find public -name '*.html' -not -name 'index.html' -exec sed -i '/<header class="site-header">/,/<\/header>/d' {} +
-          find public -name '*.html' -not -name 'index.html' -exec sed -i 's|<body>|<body><script src="https://chizkidd.github.io/header-loader.js"></script>|' {} +
+          owner="${GITHUB_REPOSITORY%%/*}"; repo="${GITHUB_REPOSITORY#*/}"
+          tag="<script src=\"https://chizkidd.github.io/header-loader.js\" data-repo=\"${GITHUB_REPOSITORY}\" data-index=\"https://${owner}.github.io/${repo}/\"></script>"
+          find public -name '*.html' -not -name 'index.html' -exec sed -i -E "s|(<body[^>]*>)|\1${tag}|" {} +
 
       - name: Build landing page
         run: python .site-tools/scripts/build_course_index.py --public public --config "${{ inputs.config }}"
