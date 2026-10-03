@@ -1,0 +1,100 @@
+# Reusable workflow: convert a repo's Jupyter notebooks to HTML and deploy them to
+# GitHub Pages with the shared course landing page (see scripts/build_course_index.py).
+#
+# Caller (in a course repo, .github/workflows/deploy.yml):
+#   on: {push: {branches: [main]}, workflow_dispatch: {}}
+#   jobs:
+#     site:
+#       uses: chizkidd/chizkidd.github.io/.github/workflows/notebooks-site.yml@main
+#       permissions: {contents: read, pages: write, id-token: write}
+name: Build and deploy notebooks site
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        description: Path to the course config (title, credit, sections)
+        type: string
+        default: course.yml
+      tools-ref:
+        description: Ref of chizkidd/chizkidd.github.io that supplies the shared scripts
+        type: string
+        default: main
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout course repo
+        uses: actions/checkout@v4
+
+      - name: Checkout shared tools
+        uses: actions/checkout@v4
+        with:
+          repository: chizkidd/chizkidd.github.io
+          ref: ${{ inputs.tools-ref }}
+          path: .site-tools
+          sparse-checkout: scripts
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install converter
+        run: pip install jupyter nbconvert nbformat pyyaml
+
+      - name: Strip Colab and widget metadata (in the build copy only)
+        run: python .site-tools/scripts/clean_notebooks.py
+
+      - name: Convert notebooks to HTML
+        run: |
+          mkdir -p public
+          find . -name '*.ipynb' \
+            -not -path './public/*' -not -path './.git/*' \
+            -not -path './.site-tools/*' -not -path '*/.ipynb_checkpoints/*' \
+            | sort | while read -r nb; do
+              dir=$(dirname "${nb#./}")
+              mkdir -p "public/$dir"
+              echo "Converting $nb"
+              jupyter nbconvert --to html --template lab --output-dir="public/$dir" "$nb" \
+                || echo "::warning::failed to convert $nb"
+            done
+
+      - name: Copy images and supporting files
+        run: |
+          rsync -a --prune-empty-dirs \
+            --exclude='/public' --exclude='/.git' --exclude='/.github' --exclude='/.site-tools' \
+            --include='*/' \
+            --include='_imgs/***' --include='_src/***' --include='_assets/***' \
+            --include='*.png' --include='*.jpg' --include='*.jpeg' --include='*.gif' \
+            --include='*.svg' --include='*.webp' --include='*.mp4' --include='*.csv' \
+            --exclude='*' ./ public/
+
+      - name: Swap in the shared site header
+        run: |
+          find public -name '*.html' -not -name 'index.html' -exec sed -i '/<header class="site-header">/,/<\/header>/d' {} +
+          find public -name '*.html' -not -name 'index.html' -exec sed -i 's|<body>|<body><script src="https://chizkidd.github.io/header-loader.js"></script>|' {} +
+
+      - name: Build landing page
+        run: python .site-tools/scripts/build_course_index.py --public public --config "${{ inputs.config }}"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

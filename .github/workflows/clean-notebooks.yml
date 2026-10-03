@@ -1,0 +1,40 @@
+# Reusable workflow: strip Colab/widget metadata from notebooks and commit the result,
+# so they render on github.com. Optional; the site build cleans its own copy anyway.
+#
+# Caller:
+#   on: {push: {branches: [main], paths: ['**.ipynb']}, workflow_dispatch: {}}
+#   jobs:
+#     clean:
+#       uses: chizkidd/chizkidd.github.io/.github/workflows/clean-notebooks.yml@main
+#       permissions: {contents: write}
+name: Clean notebooks
+
+on:
+  workflow_call:
+    inputs:
+      tools-ref:
+        type: string
+        default: main
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: chizkidd/chizkidd.github.io
+          ref: ${{ inputs.tools-ref }}
+          path: .site-tools
+          sparse-checkout: scripts
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install nbformat
+      - run: python .site-tools/scripts/clean_notebooks.py
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sanitize notebooks for GitHub rendering [skip ci]"
+          file_pattern: "*.ipynb **/*.ipynb"
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
