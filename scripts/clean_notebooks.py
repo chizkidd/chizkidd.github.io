@@ -25,6 +25,10 @@ for path in glob.glob("**/*.ipynb", recursive=True):
     for cell in nb.cells:
         if cell.cell_type != "code":
             continue
+        src = cell.source.lower()
+        if cell.get("outputs") and ("notebook_login" in src or "%%html" in src):
+            cell["outputs"] = []
+            dirty = True
         kept = [o for o in cell.get("outputs", [])
                 if not any(m in o.get("data", {}) for m in WIDGET_MIMES)]
         if len(kept) != len(cell.get("outputs", [])):
