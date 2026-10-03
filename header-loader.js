@@ -1,4 +1,9 @@
 (function() {
+    // Course pages pass data-repo / data-index on this script tag to get the footer bar
+    const SELF = document.currentScript;
+    const REPO = SELF && SELF.dataset.repo;
+    const INDEX = SELF && SELF.dataset.index;
+
     // 0. Theme: reuse the choice saved by the main site (same origin), else follow the OS
     try {
         const stored = localStorage.getItem('theme');
@@ -53,6 +58,22 @@
         }
         
         .site-title:hover { text-decoration: none !important; }
+
+        /* Course footer bar (notebook pages) */
+        #course-footer {
+            position: fixed; left: 0; right: 0; bottom: 0; height: 36px; z-index: 9998;
+            background: var(--hl-bg); border-top: 1px solid var(--hl-border);
+            font-family: Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300;
+        }
+        #course-footer .wrap {
+            max-width: 800px; margin: 0 auto; padding: 0 30px; height: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #course-footer a { color: var(--hl-muted) !important; text-decoration: none !important; }
+        #course-footer a:hover { color: var(--hl-text) !important; text-decoration: underline !important; }
+        body.has-course-footer { padding-bottom: 36px; }
+        @media screen and (max-width: 600px) { #course-footer .wrap { padding: 0 12px; } }
+        @media print { #course-footer { display: none; } body.has-course-footer { padding-bottom: 0; } }
     `;
     document.head.appendChild(style);
 
@@ -88,6 +109,25 @@
         const toggle = document.getElementById('menu-toggle');
         const trigger = document.getElementById('nav-trigger');
         
+        if (REPO) {
+            const bar = document.createElement('footer');
+            bar.id = 'course-footer';
+            const wrap = document.createElement('div');
+            wrap.className = 'wrap';
+            const back = document.createElement('a');
+            back.href = INDEX || '/';
+            back.textContent = '\u2190 Course index';
+            const repo = document.createElement('a');
+            repo.href = 'https://github.com/' + REPO;
+            repo.target = '_blank';
+            repo.rel = 'noopener';
+            repo.textContent = 'View Repository';
+            wrap.append(back, repo);
+            bar.appendChild(wrap);
+            document.body.appendChild(bar);
+            document.body.classList.add('has-course-footer');
+        }
+
         // Manual Toggle (for mobile/touch where hover doesn't exist)
         toggle.onclick = (e) => {
             e.stopPropagation();
