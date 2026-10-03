@@ -596,6 +596,7 @@ Q \quad
  & & & \\ \hline
 \end{array} \\
 $$
+
 $$\qquad K$$
 
 <!-- <table style="margin: 1rem auto; border-collapse: collapse; font-family: inherit;">
