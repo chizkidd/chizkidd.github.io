@@ -1,0 +1,81 @@
+/* Shared landing-page style for notebook course sites (fast.ai style).
+   Palette matches css/main.css and header-loader.js. */
+
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --bg-content: #ffffff;
+  --text: #17202c;
+  --muted: #5a6576;
+  --border: #dae0e7;
+  --link: #2d52cf;
+  --link-hover: #17202c;
+  --link-visited: #5b43b5;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f141b;
+  --bg-content: #161c25;
+  --text: #e3e8ef;
+  --muted: #93a0b2;
+  --border: #2a3341;
+  --link: #8fa8ff;
+  --link-hover: #ffffff;
+  --link-visited: #b9a7ff;
+}
+
+* { margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 300;
+  color: var(--text);
+  background-color: var(--bg);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 { font-size: 100%; font-weight: 400; }
+
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); text-decoration: underline; }
+a:visited { color: var(--link-visited); }
+
+.wrap { max-width: 800px; padding: 0 30px; margin: 0 auto; }
+.page-content { padding: 30px 0; background-color: var(--bg-content); }
+
+.header-matched-heading {
+  color: var(--text);
+  font-size: 32px;
+  letter-spacing: -1.2px;
+  font-weight: 400;
+  line-height: 1.1;
+  margin-top: 30px;
+  margin-bottom: 25px;
+}
+
+.section-heading {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 5px;
+  margin-top: 40px;
+  margin-bottom: 15px;
+}
+
+.home-nav-list { padding-left: 20px; margin-bottom: 30px; list-style-type: disc; }
+.home-nav-list li { margin-bottom: 5.5px; }
+
+.site-footer { border-top: 1px solid var(--border); padding: 30px 0; }
+.site-footer p { font-size: 15px; letter-spacing: -.3px; color: var(--muted); text-align: center; }
+.site-footer .last-updated { margin-top: 10px; font-size: 13px; }
+
+@media screen and (max-width: 600px) {
+  .wrap { padding: 0 12px; }
+}

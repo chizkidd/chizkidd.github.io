@@ -20,6 +20,8 @@ google_analytics: G-WFFQCFF6S8
 #  Author's home: "http://deanattali.com"
 
 # Build settings
+exclude:
+  - scripts/
 markdown: kramdown
 permalink: pretty
 # theme: minima
