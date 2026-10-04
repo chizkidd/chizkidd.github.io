@@ -1,0 +1,45 @@
+# Rebuilds all six course sites when the shared build changes.
+#
+# The course repos call notebooks-site.yml and scripts/ from this repo's main branch
+# at run time, so they only need a re-run when those two things change. Header, CSS and
+# loader changes are fetched by the pages at view time and need no rebuild.
+#
+# Needs the repo secret COURSES_DEPLOY_TOKEN: a fine-grained token with
+# "Actions: Read and write" on the six repos below.
+name: Redeploy course sites
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/notebooks-site.yml'
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - fastai
+          - Karpathy-Neural-Networks-Zero-to-Hero
+          - huggingface-deep-RL-course
+          - deep-learning-models
+          - transformers-from-scratch
+          - mnielsen-neural-networks-and-deep-learning
+    steps:
+      - name: Run "Deploy notebooks" in ${{ matrix.repo }}
+        env:
+          GH_TOKEN: ${{ secrets.COURSES_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Secret COURSES_DEPLOY_TOKEN is not set. Add a fine-grained token with Actions read/write on the course repos."
+            exit 1
+          fi
+          if ! gh workflow run deploy.yml --repo "${{ github.repository_owner }}/${{ matrix.repo }}" --ref main; then
+            echo "::error::Could not start the deploy in ${{ matrix.repo }}. If the token expired or lacks Actions read/write on this repo, regenerate COURSES_DEPLOY_TOKEN."
+            exit 1
+          fi
+          echo "Started deploy in ${{ matrix.repo }}"
