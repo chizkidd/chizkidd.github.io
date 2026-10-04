@@ -1,0 +1,83 @@
+# Weekly check of COURSES_DEPLOY_TOKEN. GitHub reports a token's expiry date in the
+# `github-authentication-token-expiration` response header, so nothing is hardcoded here.
+# Opens (or updates) one issue assigned to the repo owner when the token expires within
+# WARN_DAYS, or has already expired / stopped working.
+name: Check course deploy token expiry
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'   # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+env:
+  WARN_DAYS: 30
+  ISSUE_TITLE: "Renew COURSES_DEPLOY_TOKEN"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read token status
+        id: token
+        env:
+          TOKEN: ${{ secrets.COURSES_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "state=missing" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          headers=$(curl -s -D - -o /dev/null -H "Authorization: Bearer $TOKEN" https://api.github.com/rate_limit)
+          status=$(echo "$headers" | head -1 | awk '{print $2}')
+          expiry=$(echo "$headers" | grep -i '^github-authentication-token-expiration:' | cut -d' ' -f2- | tr -d '\r')
+          echo "HTTP $status, expiry: ${expiry:-none}"
+          if [ "$status" = "401" ]; then
+            echo "state=invalid" >> "$GITHUB_OUTPUT"
+          elif [ -z "$expiry" ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"            # token has no expiration date
+          else
+            days=$(( ( $(date -d "$expiry" +%s) - $(date +%s) ) / 86400 ))
+            echo "expiry=$expiry" >> "$GITHUB_OUTPUT"
+            echo "days=$days" >> "$GITHUB_OUTPUT"
+            if [ "$days" -le "$WARN_DAYS" ]; then echo "state=expiring" >> "$GITHUB_OUTPUT"; else echo "state=ok" >> "$GITHUB_OUTPUT"; fi
+          fi
+
+      - name: Open or update the renewal issue
+        if: steps.token.outputs.state != 'ok'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.token.outputs.state }}
+          EXPIRY: ${{ steps.token.outputs.expiry }}
+          DAYS: ${{ steps.token.outputs.days }}
+        run: |
+          case "$STATE" in
+            missing)  headline="The secret COURSES_DEPLOY_TOKEN is not set." ;;
+            invalid)  headline="COURSES_DEPLOY_TOKEN is rejected by GitHub (expired or revoked)." ;;
+            expiring) headline="COURSES_DEPLOY_TOKEN expires on $EXPIRY (in $DAYS days)." ;;
+          esac
+          body="$headline
+
+          Course sites keep serving their last build, but the automatic redeploy in this repo stops working without it.
+
+          **To renew:**
+          1. GitHub, Settings, Developer settings, Fine-grained tokens: regenerate it (or create a new one) with **Actions: Read and write** on the six course repos.
+          2. Repo Settings, Secrets and variables, Actions: update **COURSES_DEPLOY_TOKEN**.
+          3. Run this workflow once (Actions, \"Check course deploy token expiry\", Run workflow); this issue closes itself when the token is healthy.
+
+          _Opened by .github/workflows/token-expiry-check.yml_"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$headline (checked $(date -u +%F))"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_TITLE" --body "$body" --assignee "$GITHUB_REPOSITORY_OWNER"
+          fi
+
+      - name: Close the renewal issue once the token is healthy
+        if: steps.token.outputs.state == 'ok'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[].number'); do
+            gh issue close "$n" --repo "$GITHUB_REPOSITORY" --comment "Token is healthy again."
+          done
