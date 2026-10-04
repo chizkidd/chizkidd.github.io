@@ -1,0 +1,112 @@
+/* Shared site header: used by the blog (_includes/header.html) and injected
+   on the course sub-sites by header-loader.js. Needs theme.css. */
+
+:where(.site-header) * { margin: 0; padding: 0; }
+:where(.site-header) { font-family: Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; font-weight: 300; text-align: left; }
+:where(.site-header) img { display: block; }
+:where(.site-header) a { color: var(--link); text-decoration: none; }
+:where(.site-header) a:hover { color: var(--link-hover); text-decoration: underline; }
+:where(.site-header) a:visited { color: var(--link-visited); }
+
+.site-header .wrap:before,
+.site-header .wrap:after { content: ""; display: table; }
+.site-header .wrap:after { clear: both; }
+.site-header .wrap { max-width: 800px; padding: 0 30px; margin: 0 auto; box-sizing: content-box; }
+@media screen and (max-width: 600px) { .site-header .wrap { padding: 0 12px; } }
+
+.site-header {
+  border-top: 4px solid var(--accent-bar);
+  border-bottom: 1px solid var(--border); /* CHANGED: was #e8e8e8 */
+  min-height: 56px;
+  background-color: var(--bg); /* CHANGED: was white */
+}
+
+.site-title,
+.site-title:hover,
+.site-title:visited {
+  display: block;
+  color: var(--text); /* CHANGED: was #333 */
+  font-size: 26px;
+  letter-spacing: -1px;
+  float: left;
+  line-height: 56px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Theme toggle: sun in dark mode, moon in light mode */
+#theme-toggle {
+  float: left;
+  width: 32px;
+  height: 32px;
+  margin: 12px 0 0 10px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+#theme-toggle:hover { background-color: var(--btn-hover); border-color: var(--border); }
+#theme-toggle:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+#theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#theme-toggle .sun { display: none; }
+html[data-theme="dark"] #theme-toggle .sun { display: block; }
+html[data-theme="dark"] #theme-toggle .moon { display: none; }
+
+/* UPDATED: Hamburger menu aligned with content, not fixed */
+.site-nav {
+  float: right;
+  line-height: 56px;
+  position: relative;
+}
+
+.site-nav .menu-icon {
+  display: block;
+  font-size: 24px;
+  color: var(--text);
+  float: right;
+  width: 36px;
+  text-align: center;
+  line-height: 36px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.site-nav .menu-icon svg { 
+  width: 18px; 
+  height: 16px; 
+}
+
+.site-nav .trigger {
+  clear: both;
+  display: none;
+  background-color: var(--bg-content); /* CHANGED: was white */
+  border: 1px solid var(--border); /* CHANGED: was #e8e8e8 */
+  border-radius: 5px;
+  padding: 5px 0;
+  margin-top: 5px;
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  min-width: 120px;
+}
+
+.site-nav:hover .trigger { 
+  display: block; 
+}
+
+.site-nav .page-link {
+  display: block;
+  text-align: right;
+  line-height: 1.25;
+  padding: 5px 10px;
+  margin: 0;
+  color: var(--muted);
+  letter-spacing: -.5px;
+}
+

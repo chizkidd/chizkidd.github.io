@@ -1,29 +1,6 @@
 /* Shared landing-page style for notebook course sites (fast.ai style).
-   Palette matches css/main.css and header-loader.js. */
-
-:root {
-  color-scheme: light;
-  --bg: #f6f7f9;
-  --bg-content: #ffffff;
-  --text: #17202c;
-  --muted: #5a6576;
-  --border: #dae0e7;
-  --link: #2d52cf;
-  --link-hover: #17202c;
-  --link-visited: #5b43b5;
-}
-
-html[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #0f141b;
-  --bg-content: #161c25;
-  --text: #e3e8ef;
-  --muted: #93a0b2;
-  --border: #2a3341;
-  --link: #8fa8ff;
-  --link-hover: #ffffff;
-  --link-visited: #b9a7ff;
-}
+   Palette comes from css/theme.css. */
+@import url("../css/theme.css");
 
 * { margin: 0; padding: 0; }
 html, body { height: 100%; }

@@ -1,0 +1,46 @@
+/* Shared theme variables: used by the blog, header.css and course-index.css */
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --bg-content: #ffffff;
+  --text: #17202c;
+  --text-body: #1f2937;
+  --muted: #5a6576;
+  --border: #dae0e7;
+  --link: #2d52cf;
+  --link-hover: #17202c;
+  --link-visited: #5b43b5;
+  --code-bg: #f0f2f5;
+  --code-border: #dae0e7;
+  --table-head: #eef1f5;
+  --table-stripe: #f8f9fb;
+  --accent-bar: #17202c;
+  --btn-bg: #ffffff;
+  --btn-fg: #17202c;
+  --btn-border: #dae0e7;
+  --btn-hover: #eef1f5;
+  --shadow: 0 1px 3px rgba(23, 32, 44, 0.12);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f141b;
+  --bg-content: #161c25;
+  --text: #e3e8ef;
+  --text-body: #cdd5df;
+  --muted: #93a0b2;
+  --border: #2a3341;
+  --link: #8fa8ff;
+  --link-hover: #ffffff;
+  --link-visited: #b9a7ff;
+  --code-bg: #1b222d;
+  --code-border: #2a3341;
+  --table-head: #1b222d;
+  --table-stripe: #131922;
+  --accent-bar: #8fa8ff;
+  --btn-bg: #161c25;
+  --btn-fg: #e3e8ef;
+  --btn-border: #2a3341;
+  --btn-hover: #1f2733;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}

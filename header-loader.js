@@ -1,10 +1,13 @@
-(function() {
-    // Course pages pass data-repo / data-index on this script tag to get the footer bar
+/* Injects the blog's own header (the _includes/header.html output, via /header-fragment.html)
+   into course sub-sites, so every page shares one header. Optional data attributes on the
+   script tag: data-repo, data-index add the course footer bar (notebook pages). */
+(function () {
     const SELF = document.currentScript;
     const REPO = SELF && SELF.dataset.repo;
     const INDEX = SELF && SELF.dataset.index;
+    const BASE = 'https://chizkidd.github.io';
 
-    // 0. Theme: reuse the choice saved by the main site (same origin), else follow the OS
+    // 0. Theme: reuse the choice saved by the blog (same origin), else follow the OS
     try {
         const stored = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -17,106 +20,87 @@
     gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-WFFQCFF6S8';
     document.head.appendChild(gaScript);
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-WFFQCFF6S8');
 
-    // 2. Inject CSS for Hover States and Dropdown Layout
+    // 2. Shared styles: same files the blog uses, plus the course footer bar
+    ['theme.css', 'header.css'].forEach(function (f) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = BASE + '/css/' + f;
+        document.head.appendChild(link);
+    });
     const style = document.createElement('style');
-    style.innerHTML = `
-        :root {
-            --hl-bg: #f6f7f9; --hl-surface: #ffffff; --hl-text: #17202c; --hl-muted: #5a6576;
-            --hl-border: #dae0e7; --hl-hover: #eef1f5; --hl-bar: #17202c;
-        }
-        html[data-theme="dark"] {
-            --hl-bg: #0f141b; --hl-surface: #161c25; --hl-text: #e3e8ef; --hl-muted: #93a0b2;
-            --hl-border: #2a3341; --hl-hover: #1f2733; --hl-bar: #8fa8ff;
-        }
-        /* Main Link Styling */
-        #nav-trigger a { 
-            display: block; 
-            padding: 10px 15px; 
-            border-bottom: 1px solid var(--hl-border); 
-            color: var(--hl-muted) !important; 
-            text-decoration: none !important;
-            font-family: Helvetica, Arial, sans-serif;
-            font-size: 16px;
-            font-weight: 300;
-        }
-        #nav-trigger a:last-child { border-bottom: none; }
-        
-        /* Hover Effect for Links */
-        #nav-trigger a:hover { 
-            background-color: var(--hl-hover); 
-            color: var(--hl-text) !important; 
-            text-decoration: underline !important; 
-        }
-
-        /* HOVER LOGIC: Shows menu when mouse is over the nav area */
-        .site-nav:hover #nav-trigger {
-            display: flex !important;
-        }
-        
-        .site-title:hover { text-decoration: none !important; }
-
-        /* Course footer bar (notebook pages) */
+    style.textContent = `
+        #site-header-slot { min-height: 61px; }
         #course-footer {
             position: fixed; left: 0; right: 0; bottom: 0; height: 36px; z-index: 9998;
-            background: var(--hl-bg); border-top: 1px solid var(--hl-border);
+            background: var(--bg); border-top: 1px solid var(--border);
             font-family: Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300;
         }
         #course-footer .wrap {
             max-width: 800px; margin: 0 auto; padding: 0 30px; height: 100%;
             display: flex; justify-content: space-between; align-items: center;
         }
-        #course-footer a { color: var(--hl-muted) !important; text-decoration: none !important; }
-        #course-footer a:hover { color: var(--hl-text) !important; text-decoration: underline !important; }
+        #course-footer a { color: var(--muted) !important; text-decoration: none !important; }
+        #course-footer a:hover { color: var(--text) !important; text-decoration: underline !important; }
         body.has-course-footer { padding-bottom: 36px; }
         @media screen and (max-width: 600px) { #course-footer .wrap { padding: 0 12px; } }
         @media print { #course-footer { display: none; } body.has-course-footer { padding-bottom: 0; } }
     `;
     document.head.appendChild(style);
 
-    // 3. Header HTML
-    const headerHTML = `
-    <header class="site-header" style="border-top: 4px solid var(--hl-bar); border-bottom: 1px solid var(--hl-border); min-height: 56px; background-color: var(--hl-bg); font-family: Helvetica, Arial, sans-serif;">
-        <div class="wrap" style="max-width: 800px; margin: 0 auto; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; height: 56px; position: relative;">
-            <div style="display: flex; align-items: center;">
-                <a href="https://chizkidd.github.io/" style="margin-right: 10px; display: flex; align-items: center;">
-                    <img src="https://chizkidd.github.io/assets/rssicon.svg" alt="RSS" style="width: 24px; height: 24px;">
-                </a>
-                <a class="site-title" href="https://chizkidd.github.io/" style="color: var(--hl-text); font-size: 26px; letter-spacing: -1px; text-decoration: none; font-weight: 400;">Chizoba Obasi blog</a>
-            </div>
-            
-            <nav class="site-nav" style="position: relative; padding: 10px 0;">
-                <div id="menu-toggle" style="color: var(--hl-text); cursor: pointer; padding: 10px; display: block;">
-                    <svg viewBox="0 0 18 15" width="18px" height="15px"><path fill="currentColor" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.031C17.335,12.031,18,12.695,18,13.516L18,13.516z"/></svg>
-                </div>
-                <div id="nav-trigger" style="display: none; position: absolute; right: 0; top: 45px; background: var(--hl-surface); border: 1px solid var(--hl-border); border-radius: 5px; min-width: 160px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; flex-direction: column;">
-                    <a href="https://chizkidd.github.io/about/">About</a>
-                    <a href="https://chizkidd.github.io/courses/">Courses</a>
-                    <a href="https://chizkidd.github.io/projects/">Projects</a>
-                </div>
-            </nav>
-        </div>
-    </header>`;
+    // 3. Header: fetched from the blog so it can never drift from the real one
+    const FALLBACK = '<header class="site-header"><div class="wrap"><a class="site-title" href="' + BASE +
+        '/">Chizoba Obasi blog</a></div></header>';
+
+    function wireThemeToggle(slot) {
+        const btn = slot.querySelector('#theme-toggle');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            const root = document.documentElement;
+            const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
+        });
+    }
+
+    function absolutize(slot) {
+        slot.querySelectorAll('a[href^="/"], img[src^="/"]').forEach(function (el) {
+            const attr = el.tagName === 'A' ? 'href' : 'src';
+            el.setAttribute(attr, BASE + el.getAttribute(attr));
+        });
+    }
 
     function injectHeader() {
-        const container = document.createElement('div');
-        container.innerHTML = headerHTML;
-        document.body.prepend(container);
-        
-        const toggle = document.getElementById('menu-toggle');
-        const trigger = document.getElementById('nav-trigger');
-        
+        const slot = document.createElement('div');
+        slot.id = 'site-header-slot';
+        // Break out of any page padding (nbconvert pages) so the header spans the full width
+        const cs = getComputedStyle(document.body);
+        const out = function (side) { return -(parseFloat(cs['margin' + side]) + parseFloat(cs['padding' + side])) + 'px'; };
+        slot.style.margin = out('Top') + ' ' + out('Right') + ' 0 ' + out('Left');
+        slot.style.minWidth = '0';
+        document.body.prepend(slot);
+
+        fetch(BASE + '/header-fragment.html')
+            .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+            .catch(function () { return FALLBACK; })
+            .then(function (html) {
+                slot.innerHTML = html;
+                slot.style.minHeight = 'auto';
+                absolutize(slot);
+                wireThemeToggle(slot);
+            });
+
         if (REPO) {
             const bar = document.createElement('footer');
             bar.id = 'course-footer';
             const wrap = document.createElement('div');
             wrap.className = 'wrap';
             const back = document.createElement('a');
-            back.href = INDEX || '/';
-            back.textContent = '\u2190 Course index';
+            back.href = INDEX || BASE + '/';
+            back.textContent = '← Course index';
             const repo = document.createElement('a');
             repo.href = 'https://github.com/' + REPO;
             repo.target = '_blank';
@@ -127,18 +111,6 @@
             document.body.appendChild(bar);
             document.body.classList.add('has-course-footer');
         }
-
-        // Manual Toggle (for mobile/touch where hover doesn't exist)
-        toggle.onclick = (e) => {
-            e.stopPropagation();
-            const isHidden = trigger.style.display === 'none' || trigger.style.display === '';
-            trigger.style.display = isHidden ? 'flex' : 'none';
-        };
-
-        // Close menu when clicking elsewhere
-        document.onclick = () => {
-            trigger.style.display = 'none';
-        };
     }
 
     if (document.readyState === 'loading') {
