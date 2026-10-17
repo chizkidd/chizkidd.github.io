@@ -2,50 +2,59 @@
 layout: post
 comments: true
 title: "Evaluating Tone Preservation in ASR: How Meta's omniASR Handles Igbo Diacritics"
-excerpt: Controlled evaluation of omniASR-CTC-1B on Igbo language using 21 systematically designed samples. Diacritic Error Rate (DER) quantifies tone-specific failures. Bootstrap resampling (10,000 iterations) yields 75.5% loss (95% CI [57.1%, 89.7%]). Monotone control reveals orthographic bias. Includes full methodology, code, and reproducibility guide.
+excerpt: Controlled evaluation of omniASR-CTC-1B on Igbo using 21 designed samples. Counting dropped and added tone and dot-below marks per clip, tonal clips lose 75.5% of expected marks (clip-level bootstrap 95% CI [57.1%, 89.7%]) while other categories gain marks. A monotone control is suggestive of text-prior effects. Includes methodology, corrected metrics, code, and reproducibility guide.
 date: 2026-03-01
 mathjax: true
 ---
 
-This is a brief guide to my evaluation of tonal preservation in facebook's omniASR-CTC-1B Automatic Speech Recognition (ASR) model for Igbo, a tonal Niger-Congo language with 45 million speakers. The model claims support for 1,600+ languages including Igbo, but what does "support" mean when tone changes word meaning? I created 21 systematically designed audio samples, ran them through the model, and measured a 75.5% bootstrapped diacritic loss rate on tonal markers. The core finding: the model appears to generate tone marks probabilistically based on orthographic priors rather than acoustic conditioning. I cannot simplify this investigation any further.
+This is a brief guide to my evaluation of tonal preservation in facebook's omniASR-CTC-1B Automatic Speech Recognition (ASR) model for Igbo, a tonal Niger-Congo language with 45 million speakers. The model claims support for 1,600+ languages including Igbo, but what does "support" mean when tone changes word meaning? I created 21 designed audio samples, ran them through the model, and found that on the tonal samples 37 of 49 expected tone and dot-below marks (75.5%) were missing from the output. The pattern is consistent with the model leaning on orthographic priors rather than acoustic tone, although one speaker and 21 clips cannot establish that. I cannot simplify this investigation any further.
 
-Where to find it: The dataset with audio is on [HuggingFace](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots). The code and analysis are on [GitHub](https://github.com/chizkidd/igbo-asr-tonal-evaluation). The full analysis notebook is available at [analysis.ipynb](https://github.com/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb).
+Where to find it: The dataset with audio is on [HuggingFace](https://huggingface.co/datasets/Chiz/omniASR-igbo-blindspots). The code and analysis are on [GitHub](https://github.com/chizkidd/igbo-asr-tonal-evaluation). The full analysis notebook is available at [analysis.ipynb](https://github.com/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb).
+
+{% capture c %}
+This post was corrected on 17 October 2026. Earlier versions mixed two different metrics (a 61.2% net loss and a 75.5% drop rate), described a bootstrap mean that was really the drop rate, described the overlap between the tonal interval and the other categories incorrectly (it overlaps two of the three others), and reported a similarity score as CER. All numbers below are recomputed from the dataset, with dropped and added marks counted per clip. The monotone-clip and minimal-pair claims are softened to what one speaker and 21 clips can support, and word meanings for the akwa forms were removed pending a check against a standard Igbo reference.
+{% endcapture %}
+{% include callout.html type="note" title="Update (October 2026)" content=c %}
 
 The following is my guide to stepping through the evaluation methodology.
 
 ## The Problem
 
-In Igbo, tone is phonemic. This means tone changes word meaning, not just prosody. The difference between:
+In Igbo, tone is phonemic. This means tone changes word meaning, not just prosody. The same consonants and vowels, written with different tone marks, give different words:
 
-* akwa (crying)
-* akwà (cloth)
-* àkwà (egg)  
-* ákwá (bridge)
+* akwa
+* akwà
+* àkwà
+* ákwá
 
-...isn't decorative. These are four completely different words that happen to share consonants and vowels. The tone marks (diacritics) are the only thing distinguishing them. When omniASR lists Igbo as "supported," does it preserve these tonal distinctions? Or does "support" just mean "we trained on some Igbo data"?
+The tone marks (diacritics) are the only thing distinguishing them. When omniASR lists Igbo as "supported," does it preserve these tonal distinctions? Or does "support" just mean "we trained on some Igbo data"?
 
 ## Dataset Design
 
 I recorded 21 audio samples using my iPhone SE Voice Memos app. Each sample targets a specific failure mode across four categories.
 
-The first category tests cross-lingual orthographic interference. My hypothesis was that the model applies incorrect orthographic conventions from other languages to Igbo text. I recorded five samples: personal names without tone marks, formal greetings, numbers in Igbo, well-known proverbs, and a slow prosody test. I expected 0% diacritic loss since there was nothing to lose, but observed -38.9%, meaning the model added diacritics that don't exist.
+A note on counting before the categories. A "mark" is one letter carrying a grave, acute, macron or dot-below (so ọ, ị, ụ count, and a letter with both a dot and a tone counts once). Dropped marks D and added marks H are counted per clip and then summed, so additions in one clip never cancel drops in another. Everything below is a percentage of expected marks E unless stated.
 
-The second category tests phonemic tone sensitivity. The hypothesis here is that the model cannot distinguish phonemically contrastive tones. I recorded six samples including minimal pairs like akwa/akwà/àkwà/ákwá and oke/òkè/ọkè, dense tone marking, a monotone control (the key diagnostic), and two Yoruba controls. I expected low loss if the model uses acoustic information, but observed 75.5% loss with a bootstrap 95% confidence interval of [57.1%, 89.7%].
+The first category tests cross-lingual orthographic interference. My hypothesis was that the model applies incorrect orthographic conventions from other languages to Igbo text. I recorded five samples: personal names, formal greetings, numbers in Igbo, a well-known proverb, and a slow prosody test. The references have 18 marks, mostly dot-below letters. The model produced 25: 2 dropped and 9 added (net loss -38.9%, drop rate 11.1%, added rate 50.0%). Only 4 of the produced marks are tone marks, so part of the "addition" is orthographic convention rather than tone.
 
-The smoking gun is file 09. I spoke "O na-eri oji n'ututu" with deliberately flat intonation, with no tonal variation at all. The model transcribed it as "ọne rị ọjí nụ tútú" and ADDED tone marks I never spoke. If the model were using acoustics, it shouldn't hallucinate tones on monotone speech.
+The second category tests phonemic tone sensitivity. The hypothesis here is that the model cannot distinguish phonemically contrastive tones. I recorded six samples including minimal pairs like akwa/akwà/àkwà/ákwá and oke/òkè/ọkè, dense tone marking, a monotone control, and two Yoruba controls. If the model used acoustic information I expected low loss. Instead 37 of 49 expected marks were dropped (drop rate 75.5%, net loss 61.2%, DER 89.8%), with a clip-level bootstrap 95% confidence interval on the drop rate of [57.1%, 89.7%].
 
-The third category tests language boundary effects from code-switching. I hypothesized that switching between English and Igbo disrupts language-specific processing. Five samples test different patterns: English embedding into Igbo, Igbo embedding into English, sentence-level alternation, diacritics in English context, and Nigerian Pidgin as a control. The result was 14.3% diacritic loss, with English portions transcribed perfectly while adjacent Igbo lost tone marks.
+The most suggestive clip is file 09. I spoke "O na-eri oji n'ututu" with deliberately flat intonation, with no tonal variation. The model transcribed it as "ọne rị ọjí nụ tútú", which has 7 marks the reference does not: 3 acute tone marks and 4 dot-below letters. If the model were purely using acoustics, flat speech should not attract tone marks. It is one clip, and the dot-below additions may be standard orthography (my reference was written without dots), so I treat it as a lead, not proof.
 
-The fourth category tests domain-specific lexical coverage. The hypothesis is that culturally specific terms outside the training distribution would struggle. I recorded Nigerian place names, Igbo food terms, long proverbs, French as a high-resource control, and background noise robustness. This category showed the best diacritic preservation at only 6.3% loss, but terrible overall accuracy with 30% character error rate, indicating word-level errors.
+The third category tests language boundary effects from code-switching. I hypothesized that switching between English and Igbo disrupts language-specific processing. Five samples test different patterns: English embedding into Igbo, Igbo embedding into English, sentence-level alternation, diacritics in English context, and Nigerian Pidgin as a control. Net loss was 14.3%, but that hides 7 of 14 expected marks dropped (drop rate 50.0%) and 5 added (added rate 35.7%). English portions were mostly transcribed, with errors, while adjacent Igbo lost marks.
+
+The fourth category tests domain-specific lexical coverage. The hypothesis is that culturally specific terms outside the training distribution would struggle. I recorded Nigerian place names, Igbo food terms, long proverbs, French as a high-resource control, and background noise robustness. Net loss was the lowest at 6.3%, but 5 of 16 expected marks were dropped (31.2%) and 4 added (25.0%), and mean CER was 37.4%, indicating word-level errors.
 
 The data looks like this (metadata.csv):
 
 ```csv
-file_name,ground_truth,model_output,category,character_error_rate,diacritics_expected,diacritics_produced
-06_tonal_akwa.m4a,"akwa, akwa, akwa. Akwà, akwà, akwà...","akua akua akua akua akwa akwa...",tonal_diacritics,0.583,12,3
-09_tonal_flat.m4a,"O na-eri oji n'ututu","ọne rị ọjí nụ tútú",tonal_diacritics,0.744,0,7
+file_name,ground_truth,model_output,category,subcategory,language,character_error_rate,diacritics_expected,diacritics_produced,diacritic_loss
+audio/06_tonal_akwa.wav,"Akwa, akwa, akwa. Akwà, akwà, akwà...","akua akua akua akua akwa akwa...",tonal_diacritics,minimal_pair,ibo_Latn,0.6,15,3,12
+audio/09_tonal_flat.wav,"O na-eri oji n'ututu.","ọne rị ọjí nụ tútú",tonal_diacritics,monotone,ibo_Latn,0.744,0,7,-7
 ...
 ```
+
+(The `character_error_rate` column in the released CSV is `1 - difflib ratio`, a similarity-based score, not Levenshtein CER. The CER values quoted below are recomputed as true CER.)
 
 ## Model Inference
 
@@ -73,32 +82,40 @@ model_output = transcription[0]['transcription']
 
 ## Metrics
 
-Standard Character Error Rate (CER) conflates spacing errors with tonal errors. I defined a custom metric:
-
-### Diacritic Error Rate (DER)
+Standard Character Error Rate (CER) conflates spacing errors with tonal errors. I defined metrics that isolate marks:
 
 ```python
-def diacritic_error_rate(ground_truth, model_output):
-    E = count_diacritics(ground_truth)  # expected
-    P = count_diacritics(model_output)  # produced
-    D = max(0, E - P)  # dropped
-    H = max(0, P - E)  # hallucinated
-    return (D + H) / E if E > 0 else 0
+import unicodedata
+
+COUNTED = {0x300, 0x301, 0x304, 0x323}   # grave, acute, macron, dot-below
 
 def count_diacritics(text):
-    diacritics = set('ụọịàèìòùáéíóúẹṣ')
-    return sum(1 for c in text.lower() if c in diacritics)
+    # one count per letter (NFD cluster) that carries a counted mark
+    out = []
+    for ch in unicodedata.normalize("NFD", text):
+        if unicodedata.combining(ch) and out:
+            out[-1] += ch
+        else:
+            out.append(ch)
+    return sum(1 for c in out if {ord(x) for x in c[1:]} & COUNTED)
+
+def clip_counts(ground_truth, model_output):
+    E = count_diacritics(ground_truth)   # expected
+    P = count_diacritics(model_output)   # produced
+    return E, P, max(0, E - P), max(0, P - E)   # E, P, dropped D, added H
 ```
 
-DER isolates tone-related failures:
+Dropped D and added H are computed per clip and then summed over a category, so additions in one clip never cancel drops in another.
 
 | Metric | Formula | What it captures |
 |--------|---------|------------------|
 | CER | Levenshtein distance / length | All character errors |
-| RDD (Raw Drop Rate) | dropped / expected | Only missing tone marks |
-| DER | (dropped + hallucinated) / expected | Total tonal deviation |
+| Net loss | (E - P) / E | Net change in mark count (can be negative) |
+| RDD (Drop rate) | D / E | Only missing marks |
+| Added rate | H / E | Marks produced beyond expectation |
+| DER | (D + H) / E | Total deviation from the reference |
 
-Note that DER can exceed 100% when hallucinations are substantial, because the denominator reflects ground truth expectations, not produced output.
+Note that DER can exceed 100% when additions are substantial, because the denominator reflects ground truth expectations, not produced output. Counts also cannot tell a correct mark from a mark on the wrong letter; I add an alignment-based estimate for that below.
 
 ## Bootstrap Uncertainty
 
@@ -108,39 +125,33 @@ With N=21 samples, I needed to quantify uncertainty. I used bootstrap resampling
 def bootstrap_ci(data, stat_fn, n_boot=10000, ci=0.95, seed=42):
     rng = np.random.default_rng(seed)
     n = len(data)
-    
+
     # Point estimate
     point = float(stat_fn(data))
-    
-    # Bootstrap resampling
+
+    # Bootstrap resampling of clips
     boots = np.empty(n_boot)
     for i in range(n_boot):
         idx = rng.integers(0, n, size=n)
         boots[i] = float(stat_fn(data.iloc[idx]))
-    
-    # Percentile CI
+
+    # Percentile CI (resamples where the rate is undefined are dropped and counted)
+    ok = boots[~np.isnan(boots)]
     alpha = (1 - ci) / 2
-    lo = float(np.quantile(boots, alpha))
-    hi = float(np.quantile(boots, 1 - alpha))
-    
-    return (point, lo, hi)
+    return point, float(np.quantile(ok, alpha)), float(np.quantile(ok, 1 - alpha))
 ```
 
-Bootstrap resampling occurs at the **utterance level**, not event level. This matters because diacritic distribution is uneven across samples. Some files have 0 expected tone marks, others have 12. Resampling utterances captures this variability.
+Bootstrap resampling is at the **clip level**, not the mark level. Clips are the independent unit; resampling individual marks would treat the marks within one clip as independent and give intervals that are far too narrow. More resamples do not add information; only more independent clips (and speakers) do.
 
-Example result:
+The headline is the **point estimate** on the original data, with the interval around it. For the tonal category that is 37/49 = 75.5%, with a bootstrap interval of [57.1%, 89.7%].
 
-* Raw count: 30/49 = 61.2% drop rate
-* Bootstrap mean: 75.5% 
-* 95% CI: [57.1%, 89.7%]
-
-The bootstrap mean exceeds the raw percentage because resampling at utterance level gives more weight to samples with extreme loss rates. Both values are reported for transparency.
+An earlier version of this post reported 61.2% as a "raw count" and 75.5% as a "bootstrap mean" and explained the gap by resampling giving more weight to extreme clips. That explanation was wrong: 61.2% is the **net** loss ((49 - 19) / 49, 37 dropped minus 7 added), and 75.5% is the **drop rate** (37/49). They are different metrics, and the interval was always an interval for the drop rate.
 
 {% capture c %}
-With only 21 samples, we need uncertainty quantification. Bootstrap resampling (10,000 iterations) shows:
-**Worst-case lower bound:** 57.1%<br>
-**Even pessimistically,** loss is still >50%<br>
-**Not** a small-sample fluke
+With only 21 samples, we need uncertainty quantification. Resampling clips 10,000 times shows:
+**Tonal lower bound:** 57.1% drop rate<br>
+**Non-tonal categories:** intervals reach 0%<br>
+**Not** proof of a difference between all categories
 {% endcapture %}
 {% include callout.html type="note" title="Why Bootstrap Matters" content=c %}
 
@@ -148,33 +159,36 @@ With only 21 samples, we need uncertainty quantification. Bootstrap resampling (
 
 ### Quantitative Summary
 
-| Category | Samples | Diacritic Loss | Avg CER |
-|----------|---------|----------------|---------|
-| **Phonemic Tone Sensitivity** | 6 | **75.5%** | 50.6% |
-| Cross-lingual Interference | 5 | -38.9% | 28.8% |
-| Domain-Specific Coverage | 5 | 6.3% | 30.1% |
-| Language Boundary Effects | 5 | 14.3% | 20.0% |
-| **Overall** | **21** | **26.8%** | **32.5%** |
+| Category | Clips | E | Dropped | Added | Net loss | Drop rate | Added rate | DER | Mean CER |
+|----------|-------|---|---------|-------|----------|-----------|------------|-----|----------|
+| **Phonemic Tone Sensitivity** | 6 | 49 | 37 | 7 | 61.2% | **75.5%** | 14.3% | 89.8% | 51.6% |
+| Cross-lingual Interference | 5 | 18 | 2 | 9 | -38.9% | 11.1% | 50.0% | 61.1% | 28.5% |
+| Language Boundary Effects | 5 | 14 | 7 | 5 | 14.3% | 50.0% | 35.7% | 85.7% | 25.7% |
+| Domain-Specific Coverage | 5 | 16 | 5 | 4 | 6.3% | 31.2% | 25.0% | 56.2% | 37.4% |
+| **Overall** | **21** | **97** | **51** | **25** | 26.8% | 52.6% | 25.8% | 78.4% | 36.5% |
 
-### Bootstrap Confidence Intervals
+### Bootstrap Confidence Intervals (drop rate)
 
 ```
-Tonal category:  75.5% (95% CI: [57.1%, 89.7%])
-Overall:         52.6% (95% CI: [30.3%, 69.7%])
+Tonal:             75.5%  (95% CI: [57.1%, 89.7%])
+Overall:           52.6%  (95% CI: [30.3%, 69.7%])
+Language boundary: 50.0%  (95% CI: [0%, 91.7%])
+Domain:            31.2%  (95% CI: [0%, 83.3%])
+Cross-lingual:     11.1%  (95% CI: [0%, 27.3%])
 ```
 
-Even under the worst-case lower bound (57.1%), tonal diacritic loss remains severe.
+With 5 or 6 clips per category the non-tonal intervals are very wide. Counting only tone marks (grave, acute, macron), the references have 45 tone-bearing letters and the model output has 9; in the tonal clips it is 43 versus 5.
 
 ### Visualizations
 
-![loss by category](/assets/images/2026/omniASR/fig1_loss_by_category.png)
-Bar chart showing 61.2% raw count loss for tonal category (red), with negative values indicating diacritic hallucination (script interference).
+![marks dropped vs added by category](/assets/images/2026/omniASR/fig1_drop_rate_by_category.png)
+Paired bars for each category: drop rate (dark) and added rate (grey), with counts. Net loss alone would have hidden the large additions in the cross-lingual and language-boundary categories.
 
-![char error rate vs diacritic loss](/assets/images/2026/omniASR/fig2_cer_vs_diacritic_loss.png)
-Scatter plot showing tonal samples (red) have high diacritic loss even when CER is moderate.
+![char error rate vs drop rate](/assets/images/2026/omniASR/fig2_cer_vs_drop_rate.png)
+Per-clip CER against drop rate for the 18 clips with at least one expected mark (Pearson r = 0.36). Tonal clips (red) combine high CER (about 48% to 53%) with 50% to 100% mark loss, so with this few clips tone loss cannot be cleanly separated from general transcription errors.
 
-![boostrap confidence interval](/assets/images/2026/omniASR/fig3_bootstrap_ci.png)
-Forest plot showing 95% CIs for each category, with 50% threshold line.
+![bootstrap confidence interval](/assets/images/2026/omniASR/fig3_bootstrap_95_ci.png)
+Drop rate with 95% clip-level bootstrap intervals. Intervals stop at 0% because a rate cannot be negative.
 
 ## Example: Tonal Minimal Pairs
 
@@ -187,12 +201,12 @@ Input (what I said):
 Model output:
 "akua akua akua akua akwa akwa akwa akua akwa ọkua ọkua ọkua"
 
-Expected diacritics: 12
-Produced diacritics: 3
-Loss rate: 75%
+Expected marks: 15
+Produced marks: 3
+Drop rate: 12/15 = 80%
 ```
 
-The four distinct words collapsed into random variations. From a linguistic perspective, this is catastrophic. The word akwà meaning cloth got transcribed as akwa, which could mean crying instead. The word àkwà meaning egg got transcribed as akwa, and the meaning is completely lost. The word ákwá meaning bridge got transcribed as akua, which is wrong both in word and tone.
+The four distinct tonal forms collapsed into the same few outputs, and the output carries no tone marks at all. From a linguistic perspective this is a serious loss, since the tone pattern is what separates these words.
 
 ## The Monotone Test
 
@@ -205,92 +219,94 @@ File 09 is my favorite diagnostic. Setup:
 If the model uses acoustic information to place diacritics, it should produce few or no tone marks on flat speech. Result:
 
 ```
-Ground truth: "O na-eri oji n'ututu"  (0 diacritics)
-Model output: "ọne rị ọjí nụ tútú"    (7 diacritics)
+Ground truth: "O na-eri oji n'ututu"  (0 marks)
+Model output: "ọne rị ọjí nụ tútú"    (7 marks: 3 acute tone marks, 4 dot-below letters)
 ```
 
-The model ADDED tone marks I never spoke. This is clear evidence of orthographic bias over acoustic conditioning. The model is using statistical patterns from training data to guess where diacritics should go, not listening to the audio.
+The model added tone marks I never spoke. That is consistent with orthographic bias over acoustic conditioning: placing marks from statistical patterns rather than listening. But it is one clip, and the four dot-below additions may simply be standard Igbo orthography, since I wrote the reference without dots. Treat this as a lead for a proper acoustic test, not as proof of the mechanism.
 
 ## Statistical Analysis
 
-### Hypothesis Testing
+### Comparing categories
 
-```
-Null hypothesis (H0): Diacritic loss in tonal category ≤ other categories  
-Alternative (H1): Tonal category shows higher loss
+The question is whether the tonal category's drop rate is higher than the others'. Overlap between two separate confidence intervals is not a test, so I used a paired bootstrap of the difference in drop rate (resampling clips within each category):
 
-Test: Bootstrap confidence intervals (10,000 iterations, 95% CI)
+| Tonal minus | Difference in drop rate | 95% CI |
+|---|---|---|
+| Cross-lingual | 64.4 points | [40.5, 85.7] |
+| Domain-Specific | 44.3 points | [-9.4, 80.6] |
+| Language Boundary | 25.5 points | [-18.9, 78.6] |
 
-Result: Tonal bootstrap mean (75.5%) substantially exceeds all other categories (highest alternative: 38.9% for script hallucination). While confidence intervals show some overlap due to small sample size, the tonal category's point estimate is nearly 2x higher than the next closest category.
+Only the contrast with the cross-lingual category excludes zero. The tonal interval [57.1%, 89.7%] overlaps the language-boundary and domain intervals. So the data support "tonal clips drop many marks" but not "tonal clips drop more than every other category". An earlier version of this post claimed the intervals did not overlap; that was incorrect.
 
-Conclusion: Tonal degradation exhibits the highest loss rate across all categories (bootstrap mean: 75.5%). While confidence intervals show some overlap with script hallucination due to small sample size (N=21), the effect size is large and consistent across resamples.
-```
+### Position-aware estimate
 
-### Robustness Check
+Counts cannot tell a correct mark from a mark on the wrong letter. I aligned reference and output on base letters and classified each mark. Overall: 33 correct, 7 wrong (right letter, different mark), 57 missing and 31 inserted. In the tonal clips: 4 correct, 7 wrong, 38 missing, 8 inserted. This is an estimate, since a mis-heard letter can make a mark look missing.
 
-Even under worst-case assumptions using the lower bound of the confidence interval, tonal loss remains at 57.1%, which is still greater than 50%. Overall loss stays at 30.3%, which is still substantial. This suggests the observed tonal degradation is unlikely to be driven solely by sampling variability.
+### Robustness
 
+The lower bound of the tonal interval (57.1%) means that if these six clips were a random sample of similar clips, drop rates far below that would be unlikely. Six clips from one speaker are not a random sample of Igbo speech, so the interval describes noise in this dataset, not a guarantee about the language.
 
 ## Code
 
-The full analysis is in `analysis.ipynb`. The core evaluation functions handle diacritic counting, character error rate calculation, and bootstrap resampling. Diacritic counting uses a set of Igbo tone mark characters and counts occurrences in the text. Character error rate is computed using Python's SequenceMatcher for character-level similarity. Bootstrap resampling runs 10,000 iterations on the tonal diacritics category to compute confidence intervals.
+The full corrected analysis is in `analysis-2.ipynb` (offline, runs from `data/metadata.csv` in seconds, no GPU). `analysis.ipynb` is the original run that produced the model outputs. The core evaluation functions handle mark counting, character error rate (Levenshtein), bootstrap resampling, paired contrasts and the aligned-mark estimate.
 
-All evaluation code is organized in the `src/` directory. The `evaluate.py` module contains metrics like DER and bootstrap confidence intervals. The `visualize.py` module has plotting functions for all three figures. The `utils.py` module handles data loading and validation.
+All evaluation code is organized in the `src/` directory. The `evaluate.py` module contains the metrics and bootstrap functions. The `visualize.py` module has plotting functions for all three figures. The `utils.py` module handles data loading and validation.
 
 ## Run it
 
-Clone the repository and reproduce:
+Clone the repository and reproduce the numbers:
 
 ```bash
 git clone https://github.com/chizkidd/igbo-asr-tonal-evaluation.git
 cd igbo-asr-tonal-evaluation
-pip install -r requirements.txt
-jupyter notebook analysis.ipynb
+python3 -m pip install pandas numpy matplotlib seaborn
+python3 src/evaluate.py data/metadata.csv
 ```
 
-Or run in Google Colab: 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb)
-
-The notebook takes about 5-10 minutes to run on Colab with a T4 GPU. You'll see the analysis output:
+Or run `analysis-2.ipynb` in Google Colab (clone the repo in the first cell). Regenerating the model outputs (`analysis.ipynb`) needs a GPU. Running `src/evaluate.py` prints:
 
 ```
-Loading metadata...
-Total samples: 21
-Categories: 4
+Pooled metrics (D and H computed per clip):
+                      n_clips  expected  produced  dropped  added  net_loss  drop_rate  added_rate    DER  mean_cer
+code_switching            5.0      14.0      12.0      7.0    5.0     0.143      0.500       0.357  0.857     0.257
+cultural_context          5.0      16.0      15.0      5.0    4.0     0.062      0.312       0.250  0.562     0.374
+script_hallucination      5.0      18.0      25.0      2.0    9.0    -0.389      0.111       0.500  0.611     0.285
+tonal_diacritics          6.0      49.0      19.0     37.0    7.0     0.612      0.755       0.143  0.898     0.516
+overall                  21.0      97.0      71.0     51.0   25.0     0.268      0.526       0.258  0.784     0.365
 
-Computing metrics...
-Overall DER: 26.8%
-  Tonal category: 75.5%
-  Script interference: -38.9%
-  Code-switching: 14.3%
-  Domain-specific: 6.3%
+Bootstrap 95% CIs on drop rate (clip-level resampling, 10,000 draws):
+  code_switching         0.500  [0.000, 0.917]
+  cultural_context       0.312  [0.000, 0.833]
+  script_hallucination   0.111  [0.000, 0.273]
+  tonal_diacritics       0.755  [0.571, 0.897]
+  overall                0.526  [0.303, 0.697]
 
-Bootstrap resampling (10,000 iterations)...
-Tonal diacritics: 75.5% [57.1%, 89.7%]
-Overall: 52.6% [30.3%, 69.7%]
-
-Generating visualizations...
-Saved: results/visualizations/fig1_loss_by_category.png
-Saved: results/visualizations/fig2_cer_vs_loss.png
-Saved: results/visualizations/fig3_bootstrap_ci.png
+Aligned mark classification:
+                      correct  wrong  missing  inserted
+code_switching              7      0        7         5
+cultural_context            8      0        8         7
+script_hallucination       14      0        4        11
+tonal_diacritics            4      7       38         8
+overall                    33      7       57        31
 ```
 
 {% capture c %}
 **Model:** omniASR-CTC-1B (975M params)  
-**Data:** 21 samples, 4 categories  
-**Metrics:** Custom DER (Diacritic Error Rate)  
-**Stats:** Bootstrap with utterance-level resampling  
+**Data:** 21 samples, 4 categories, 1 speaker  
+**Metrics:** Net loss, drop rate, added rate, DER, CER  
+**Stats:** Bootstrap with clip-level resampling, paired contrasts  
 **Code:** github.com/chizkidd/igbo-asr-tonal-evaluation
 {% endcapture %}
 {% include callout.html type="note" title="Reproducibility" content=c %}
 
 ## Scope and Limitations
 
-This study demonstrates three things. First, systematic diacritic loss in omniASR on Igbo across 21 controlled samples. Second, failure to preserve tonal minimal pairs in this evaluation setup. Third, diacritic hallucination on monotone speech, which is evidence of orthographic bias.
+This study demonstrates three things. First, a high rate of missing marks in omniASR on tonal Igbo clips (37 of 49 expected marks across six samples from one speaker). Second, failure to preserve tonal minimal pairs in this evaluation setup. Third, marks added on a monotone clip, which is consistent with orthographic bias but is a single clip.
 
-This study does not claim four things. It doesn't claim universal failure on all Igbo speech. It doesn't claim that tone modeling is architecturally absent from the model. It doesn't claim that Igbo is uniquely disadvantaged compared to all other low-resource languages. And it doesn't claim that the observed error rates generalize to all dialects or all speakers.
+This study does not claim six things. It doesn't claim universal failure on all Igbo speech. It doesn't claim that tone modeling is architecturally absent from the model. It doesn't claim that Igbo is uniquely disadvantaged compared to all other low-resource languages. It doesn't claim that the observed error rates generalize to all dialects or all speakers. It doesn't claim that tonal clips lose more marks than every other category (only the cross-lingual contrast is clearly separated). And all references come from a single annotator, with no inter-annotator agreement measured.
 
-What would strengthen these claims? Multi-speaker evaluation with 10+ speakers across different dialects. Acoustic analysis with F0 contour extraction and pitch tracking validation. Comparative evaluation on other models like Whisper, MMS, USM, and Azure Speech. And controlled resynthesis experiments that isolate acoustic factors from lexical priors.
+What would strengthen these claims? A second annotator for the references. Multi-speaker evaluation with 10+ speakers across different dialects. Acoustic analysis with F0 contour extraction and pitch tracking validation. Comparative evaluation on other models like Whisper, MMS, USM, and Azure Speech. And controlled resynthesis experiments that isolate acoustic factors from lexical priors.
 
 {% capture c %}
 **Current:** Single speaker, 21 samples (proof-of-concept)  
@@ -322,13 +338,13 @@ All of these are important, but if you understand this 21-sample evaluation, you
 
 **Why only 21 samples?** This is a proof-of-concept for blind spot discovery. Large datasets measure prevalence; small targeted datasets reveal failure modes. I prioritized depth (systematic coverage of error types) over breadth (statistical power).
 
-**Is 75.5% loss generalizable?** Not necessarily. This is the loss rate on my voice, my dialect, my recording setup, for these specific test cases. Multi-speaker evaluation would give population estimates.
+**Is the 75.5% drop rate generalizable?** Not necessarily. This is the drop rate on my voice, my dialect, my recording setup, for these specific test cases. Multi-speaker evaluation would give population estimates.
 
-**Why not use Word Error Rate?** WER measures whole-word accuracy. In Igbo, "akwa" vs "akwà" counts as correct by WER (same word, different tone), but semantically these are different words. Diacritic-specific metrics capture what WER misses.
+**Why not use Word Error Rate?** WER measures whole-word accuracy. Many WER pipelines strip diacritics during normalization, in which case "akwa" vs "akwà" counts as correct even though they are different words. Even without normalization, a wrong tone mark and a completely wrong word both count as one word error, so you can't tell them apart. Mark-specific metrics capture what WER hides.
 
 **Does the model "understand" Igbo?** That's philosophical. Mechanically: it learned statistical patterns from training data. Whether assigning probability distributions to tokens constitutes "understanding" is up to you.
 
-**Why does the bootstrap mean exceed the raw percentage?** Bootstrap resamples at utterance level. Samples with extreme loss rates (e.g., file 09 with 0 expected, 7 hallucinated) get resampled more in some iterations, pulling the mean up. This reflects uncertainty about which utterances are "typical."
+**Why did earlier versions show 61.2% and 75.5% for the tonal category?** They are two different metrics. 61.2% is net loss ((E - P) / E, with 7 marks added offsetting 7 of the 37 dropped), and 75.5% is the drop rate (D / E). Neither is a bootstrap mean; the bootstrap gives an interval around the 75.5%.
 
 **What's next?** Collect a 200-sample multi-speaker dataset across 5 Igbo dialects. After that: comparative model evaluation (Whisper vs MMS vs omniASR) and fine-tuning experiments with tone-annotated data.
 
@@ -340,7 +356,7 @@ If every voice interface does this, what happens to how people write Igbo? Do th
 
 ## Resources
 
-The dataset is available on [Huggingface](huggingface.co/datasets/chiz/omniASR-igbo-blindspots). The code is on [github](github.com/chizkidd/igbo-asr-tonal-evaluation). The model evaluated is [facebook/omniASR-CTC-1B](https://huggingface.co/facebook/omniASR-CTC-1B) on HuggingFace. The dataset is licensed under CC-BY-4.0 and the code under MIT. Feel free to use it, cite it, and build on it.
+The dataset is available on [Huggingface](https://huggingface.co/datasets/Chiz/omniASR-igbo-blindspots). The code is on [GitHub](https://github.com/chizkidd/igbo-asr-tonal-evaluation). The model evaluated is [facebook/omniASR-CTC-1B](https://huggingface.co/facebook/omniASR-CTC-1B) on HuggingFace. The dataset is licensed under CC-BY-4.0 and the code under MIT. Feel free to use it, cite it, and build on it.
 
 ## Citation
 
@@ -363,7 +379,7 @@ For the dataset:
   author={Obasi, Chizoba},
   year={2026},
   publisher={HuggingFace},
-  howpublished={\url{https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots}},
+  howpublished={\url{https://huggingface.co/datasets/Chiz/omniASR-igbo-blindspots}},
   note={Model evaluated: facebook/omniASR-CTC-1B (975M parameters)}
 }
 ```
