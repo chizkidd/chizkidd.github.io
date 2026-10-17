@@ -321,6 +321,20 @@ button.rec-line:hover{color:var(--accent)}
 .qc .rev b{font-size:16px}
 .qc.win{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .qc.bad{border-color:#C0392B;box-shadow:0 0 0 2px #C0392B}
+.qc{position:relative}
+.rkb{position:absolute;bottom:12px;right:12px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);align-items:center;justify-content:center;font-family:var(--f-display);font-weight:900;font-size:20px;display:none}
+.qc.pk .rkb{display:flex}
+.qc.pk{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.qc.ok{border-color:#2E9E5B;box-shadow:0 0 0 2px #2E9E5B}
+.qc.near{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.dl-sum{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:14px}
+.dl-sum .big{font-family:var(--f-display);font-weight:900;font-size:64px;line-height:.9;color:var(--accent)}
+.dl-grid{font-size:34px;letter-spacing:.12em;margin:8px 0;line-height:1.1}
+.dl-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;justify-content:center}
+.dl-sum .dl-actions{justify-content:flex-start}
+.dl-pre{white-space:pre-wrap;word-break:break-word;font-family:var(--f-mono);font-size:14px;background:var(--panel2);border-radius:8px;padding:10px 12px;margin:10px 0;text-align:left}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .qz-tag{display:inline-block;font-family:var(--f-display);font-weight:900;font-size:26px;line-height:1;color:var(--accent-ink);background:var(--accent);padding:5px 12px;border-radius:8px;margin-top:6px}
 .qh-q{font-family:var(--f-display);font-weight:800;font-size:clamp(20px,3.2vw,28px);line-height:1.2;margin:6px 0 16px;max-width:46ch}
 .qh-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
@@ -343,6 +357,8 @@ footer p{margin:0 0 8px}
   .race,.pl{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:620px){
+  .themebtn{top:10px;right:10px;padding:4px 10px;font-size:12px}
+  .hero .eyebrow{padding-right:96px;font-size:10px;line-height:1.5}
   .rv-pick{grid-template-columns:minmax(0,1fr)}
   .rv-vs{justify-self:start;font-size:18px;padding:0}
   .bf-side.l{grid-template-columns:66px minmax(0,1fr)}
@@ -391,6 +407,7 @@ footer p{margin:0 0 8px}
     <button class="tab" role="tab" id="t-rivals" aria-selected="false" data-tab="rivals">Rivals</button>
     <button class="tab" role="tab" id="t-records" aria-selected="false" data-tab="records">Records</button>
     <button class="tab" role="tab" id="t-quiz" aria-selected="false" data-tab="quiz">Guess the MVP</button>
+    <button class="tab" role="tab" id="t-daily" aria-selected="false" data-tab="daily">Daily</button>
   </nav>
 
   <section class="panel" id="p-season" role="tabpanel" aria-labelledby="t-season">
@@ -493,6 +510,14 @@ footer p{margin:0 0 8px}
     </div>
     <p class="pc-hint" id="qzHint" style="margin-bottom:10px">Classic: five stat lines, pick the MVP.</p>
     <div id="qz" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" id="p-daily" role="tabpanel" aria-labelledby="t-daily" hidden>
+    <div class="tools">
+      <div class="seg" id="dlMode" role="group" aria-label="Game mode"><button type="button" data-m="daily" aria-pressed="true">Daily Ballot</button><button type="button" data-m="survivor" aria-pressed="false">Survivor</button></div>
+    </div>
+    <p class="pc-hint" id="dlHint" style="margin-bottom:10px">One season a day, the same for everyone. Rank the five and see how close you get to the real vote.</p>
+    <div id="dlBox" aria-live="polite"></div>
   </section>
 
   <footer>
@@ -665,7 +690,7 @@ var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce
 var state={year:Y1,sel:null,tab:"season",playing:false,timer:null,lock:null,tlEra:"",
   sort:{k:"y",dir:-1},q:"",tview:"cards",tera:"",tteam:"",trank:"all",
   psort:{k:"n",dir:-1},pq:"",pmin:1,psel:null,
-  hm:{min:3,sort:"first",color:"team"},ra:"Bill Russell",rb:"Wilt Chamberlain",rera:"",qz:{era:"",mode:"classic"}};
+  hm:{min:3,sort:"first",color:"team"},ra:"Bill Russell",rb:"Wilt Chamberlain",rera:"",dmode:"daily",qz:{era:"",mode:"classic"}};
 
 function syncHash(){
   try{
@@ -1700,8 +1725,193 @@ function buildQuiz(){
   }
 }
 
+/* ---------- daily ballot + survivor ---------- */
+var DL_EPOCH=Date.UTC(2026,9,17); /* launch day is #1 */
+var DL_URL="https://chizkidd.github.io/mvp-ballot-box/#tab=daily";
+var G_OK="🟩", G_NEAR="🟨", G_BAD="🟥", G_BALL="🏀";
+function dlDayNum(){ var n=Math.floor((Date.now()-DL_EPOCH)/86400000)+1; return n<1?1:n; }
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function seededShuffle(arr,seed){
+  var r=mulberry(seed), a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(r()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+/* seasons with a clean 1-to-5 order (the four with a tie for fifth are left out) */
+function dlPool(){ var ys=[]; for(var y=Y0;y<=Y1;y++){ if(BY[y].length===5) ys.push(y); } return ys; }
+function dlSeason(n){ var pool=seededShuffle(dlPool(),20261017); return pool[(n-1)%pool.length]; }
+function dlLoad(){ try{ return JSON.parse(localStorage.getItem("mvpbox.daily"))||{}; }catch(e){ return {}; } }
+function dlSave(o){ try{ localStorage.setItem("mvpbox.daily",JSON.stringify(o)); }catch(e){} }
+function svBest(){ try{ return parseInt(localStorage.getItem("mvpbox.surv"),10)||0; }catch(e){ return 0; } }
+function svBestSet(v){ try{ localStorage.setItem("mvpbox.surv",String(v)); }catch(e){} }
+function dlCopy(text,btn){
+  var done=function(){ var t=btn.textContent; btn.textContent="Copied"; setTimeout(function(){ btn.textContent=t; },1600); };
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,function(){ dlCopyOld(text,done); }); return; } }catch(e){}
+  dlCopyOld(text,done);
+}
+function dlCopyOld(text,done){
+  try{ var t=document.createElement("textarea"); t.value=text; t.style.position="fixed"; t.style.opacity="0"; document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t); done(); }catch(e){}
+}
+function dlShareBtns(text){
+  var box=el("div","dl-actions");
+  var c=el("button","btn","Copy result"); c.type="button"; c.addEventListener("click",function(){ dlCopy(text,c); }); box.appendChild(c);
+  if(navigator.share){
+    var s=el("button","btn ghost","Share"); s.type="button";
+    s.addEventListener("click",function(){ try{ navigator.share({text:text}); }catch(e){} });
+    box.appendChild(s);
+  }
+  return box;
+}
+function dlCard(r){
+  var c=el("button","qc"); c.type="button"; c.style.setProperty("--c",col(r.tm));
+  c.innerHTML="<span class='rkb'></span><span class='top'><span class='tm'>"+r.tm+"</span><span class='age'>age "+r.age+"</span></span><span class='stat'>"+r.ppg.toFixed(1)+"<small>PTS</small></span><span class='sub2'>"+r.rpg.toFixed(1)+" reb &middot; "+r.apg.toFixed(1)+" ast &middot; "+r.g+" GP</span><span class='rev'><b></b><span class='track'><span class='fill' style='width:0'></span></span><span class='sub2'></span></span>";
+  return c;
+}
+function dlReveal(card,r,note){
+  card.disabled=true; card.classList.add("show");
+  card.querySelector(".rev b").textContent=r.name+(r.rank===1?" (MVP)":"");
+  card.querySelector(".rev .sub2").textContent=note;
+  var f=card.querySelector(".fill"); requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=(r.share*100)+"%"; }); });
+}
+function dlTimeLeft(){
+  var ms=(DL_EPOCH+dlDayNum()*86400000)-Date.now(), h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000);
+  return h+"h "+m+"m";
+}
+
+/* ----- Daily Ballot: rank the five ----- */
+var DLS={n:0,y:0,rows:[],order:[]};
+function dlScore(order,rows){ /* order: names in the visitor's ranking, best first */
+  var pts=0, marks=[];
+  rows.forEach(function(r){
+    var mine=order.indexOf(r.name)+1, d=Math.abs(mine-r.rank);
+    pts+=Math.max(0,4-d);
+    marks[r.rank-1]=d===0?G_OK:d===1?G_NEAR:G_BAD;
+  });
+  return {pts:pts,grid:marks.join("")};
+}
+function buildDailyBallot(){
+  var box=$("#dlBox"); box.innerHTML="";
+  var n=dlDayNum(), y=dlSeason(n), rows=BY[y].slice();
+  DLS.n=n; DLS.y=y; DLS.rows=rows; DLS.order=[];
+  var saved=dlLoad(), day=saved.days&&saved.days[n];
+  var shuffled=seededShuffle(rows,n*7919+13);
+  var streak=(saved.last===n||saved.last===n-1)?(saved.streak||0):0;
+  box.appendChild(el("div","qz-bar","<div><span class='m'>Daily Ballot</span><div class='qz-s'>#"+n+"</div></div><div><span class='m'>Season</span><br><b>"+fmtS(y)+"</b></div><div><span class='m'>Streak</span><br><b>"+streak+"</b></div><div><span class='m'>Best</span><br><b>"+(saved.best||0)+"/20</b></div>"));
+  var intro=el("p",null,day?"Your ballot is in. Here is how the voters actually ranked these five.":"Same five stat lines for everyone today. Tap the players in the order you think the voters ranked them, best first.");
+  box.appendChild(intro);
+  var cards=el("div","qz-cards"), btns=[];
+  var byName={}; shuffled.forEach(function(r){ var c=dlCard(r); c.dataset.name=r.name; byName[r.name]=c; btns.push(c); cards.appendChild(c); });
+  box.appendChild(cards);
+  var foot=el("div","qz-foot","<span class='qz-msg'></span>"), msg=$(".qz-msg",foot);
+  var reset=el("button","btn ghost","Reset"); reset.type="button";
+  var lock=el("button","btn","Lock in ballot"); lock.type="button"; lock.disabled=true;
+  foot.appendChild(reset); foot.appendChild(lock); box.appendChild(foot);
+  var out=el("div"); box.appendChild(out);
+
+  function paint(){
+    btns.forEach(function(c){
+      var k=DLS.order.indexOf(c.dataset.name);
+      c.classList.toggle("pk",k>=0);
+      $(".rkb",c).textContent=k>=0?String(k+1):"";
+    });
+    lock.disabled=DLS.order.length!==5;
+    msg.textContent=DLS.order.length===5?"Happy with it? Lock it in.":("Pick #"+(DLS.order.length+1)+" of 5");
+  }
+  function finish(order,fresh){
+    var sc=dlScore(order,rows);
+    btns.forEach(function(c){ c.classList.remove("pk"); });
+    /* reorder the cards into the real order */
+    rows.forEach(function(r){ cards.appendChild(byName[r.name]); });
+    rows.forEach(function(r){
+      var c=byName[r.name], mine=order.indexOf(r.name)+1, d=Math.abs(mine-r.rank);
+      c.classList.add(d===0?"ok":d===1?"near":"bad");
+      dlReveal(c,r,rkOrd(r)+" · "+pct(r.share)+" · you said "+ord(mine));
+    });
+    foot.hidden=true; intro.textContent="Here is how the voters actually ranked these five.";
+    if(fresh){
+      var s=dlLoad(); s.days=s.days||{};
+      s.streak=(s.last===n-1)?(s.streak||0)+1:1; s.last=n; s.best=Math.max(s.best||0,sc.pts);
+      s.days[n]={score:sc.pts,order:order}; dlSave(s); streak=s.streak;
+    }
+    var s2=dlLoad();
+    var verdict=sc.pts>=19?"Perfect ballot. Hall of Fame voter.":sc.pts>=16?"All-NBA ballot":sc.pts>=12?"Sixth-man voter":"Back to the box scores";
+    var text="MVP Ballot Box Daily #"+n+" "+G_BALL+"\n"+sc.pts+"/20 "+sc.grid+"\n"+DL_URL;
+    out.innerHTML="";
+    var sum=el("div","dl-sum","<div class='big'>"+sc.pts+"<small style='font-size:28px;color:var(--muted)'>/20</small></div><p style='font-size:20px;margin:8px 0 2px'>"+verdict+"</p><div class='dl-grid'>"+sc.grid+"</div><p class='pc-hint'>Green is the right spot, yellow is one off. Streak "+(s2.streak||streak)+" &middot; next ballot in "+dlTimeLeft()+".</p>");
+    sum.appendChild(el("pre","dl-pre")); sum.lastChild.textContent=text;
+    sum.appendChild(dlShareBtns(text));
+    out.appendChild(sum);
+  }
+  cards.addEventListener("click",function(ev){
+    var c=ev.target.closest(".qc"); if(!c||c.disabled||day) return;
+    var k=DLS.order.indexOf(c.dataset.name);
+    if(k>=0) DLS.order.splice(k,1); else if(DLS.order.length<5) DLS.order.push(c.dataset.name);
+    paint();
+  });
+  reset.addEventListener("click",function(){ DLS.order=[]; paint(); });
+  lock.addEventListener("click",function(){ if(DLS.order.length===5) finish(DLS.order.slice(),true); });
+  if(day){ finish(day.order,false); } else paint();
+}
+
+/* ----- Survivor: pick the MVP, one miss ends the run ----- */
+var SV={pool:[],i:0,streak:0};
+function svStart(){ SV.pool=shuffle(dlPool()); SV.i=0; SV.streak=0; svShow(); }
+function svShow(){
+  var box=$("#dlBox"); box.innerHTML="";
+  if(SV.i>=SV.pool.length){ svOver(box,true); return; }
+  var y=SV.pool[SV.i], rows=shuffle(BY[y].slice());
+  box.appendChild(el("div","qz-bar","<div><span class='m'>Survivor</span><div class='qz-s'>"+fmtS(y)+"</div></div><div><span class='m'>Streak</span><br><b>"+SV.streak+"</b></div><div><span class='m'>Best</span><br><b>"+svBest()+"</b></div>"));
+  box.appendChild(el("p",null,"Who won the MVP? One wrong pick ends the run."));
+  var cards=el("div","qz-cards");
+  rows.forEach(function(r,i){ var c=dlCard(r); c.dataset.i=i; cards.appendChild(c); });
+  box.appendChild(cards);
+  var foot=el("div","qz-foot","<span class='qz-msg'>Pick the player you think won.</span>");
+  var nx=el("button","btn","Next season"); nx.type="button"; nx.hidden=true; foot.appendChild(nx); box.appendChild(foot);
+  var answered=false;
+  cards.addEventListener("click",function(ev){
+    var c=ev.target.closest(".qc"); if(!c||answered) return; answered=true;
+    var pick=rows[parseInt(c.dataset.i,10)], right=pick.rank===1;
+    $$(".qc",cards).forEach(function(card,i){
+      var r=rows[i]; dlReveal(card,r,rkOrd(r)+" · "+pct(r.share));
+      if(r.rank===1) card.classList.add("win"); else if(card===c) card.classList.add("bad");
+    });
+    var w=rows.filter(function(r){ return r.rank===1; })[0];
+    if(right){
+      SV.streak++; if(SV.streak>svBest()) svBestSet(SV.streak);
+      $(".qz-msg",foot).innerHTML="<b>Correct.</b> Streak "+SV.streak+".";
+      nx.hidden=false; nx.addEventListener("click",function(){ SV.i++; svShow(); });
+    } else {
+      $(".qz-msg",foot).innerHTML="<b>Run over.</b> "+esc(w.name)+" won with "+pct(w.share)+" of the vote.";
+      var go=el("button","btn","See my run"); go.type="button"; go.addEventListener("click",function(){ svOver($("#dlBox"),false); }); foot.appendChild(go);
+    }
+  });
+}
+function svOver(box,perfect){
+  box.innerHTML="";
+  var text="MVP Ballot Box Survivor "+G_BALL+"\nStreak: "+SV.streak+(perfect?" (cleared every season)":"")+"\n"+DL_URL;
+  var end=el("div","qz-end","<div class='big'>"+SV.streak+"</div><p style='font-size:20px;margin:6px 0 14px'>"+(perfect?"You cleared every season.":SV.streak===0?"Out on the first pick. Best: "+svBest()+".":"in a row. Best: "+svBest()+".")+"</p>");
+  end.appendChild(el("pre","dl-pre")); end.lastChild.textContent=text;
+  end.appendChild(dlShareBtns(text));
+  var again=el("button","btn","Play again"); again.type="button"; again.addEventListener("click",svStart); end.lastChild.appendChild(again);
+  box.appendChild(end);
+}
+var dlReady=false;
+function buildDaily(){
+  if(!dlReady){
+    dlReady=true;
+    $$("#dlMode button").forEach(function(b){
+      b.addEventListener("click",function(){
+        state.dmode=b.dataset.m;
+        $$("#dlMode button").forEach(function(x){ x.setAttribute("aria-pressed",x===b?"true":"false"); });
+        $("#dlHint").textContent=state.dmode==="survivor"?"Random seasons back to back. Pick the MVP from the stat lines. One miss and the run is over.":"One season a day, the same for everyone. Rank the five and see how close you get to the real vote.";
+        if(state.dmode==="survivor") svStart(); else buildDailyBallot();
+      });
+    });
+  }
+  if(state.dmode==="survivor"&&SV.pool.length) svShow(); else if(state.dmode==="survivor") svStart(); else buildDailyBallot();
+}
+
 /* ---------- tabs ---------- */
-var TABS=["season","timeline","careers","table","players","rivals","records","quiz"];
+var TABS=["season","timeline","careers","table","players","rivals","records","quiz","daily"];
 function showTab(t){
   state.tab=t;
   if(t!=="season") stop();
@@ -1714,6 +1924,7 @@ function showTab(t){
   if(t==="rivals") buildRivals();
   if(t==="records") buildRecords();
   if(t==="quiz") buildQuiz();
+  if(t==="daily") buildDaily();
   syncHash();
 }
 $$(".tab").forEach(function(b){ b.addEventListener("click",function(){ showTab(b.dataset.tab); }); });
