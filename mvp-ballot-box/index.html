@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="An interactive explorer of the top five NBA MVP vote-getters every season from 1991-92 to 2025-26.">
+<style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>MVP Ballot Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: an arena scoreboard over a hardwood floor. A big season readout drives five animated vote bars colored by team; tabs open the same data as a grid, a sortable table and a player tracker. */
+:root{
+  --bg:#EEF0F6; --panel:#FFFFFF; --panel2:#F3F4FA; --ink:#10172E; --muted:#576080; --line:#D8DCEA;
+  --accent:#D44A00; --accent-ink:#FFFFFF; --gold:#A86B00; --plank:rgba(16,23,46,.05); --court:rgba(16,23,46,.12);
+  --f-display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1022; --panel:#141B35; --panel2:#1B2342; --ink:#EDF0FA; --muted:#9AA3C6; --line:#27315C;
+    --accent:#FF7A2E; --accent-ink:#1A0A00; --gold:#E8B04A; --plank:rgba(255,255,255,.035); --court:rgba(255,255,255,.12);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1022; --panel:#141B35; --panel2:#1B2342; --ink:#EDF0FA; --muted:#9AA3C6; --line:#27315C;
+  --accent:#FF7A2E; --accent-ink:#1A0A00; --gold:#E8B04A; --plank:rgba(255,255,255,.035); --court:rgba(255,255,255,.12);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.45;
+  padding-block:0 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* hero */
+.hero{
+  position:relative;overflow:hidden;margin-top:16px;border:1px solid var(--line);border-radius:10px;
+  padding:28px 24px 22px;background:
+    repeating-linear-gradient(90deg,transparent 0 62px,var(--plank) 62px 64px),var(--panel);
+}
+.hero::after{content:"";position:absolute;right:-70px;bottom:-110px;width:300px;height:300px;border-radius:50%;border:4px solid var(--court);pointer-events:none}
+.hero::before{content:"";position:absolute;right:-8px;top:0;bottom:0;width:4px;background:var(--court);pointer-events:none}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(44px,9vw,84px);line-height:.92;margin:6px 0 8px;letter-spacing:.005em;text-transform:uppercase;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{margin:0;max-width:56ch;color:var(--muted)}
+.kpis{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:18px;position:relative;z-index:1}
+.kpi b{display:block;font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1}
+.kpi span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;margin:18px 0 16px;overflow-x:auto;padding-bottom:2px}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);padding:9px 16px;border-radius:8px;font-weight:600;letter-spacing:.02em}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel[hidden]{display:none!important}
+
+/* scoreboard */
+.board{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 24px;align-items:end;background:var(--ink);color:var(--bg);border-radius:10px;padding:18px 22px 16px}
+.board .lab{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.season{font-family:var(--f-display);font-weight:900;font-size:clamp(64px,15vw,132px);line-height:.85;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.season.flip{animation:flip .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes flip{from{transform:translateY(.25em);opacity:0}to{transform:none;opacity:1}}
+.who-won{font-size:15px;margin-top:6px;opacity:.9}
+.who-won b{font-weight:700}
+.ctrls{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.cbtn{background:transparent;border:1.5px solid color-mix(in srgb,var(--bg) 55%,transparent);color:var(--bg);border-radius:8px;min-width:44px;height:44px;padding:0 14px;font-weight:600}
+.cbtn:hover{background:color-mix(in srgb,var(--bg) 14%,transparent)}
+.cbtn.play{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);min-width:92px}
+.sliderrow{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:color-mix(in srgb,var(--bg) 28%,transparent)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:color-mix(in srgb,var(--bg) 28%,transparent)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:var(--accent);border:3px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--bg)}
+.decades{display:flex;gap:6px;flex-wrap:wrap}
+.dec{background:transparent;color:var(--bg);border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);border-radius:6px;padding:4px 12px;font-family:var(--f-mono);font-size:13px}
+.dec[aria-pressed="true"]{background:var(--bg);color:var(--ink)}
+
+/* race */
+.race{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,350px);gap:20px;margin-top:18px;align-items:start}
+.rows{display:flex;flex-direction:column;gap:8px;min-width:0}
+.row{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;width:100%;text-align:left;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.row:hover{border-color:var(--muted)}
+.row.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.rk{font-family:var(--f-display);font-weight:900;font-size:38px;line-height:.9;color:var(--muted);text-align:center}
+.row.win .rk{color:var(--accent)}
+.rbody{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rtop{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.nm{font-weight:600;font-size:18px}
+.tm{font-family:var(--f-mono);font-size:12px;padding:1px 7px;border-radius:4px;background:var(--c);color:#fff}
+.age{font-size:13px;color:var(--muted)}
+.mvp{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;padding:2px 8px;border-radius:4px;background:var(--accent);color:var(--accent-ink);font-weight:500}
+.rbar{display:grid;grid-template-columns:minmax(0,1fr) 62px;gap:10px;align-items:center}
+.track{display:block;height:16px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.fill{display:block;height:100%;width:0;background-color:var(--c);
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.2) 0 2px,transparent 2px 9px);
+  transition:width .85s cubic-bezier(.2,.8,.2,1)}
+.pct{font-family:var(--f-mono);font-size:14px;font-weight:500;text-align:right}
+.rnum{font-size:13px;color:var(--muted)}
+.rnum b{color:var(--ink);font-weight:600;font-family:var(--f-mono)}
+.notes{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.note{font-size:13px;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 10px;color:var(--muted)}
+.note b{color:var(--ink);font-weight:600}
+.note.hot{border-color:var(--accent);color:var(--ink)}
+
+/* player card */
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.pc-head{padding:16px 18px 14px;background:var(--c,var(--ink));color:#fff}
+.pc-head h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em}
+.pc-head p{margin:6px 0 0;font-size:14px;opacity:.92}
+.pc-body{padding:14px 18px 16px;display:flex;flex-direction:column;gap:12px}
+.pc-cap{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pc-chart{position:relative;display:grid;grid-template-columns:repeat(35,minmax(0,1fr));gap:2px;height:96px;align-items:end;border-bottom:1px solid var(--line)}
+.pc-chart .gap{height:3px;background:var(--line);border-radius:1px}
+.pc-chart button{display:block;width:100%;padding:0;border:0;border-radius:2px 2px 0 0;background:var(--c);min-height:4px;opacity:.78;position:relative}
+.pc-chart button.mvpbar{opacity:1;box-shadow:inset 0 4px 0 var(--accent)}
+.pc-chart button.cur{opacity:1;outline:2px solid var(--ink);outline-offset:1px}
+.pc-chart button:hover{opacity:1}
+.pc-axis{position:relative;height:14px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.pc-axis span{position:absolute;transform:translateX(-50%)}
+.pc-axis span:first-child{transform:none}
+.pc-axis span:last-child{transform:translateX(-100%)}
+.pc-stat{font-size:14px;background:var(--panel2);border-radius:6px;padding:8px 10px}
+.pc-stat b{font-family:var(--f-mono);font-weight:500}
+.pc-list{list-style:none;margin:0;padding:0;max-height:210px;overflow:auto;border-top:1px solid var(--line)}
+.pc-list li button{display:grid;grid-template-columns:76px 40px 1fr auto;gap:8px;width:100%;text-align:left;border:0;background:transparent;padding:7px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.pc-list li button:hover{background:var(--panel2)}
+.pc-list .tag{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.pc-hint{font-size:13px;color:var(--muted);margin:0}
+
+/* timeline */
+.tl-info{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between;margin-bottom:10px;color:var(--muted);font-size:14px}
+.tl-info b{color:var(--ink)}
+.clear{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:4px 10px;font-size:13px}
+.tl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px}
+.tl{min-width:560px;display:flex;flex-direction:column;gap:4px}
+.tl-row{display:grid;grid-template-columns:70px repeat(5,minmax(0,1fr));gap:4px;align-items:stretch}
+.tl-head{position:sticky;top:0;z-index:2;background:var(--panel);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-bottom:4px}
+.tl-head div:not(:first-child){text-align:center}
+.yr{border:0;background:transparent;text-align:left;font-family:var(--f-mono);font-size:13px;color:var(--muted);padding:0 4px}
+.yr:hover{color:var(--accent);text-decoration:underline}
+.chip{display:flex;flex-direction:column;justify-content:center;gap:0;padding:5px 8px;min-height:44px;border:0;border-radius:5px;background:var(--c);color:#fff;text-align:left;transition:opacity .15s,transform .15s;min-width:0}
+.chip .cn{font-weight:600;font-size:14px;line-height:1.15;overflow-wrap:anywhere}
+.chip .cs{font-family:var(--f-mono);font-size:11px;opacity:.88}
+.chip.r1{box-shadow:inset 0 0 0 2px var(--accent)}
+.has-sel .chip{opacity:.14}
+.has-sel .chip.on{opacity:1;transform:scale(1.03)}
+
+/* table */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.search{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:10px 12px;font:inherit}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.tscroll{overflow:auto;max-height:72vh;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th,td{padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--panel2);z-index:1;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none}
+th[aria-sort]{color:var(--ink)}
+th .arr{color:var(--accent)}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+th.n{text-align:right}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel2)}
+tr.w td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mini{display:inline-block;width:70px;height:8px;background:var(--panel2);border-radius:2px;vertical-align:middle;margin-left:8px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--c)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:7px}
+
+/* players */
+.pl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,350px);gap:20px;align-items:start}
+
+footer{margin-top:28px;font-size:13px;color:var(--muted);max-width:80ch}
+footer a{color:inherit}
+
+@media (max-width:860px){
+  .race,.pl{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  .hero{padding:22px 16px 18px}
+  .board{padding:16px}
+  .board{grid-template-columns:minmax(0,1fr)}
+  .ctrls{justify-content:flex-start}
+  .row{grid-template-columns:28px minmax(0,1fr);gap:8px;padding:10px}
+  .rk{font-size:30px}
+  .pc-list li button{grid-template-columns:70px 36px 1fr}
+  .pc-list li button .tag:last-child{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .fill{transition:none}.season.flip{animation:none}.chip{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">NBA Most Valuable Player voting</div>
+    <h1>MVP <span>Ballot</span> Box</h1>
+    <p class="sub">The five biggest vote-getters every year from 1991-92 to 2025-26. Scrub through the seasons, trace a player across the decades, or sort the whole ballot.</p>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" id="t-season" aria-selected="true" data-tab="season">Season</button>
+    <button class="tab" role="tab" id="t-timeline" aria-selected="false" data-tab="timeline">Timeline</button>
+    <button class="tab" role="tab" id="t-table" aria-selected="false" data-tab="table">Table</button>
+    <button class="tab" role="tab" id="t-players" aria-selected="false" data-tab="players">Players</button>
+  </nav>
+
+  <section class="panel" id="p-season" role="tabpanel" aria-labelledby="t-season">
+    <div class="board">
+      <div>
+        <div class="lab">Season</div>
+        <div class="season" id="seasonLabel">2025-26</div>
+        <div class="who-won" id="whoWon"></div>
+      </div>
+      <div class="ctrls">
+        <button class="cbtn" id="prev" aria-label="Previous season">&#8592;</button>
+        <button class="cbtn play" id="play" aria-pressed="false">Play</button>
+        <button class="cbtn" id="next" aria-label="Next season">&#8594;</button>
+      </div>
+      <div class="sliderrow">
+        <input type="range" id="slider" min="1992" max="2026" step="1" value="2026" aria-label="Season">
+        <div class="decades" id="decades"></div>
+      </div>
+    </div>
+    <div class="race">
+      <div>
+        <div class="rows" id="rows"></div>
+        <div class="notes" id="notes"></div>
+      </div>
+      <aside class="pcard" id="cardSeason" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section class="panel" id="p-timeline" role="tabpanel" aria-labelledby="t-timeline" hidden>
+    <div class="tl-info"><span id="tlInfo">Hover a name to light up every year that player finished in the top five. Click to hold the highlight.</span><button class="clear" id="tlClear" hidden>Clear</button></div>
+    <div class="tl-scroll"><div class="tl" id="tl"></div></div>
+  </section>
+
+  <section class="panel" id="p-table" role="tabpanel" aria-labelledby="t-table" hidden>
+    <div class="tools">
+      <input class="search" id="tq" type="search" placeholder="Search a player, team or season (try LAL or 2016)" aria-label="Search the ballot">
+      <label class="chk"><input type="checkbox" id="tmvp"> MVP winners only</label>
+      <span class="count" id="tcount"></span>
+    </div>
+    <div class="tscroll"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+  </section>
+
+  <section class="panel" id="p-players" role="tabpanel" aria-labelledby="t-players" hidden>
+    <div class="pl">
+      <div>
+        <div class="tools">
+          <input class="search" id="pq" type="search" placeholder="Find a player" aria-label="Find a player">
+          <span class="count" id="pcount"></span>
+        </div>
+        <div class="tscroll"><table style="min-width:520px"><thead id="phead"></thead><tbody id="pbody"></tbody></table></div>
+      </div>
+      <aside class="pcard" id="cardPlayers" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <footer>
+    Vote share is points won divided by points possible. Each voter gives 10 points for a first-place vote, so points possible is ten times the number of voters. Stats shown are that season's per-game numbers. Data: <a href="https://www.basketball-reference.com/awards/mvp.html" target="_blank" rel="noopener">Basketball Reference</a> MVP voting pages, 1991-92 through 2025-26.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var TEAM={CHI:"#C8102E",POR:"#C4412B",SAS:"#5F6B76",UTA:"#2F5D8A",NYK:"#E06C1B",PHO:"#6A3FA0",HOU:"#9E1B32",ATL:"#B0452E",ORL:"#0077C0",SEA:"#00653A",MIA:"#98002E",DET:"#1D428A",CHH:"#00788C",PHI:"#2E6BC6",LAL:"#552583",MIN:"#236192",SAC:"#7A4FB0",NJN:"#3A5A8C",DAL:"#00538C",IND:"#2B4B8F",CLE:"#860038",NOH:"#0E7F86",NOP:"#1B3A57",BOS:"#0F7B43",OKC:"#007AC1",LAC:"#D1383D",GSW:"#2A6FDB",MIL:"#2E7D4F",DEN:"#1E3A5F"};
+
+/* name, age, team, first-place votes, points won, games, ppg, rpg, apg */
+var DATA={
+1992:{max:960,rows:[["Michael Jordan",28,"CHI",80,900,80,30.1,6.4,6.1],["Clyde Drexler",29,"POR",12,561,76,25.0,6.6,6.7],["David Robinson",26,"SAS",2,337,68,23.2,12.2,2.7],["Karl Malone",28,"UTA",1,262,81,28.0,11.2,3.0],["Patrick Ewing",29,"NYK",0,100,82,24.0,11.2,1.9]]},
+1993:{max:980,rows:[["Charles Barkley",29,"PHO",59,835,76,25.6,12.2,5.1],["Hakeem Olajuwon",30,"HOU",22,647,82,26.1,13.0,3.5],["Michael Jordan",29,"CHI",13,565,78,32.6,6.7,5.5],["Patrick Ewing",30,"NYK",4,359,81,24.2,12.1,1.9],["Dominique Wilkins",33,"ATL",0,54,71,29.9,6.8,3.2]]},
+1994:{max:1010,rows:[["Hakeem Olajuwon",31,"HOU",66,889,80,27.3,11.9,3.6],["David Robinson",28,"SAS",24,730,80,29.8,10.7,4.8],["Scottie Pippen",28,"CHI",7,390,72,22.0,8.7,5.6],["Shaquille O'Neal",21,"ORL",3,289,81,29.3,13.2,2.4],["Patrick Ewing",31,"NYK",1,255,79,24.5,11.2,2.3]]},
+1995:{max:1050,rows:[["David Robinson",29,"SAS",73,901,81,27.6,10.8,2.9],["Shaquille O'Neal",22,"ORL",12,605,79,29.3,11.4,2.7],["Karl Malone",31,"UTA",14,532,82,26.7,10.6,3.5],["Patrick Ewing",32,"NYK",2,230,79,23.9,11.0,2.7],["Hakeem Olajuwon",32,"HOU",1,147,72,27.8,10.8,3.5]]},
+1996:{max:1130,rows:[["Michael Jordan",32,"CHI",109,1114,82,30.4,6.6,4.3],["David Robinson",30,"SAS",0,574,82,25.0,12.2,3.0],["Anfernee Hardaway",24,"ORL",2,360,82,21.7,4.3,7.1],["Hakeem Olajuwon",33,"HOU",1,238,72,26.9,10.9,3.6],["Scottie Pippen",30,"CHI",0,226,77,19.4,6.4,5.9]]},
+1997:{max:1150,rows:[["Karl Malone",33,"UTA",63,986,82,27.4,9.9,4.5],["Michael Jordan",33,"CHI",52,957,82,29.6,5.9,4.3],["Grant Hill",24,"DET",0,376,80,21.4,9.0,7.3],["Tim Hardaway",30,"MIA",0,238,81,20.3,3.4,8.6],["Glen Rice",29,"CHH",0,134,79,26.8,4.0,2.0]]},
+1998:{max:1160,rows:[["Michael Jordan",34,"CHI",92,1084,82,28.7,5.8,3.5],["Karl Malone",34,"UTA",20,842,81,27.0,10.3,3.9],["Gary Payton",29,"SEA",3,431,82,19.2,4.6,8.3],["Shaquille O'Neal",25,"LAL",1,311,60,28.3,11.4,2.4],["Tim Duncan",21,"SAS",0,148,82,21.1,11.9,2.7]]},
+1999:{max:1180,rows:[["Karl Malone",35,"UTA",44,827,49,23.8,9.4,4.1],["Alonzo Mourning",28,"MIA",36,773,46,20.1,11.0,1.6],["Tim Duncan",22,"SAS",30,740,50,21.7,11.4,2.4],["Allen Iverson",23,"PHI",5,319,48,26.8,4.9,4.6],["Jason Kidd",25,"PHO",2,159,50,16.9,6.8,10.8]]},
+2000:{max:1210,rows:[["Shaquille O'Neal",27,"LAL",120,1207,79,29.7,13.6,3.8],["Kevin Garnett",23,"MIN",0,408,81,22.9,11.8,5.0],["Alonzo Mourning",29,"MIA",0,367,79,21.7,9.5,1.6],["Karl Malone",36,"UTA",0,312,82,25.5,9.5,3.7],["Tim Duncan",23,"SAS",0,248,74,23.2,12.4,3.2]]},
+2001:{max:1240,rows:[["Allen Iverson",25,"PHI",93,1121,71,31.1,3.8,4.6],["Tim Duncan",24,"SAS",18,706,82,22.2,12.2,3.0],["Shaquille O'Neal",28,"LAL",7,578,74,28.7,12.7,3.7],["Chris Webber",27,"SAC",5,521,70,27.1,11.1,4.2],["Kevin Garnett",24,"MIN",1,151,81,22.0,11.4,5.0]]},
+2002:{max:1260,rows:[["Tim Duncan",25,"SAS",57,954,82,25.5,12.7,3.7],["Jason Kidd",28,"NJN",45,897,82,14.7,7.3,9.9],["Shaquille O'Neal",29,"LAL",15,696,67,27.2,10.7,3.0],["Tracy McGrady",22,"ORL",7,390,76,25.6,7.9,5.3],["Kobe Bryant",23,"LAL",1,98,80,25.2,5.5,5.5]]},
+2003:{max:1190,rows:[["Tim Duncan",26,"SAS",60,962,81,23.3,12.9,3.9],["Kevin Garnett",26,"MIN",43,871,82,23.0,13.4,6.0],["Kobe Bryant",24,"LAL",8,496,82,30.0,6.9,5.9],["Tracy McGrady",23,"ORL",4,427,75,32.1,6.5,5.5],["Shaquille O'Neal",30,"LAL",3,126,67,27.5,11.1,3.1]]},
+2004:{max:1230,rows:[["Kevin Garnett",27,"MIN",120,1219,82,24.2,13.9,5.0],["Tim Duncan",27,"SAS",0,716,69,22.3,12.4,3.1],["Jermaine O'Neal",25,"IND",2,523,78,20.1,10.0,2.1],["Peja Stojaković",26,"SAC",1,281,81,24.2,6.3,2.1],["Kobe Bryant",25,"LAL",0,212,65,24.0,5.5,5.1]]},
+2005:{max:1270,rows:[["Steve Nash",30,"PHO",65,1066,75,15.5,3.3,11.5],["Shaquille O'Neal",32,"MIA",58,1032,73,22.9,10.4,2.7],["Dirk Nowitzki",26,"DAL",0,349,78,26.1,9.7,3.1],["Tim Duncan",28,"SAS",1,328,66,20.3,11.1,2.7],["Allen Iverson",29,"PHI",2,240,75,30.7,4.0,7.9]]},
+2006:{max:1250,rows:[["Steve Nash",31,"PHO",57,924,79,18.8,4.2,10.5],["LeBron James",21,"CLE",16,688,79,31.4,7.0,6.6],["Dirk Nowitzki",27,"DAL",14,544,81,26.6,9.0,2.8],["Kobe Bryant",27,"LAL",22,483,80,35.4,5.3,4.5],["Chauncey Billups",29,"DET",15,430,81,18.5,3.1,8.6]]},
+2007:{max:1290,rows:[["Dirk Nowitzki",28,"DAL",83,1138,78,24.6,8.9,3.4],["Steve Nash",32,"PHO",44,1013,76,18.6,3.5,11.6],["Kobe Bryant",28,"LAL",2,521,77,31.6,5.7,5.4],["Tim Duncan",30,"SAS",0,286,80,20.0,10.6,3.4],["LeBron James",22,"CLE",0,183,78,27.3,6.7,6.0]]},
+2008:{max:1260,rows:[["Kobe Bryant",29,"LAL",82,1100,82,28.3,6.3,5.4],["Chris Paul",22,"NOH",28,894,80,21.1,4.0,11.6],["Kevin Garnett",31,"BOS",15,670,71,18.8,9.2,3.4],["LeBron James",23,"CLE",1,438,75,30.0,7.9,7.2],["Dwight Howard",22,"ORL",0,60,82,20.7,14.2,1.3]]},
+2009:{max:1210,rows:[["LeBron James",24,"CLE",109,1172,81,28.4,7.6,7.2],["Kobe Bryant",30,"LAL",2,698,82,26.8,5.2,4.9],["Dwyane Wade",27,"MIA",7,680,79,30.2,5.0,7.5],["Dwight Howard",23,"ORL",1,328,79,20.6,13.8,1.4],["Chris Paul",23,"NOH",2,192,78,22.8,5.5,11.0]]},
+2010:{max:1230,rows:[["LeBron James",25,"CLE",116,1205,76,29.7,7.3,8.6],["Kevin Durant",21,"OKC",4,609,82,30.1,7.6,2.8],["Kobe Bryant",31,"LAL",0,599,73,27.0,5.4,5.0],["Dwight Howard",24,"ORL",3,478,82,18.3,13.2,1.8],["Dwyane Wade",28,"MIA",0,119,77,26.6,4.8,6.5]]},
+2011:{max:1210,rows:[["Derrick Rose",22,"CHI",113,1182,81,25.0,4.1,7.7],["Dwight Howard",25,"ORL",3,643,78,22.9,14.1,1.4],["LeBron James",26,"MIA",4,522,79,26.7,7.5,7.0],["Kobe Bryant",32,"LAL",1,428,82,25.3,5.1,4.7],["Kevin Durant",22,"OKC",0,190,78,27.7,6.8,2.7]]},
+2012:{max:1210,rows:[["LeBron James",27,"MIA",85,1074,62,27.1,7.9,6.2],["Kevin Durant",23,"OKC",24,889,66,28.0,8.0,3.5],["Chris Paul",26,"LAC",6,385,60,19.8,3.6,9.1],["Kobe Bryant",33,"LAL",2,352,58,27.9,5.4,4.6],["Tony Parker",29,"SAS",4,331,60,18.3,2.9,7.7]]},
+2013:{max:1210,rows:[["LeBron James",28,"MIA",120,1207,76,26.8,8.0,7.3],["Kevin Durant",24,"OKC",0,765,81,28.1,7.9,4.6],["Carmelo Anthony",28,"NYK",1,475,67,28.7,6.9,2.6],["Chris Paul",27,"LAC",0,289,70,16.9,3.7,9.7],["Kobe Bryant",34,"LAL",0,184,78,27.3,5.6,6.0]]},
+2014:{max:1250,rows:[["Kevin Durant",25,"OKC",119,1232,81,32.0,7.4,5.5],["LeBron James",29,"MIA",6,891,77,27.1,6.9,6.3],["Blake Griffin",24,"LAC",0,434,80,24.1,9.5,3.9],["Joakim Noah",28,"CHI",0,322,80,12.6,11.3,5.4],["James Harden",24,"HOU",0,85,73,25.4,4.7,6.1]]},
+2015:{max:1300,rows:[["Stephen Curry",26,"GSW",100,1198,80,23.8,4.3,7.7],["James Harden",25,"HOU",25,936,81,27.4,5.7,7.0],["LeBron James",30,"CLE",5,552,69,25.3,6.0,7.4],["Russell Westbrook",26,"OKC",0,352,67,28.1,7.3,8.6],["Anthony Davis",21,"NOP",0,203,68,24.4,10.2,2.2]]},
+2016:{max:1310,rows:[["Stephen Curry",27,"GSW",131,1310,79,30.1,5.4,6.7],["Kawhi Leonard",24,"SAS",0,634,72,21.2,6.8,2.6],["LeBron James",31,"CLE",0,631,76,25.3,7.4,6.8],["Russell Westbrook",27,"OKC",0,486,80,23.5,7.8,10.4],["Kevin Durant",27,"OKC",0,147,72,28.2,8.2,5.0]]},
+2017:{max:1010,rows:[["Russell Westbrook",28,"OKC",69,888,81,31.6,10.7,10.4],["James Harden",27,"HOU",22,753,81,29.1,8.1,11.2],["Kawhi Leonard",25,"SAS",9,500,74,25.5,5.8,3.5],["LeBron James",32,"CLE",1,333,74,26.4,8.6,8.7],["Isaiah Thomas",27,"BOS",0,81,76,28.9,2.7,5.9]]},
+2018:{max:1010,rows:[["James Harden",28,"HOU",86,965,72,30.4,5.4,8.8],["LeBron James",33,"CLE",15,738,82,27.5,8.6,9.1],["Anthony Davis",24,"NOP",0,445,75,28.1,11.1,2.3],["Damian Lillard",27,"POR",0,207,73,26.9,4.5,6.6],["Russell Westbrook",29,"OKC",0,76,80,25.4,10.1,10.3]]},
+2019:{max:1010,rows:[["Giannis Antetokounmpo",24,"MIL",78,941,72,27.7,12.5,5.9],["James Harden",29,"HOU",23,776,78,36.1,6.6,7.5],["Paul George",28,"OKC",0,356,77,28.0,8.2,4.1],["Nikola Jokić",23,"DEN",0,212,80,20.1,10.8,7.3],["Stephen Curry",30,"GSW",0,175,69,27.3,5.3,5.2]]},
+2020:{max:1010,rows:[["Giannis Antetokounmpo",25,"MIL",85,962,63,29.5,13.6,5.6],["LeBron James",35,"LAL",16,753,67,25.3,7.8,10.2],["James Harden",30,"HOU",0,367,68,34.3,6.6,7.5],["Luka Dončić",20,"DAL",0,200,61,28.8,9.4,8.8],["Kawhi Leonard",28,"LAC",0,168,57,27.1,7.1,4.9]]},
+2021:{max:1010,rows:[["Nikola Jokić",25,"DEN",91,971,72,26.4,10.8,8.3],["Joel Embiid",26,"PHI",1,586,51,28.5,10.6,2.8],["Stephen Curry",32,"GSW",5,453,63,32.0,5.5,5.8],["Giannis Antetokounmpo",26,"MIL",1,348,61,28.1,11.0,5.9],["Chris Paul",35,"PHO",2,139,70,16.4,4.5,8.9]]},
+2022:{max:1000,rows:[["Nikola Jokić",26,"DEN",65,875,74,27.1,13.8,7.9],["Joel Embiid",27,"PHI",26,706,68,30.6,11.7,4.2],["Giannis Antetokounmpo",27,"MIL",9,595,67,29.9,11.6,5.8],["Devin Booker",25,"PHO",0,216,68,26.8,5.0,4.8],["Luka Dončić",22,"DAL",0,146,65,28.4,9.1,8.7]]},
+2023:{max:1000,rows:[["Joel Embiid",28,"PHI",73,915,66,33.1,10.2,4.2],["Nikola Jokić",27,"DEN",15,674,69,24.5,11.8,9.8],["Giannis Antetokounmpo",28,"MIL",12,606,63,31.1,11.8,5.7],["Jayson Tatum",24,"BOS",0,280,74,30.1,8.8,4.6],["Shai Gilgeous-Alexander",24,"OKC",0,46,68,31.4,4.8,5.5]]},
+2024:{max:990,rows:[["Nikola Jokić",28,"DEN",79,926,79,26.4,12.4,9.0],["Shai Gilgeous-Alexander",25,"OKC",15,640,75,30.1,5.5,6.2],["Luka Dončić",24,"DAL",4,566,70,33.9,9.2,9.8],["Giannis Antetokounmpo",29,"MIL",1,192,73,30.4,11.5,6.5],["Jalen Brunson",27,"NYK",0,142,77,28.7,3.6,6.7]]},
+2025:{max:1000,rows:[["Shai Gilgeous-Alexander",26,"OKC",71,913,76,32.7,5.0,6.4],["Nikola Jokić",29,"DEN",29,787,70,29.6,12.7,10.2],["Giannis Antetokounmpo",30,"MIL",0,470,67,30.4,11.9,6.5],["Jayson Tatum",26,"BOS",0,311,72,26.8,8.7,6.0],["Donovan Mitchell",28,"CLE",0,74,71,24.0,4.5,5.0]]},
+2026:{max:1000,rows:[["Shai Gilgeous-Alexander",27,"OKC",83,939,68,31.1,4.3,6.6],["Nikola Jokić",30,"DEN",10,634,65,27.7,12.9,10.7],["Victor Wembanyama",22,"SAS",5,569,64,25.0,11.5,3.1],["Luka Dončić",26,"LAL",0,250,64,33.5,7.7,8.3],["Cade Cunningham",24,"DET",2,117,64,23.9,5.5,9.9]]}
+};
+
+var SHORT={"Shai Gilgeous-Alexander":"SGA","Giannis Antetokounmpo":"Giannis","Shaquille O'Neal":"Shaq","Jermaine O'Neal":"J. O'Neal","Tim Hardaway":"T. Hardaway","Anthony Davis":"A. Davis","Isaiah Thomas":"I. Thomas","Chris Paul":"C. Paul"};
+
+var Y0=1992, Y1=2026;
+var ALL=[], BY={}, P={};
+function lastName(n){ if(SHORT[n]) return SHORT[n]; var p=n.split(" "); return p[p.length-1]; }
+function fmtS(y){ return (y-1)+"-"+String(y).slice(2); }
+function pct(v){ return (v*100).toFixed(1)+"%"; }
+function ord(n){ return n+(["th","st","nd","rd"][n]||"th"); }
+function col(tm){ return TEAM[tm]||"#555"; }
+
+for(var y=Y0;y<=Y1;y++){
+  var d=DATA[y]; BY[y]=[];
+  d.rows.forEach(function(r,i){
+    var o={y:y,rank:i+1,name:r[0],age:r[1],tm:r[2],first:r[3],pts:r[4],max:d.max,g:r[5],ppg:r[6],rpg:r[7],apg:r[8],share:r[4]/d.max};
+    ALL.push(o); BY[y].push(o);
+    if(!P[o.name]) P[o.name]={name:o.name,list:[],byYear:{}};
+    P[o.name].list.push(o); P[o.name].byYear[y]=o;
+  });
+}
+var PL=Object.keys(P).map(function(k){
+  var p=P[k], mv=p.list.filter(function(e){return e.rank===1;}).length;
+  var best=Math.max.apply(null,p.list.map(function(e){return e.share;}));
+  p.n=p.list.length; p.mvps=mv; p.best=best; p.first=p.list[0].y; p.last=p.list[p.list.length-1].y;
+  return p;
+});
+
+/* season facts */
+var margins={};
+for(var yy=Y0;yy<=Y1;yy++){ var rr=BY[yy]; margins[yy]=(rr[0].pts-rr[1].pts)/rr[0].max; }
+var closestY=Y0, widestY=Y0;
+for(yy=Y0;yy<=Y1;yy++){ if(margins[yy]<margins[closestY]) closestY=yy; if(margins[yy]>margins[widestY]) widestY=yy; }
+var unanimous=[]; for(yy=Y0;yy<=Y1;yy++){ if(BY[yy][0].first===BY[yy][0].max/10) unanimous.push(yy); }
+var LOCKOUT={1999:1,2012:1};
+
+var $=function(s,r){ return (r||document).querySelector(s); };
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+var state={year:Y1,sel:null,tab:"season",playing:false,timer:null,lock:null,sort:{k:"y",dir:-1},q:"",onlyMvp:false,psort:{k:"n",dir:-1},pq:"",psel:null};
+
+/* KPIs */
+(function(){
+  var winners={}; for(var y=Y0;y<=Y1;y++) winners[BY[y][0].name]=1;
+  var k=$("#kpis");
+  [[Y1-Y0+1,"seasons"],[ALL.length,"top-five finishes"],[PL.length,"players"],[Object.keys(winners).length,"different MVPs"],[unanimous.length,"unanimous ("+fmtS(unanimous[0])+")"]].forEach(function(a){
+    var d=el("div","kpi"); d.innerHTML="<b class='num'>"+a[0]+"</b><span>"+a[1]+"</span>"; k.appendChild(d);
+  });
+})();
+
+/* ---------- player card ---------- */
+function renderCard(box,name,focusYear){
+  var p=P[name]; box.innerHTML="";
+  var head=el("div","pc-head"); head.style.setProperty("--c",col(p.list[p.list.length-1].tm));
+  var teams=[]; p.list.forEach(function(e){ if(teams.indexOf(e.tm)<0) teams.push(e.tm); });
+  head.innerHTML="<h3></h3><p>"+p.n+" top-five finish"+(p.n===1?"":"es")+" &middot; "+p.mvps+" MVP"+(p.mvps===1?"":"s")+" &middot; best share "+pct(p.best)+"</p>";
+  head.querySelector("h3").textContent=name;
+  box.appendChild(head);
+  var body=el("div","pc-body"); box.appendChild(body);
+  body.appendChild(el("div","pc-cap","Vote share by season"));
+  var chart=el("div","pc-chart"); chart.setAttribute("role","group"); chart.setAttribute("aria-label","Vote share by season for "+name);
+  for(var y=Y0;y<=Y1;y++){
+    var e=p.byYear[y];
+    if(e){
+      var b=el("button",(e.rank===1?"mvpbar":"")+(y===focusYear?" cur":""));
+      b.type="button"; b.style.height=Math.max(4,e.share*100)+"%"; b.style.setProperty("--c",col(e.tm));
+      b.title=fmtS(y)+": "+ord(e.rank)+", "+pct(e.share)+" ("+e.tm+")";
+      b.setAttribute("aria-label",b.title);
+      b.dataset.y=y; chart.appendChild(b);
+    } else chart.appendChild(el("span","gap"));
+  }
+  body.appendChild(chart);
+  var ax=el("div","pc-axis");
+  [1992,2000,2010,2020,2026].forEach(function(t){ var s=el("span",null,"'"+String(t).slice(2)); s.style.left=((t-Y0)/(Y1-Y0)*100)+"%"; ax.appendChild(s); });
+  body.appendChild(ax);
+  if(focusYear && p.byYear[focusYear]){
+    var f=p.byYear[focusYear];
+    body.appendChild(el("div","pc-stat","<b>"+fmtS(f.y)+"</b> &middot; "+ord(f.rank)+" &middot; "+f.ppg.toFixed(1)+" pts, "+f.rpg.toFixed(1)+" reb, "+f.apg.toFixed(1)+" ast in "+f.g+" games"));
+  }
+  var ul=el("ul","pc-list");
+  p.list.forEach(function(e){
+    var li=el("li"); var bt=el("button");
+    bt.type="button"; bt.dataset.y=e.y;
+    bt.innerHTML="<span class='num'>"+fmtS(e.y)+"</span><span class='tag'>"+ord(e.rank)+"</span><span class='num'>"+pct(e.share)+"</span><span class='tag'>"+e.tm+"</span>";
+    li.appendChild(bt); ul.appendChild(li);
+  });
+  body.appendChild(ul);
+  body.appendChild(el("p","pc-hint","Click a bar or a row to open that season."));
+  box.onclick=function(ev){
+    var t=ev.target.closest("[data-y]"); if(!t) return;
+    gotoSeason(parseInt(t.dataset.y,10),name);
+  };
+}
+
+/* ---------- season view ---------- */
+var rowsBox=$("#rows"), slider=$("#slider"), label=$("#seasonLabel");
+function renderSeason(){
+  var y=state.year, rows=BY[y];
+  label.textContent=fmtS(y);
+  label.classList.remove("flip"); void label.offsetWidth; if(!reduce) label.classList.add("flip");
+  slider.value=y;
+  var w=rows[0];
+  $("#whoWon").innerHTML="MVP: <b></b> ("+w.tm+")";
+  $("#whoWon").querySelector("b").textContent=w.name;
+  document.querySelectorAll(".dec").forEach(function(b){ var a=+b.dataset.a, z=+b.dataset.z; b.setAttribute("aria-pressed",(y>=a&&y<=z)?"true":"false"); });
+
+  rowsBox.innerHTML="";
+  rows.forEach(function(r,i){
+    var b=el("button","row"+(r.rank===1?" win":"")+(r.name===state.sel?" sel":""));
+    b.type="button"; b.dataset.name=r.name; b.style.setProperty("--c",col(r.tm));
+    b.innerHTML="<span class='rk'>"+r.rank+"</span><span class='rbody'><span class='rtop'><span class='nm'></span><span class='tm'>"+r.tm+"</span>"+(r.rank===1?"<span class='mvp'>MVP</span>":"")+"<span class='age'>age "+r.age+"</span></span><span class='rbar'><span class='track'><span class='fill'></span></span><span class='pct'>"+pct(r.share)+"</span></span><span class='rnum'><b>"+r.first+"</b> first-place &middot; <b>"+r.pts+"</b> of "+r.max+" pts</span></span>";
+    b.querySelector(".nm").textContent=r.name;
+    rowsBox.appendChild(b);
+    var f=b.querySelector(".fill");
+    if(reduce){ f.style.width=(r.share*100)+"%"; }
+    else { f.style.transitionDelay=(i*70)+"ms"; requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=(r.share*100)+"%"; }); }); }
+  });
+
+  var voters=rows[0].max/10, mar=rows[0].pts-rows[1].pts, notes=$("#notes"); notes.innerHTML="";
+  function note(html,hot){ notes.appendChild(el("span","note"+(hot?" hot":""),html)); }
+  note("Voters <b class='num'>"+voters+"</b>");
+  note("Winner took <b class='num'>"+pct(rows[0].share)+"</b> of the points");
+  note("Margin over #2 <b class='num'>"+mar+"</b> pts");
+  if(rows[0].first===voters) note("<b>Unanimous.</b> Every voter picked "+lastName(rows[0].name),true);
+  if(y===closestY) note("<b>Tightest race</b> of these 35 seasons",true);
+  if(y===widestY) note("<b>Widest margin</b> of these 35 seasons",true);
+  if(LOCKOUT[y]) note("Lockout-shortened season");
+
+  state.sel=state.sel&&P[state.sel].byYear[y]?state.sel:rows[0].name;
+  rowsBox.querySelectorAll(".row").forEach(function(b){ b.classList.toggle("sel",b.dataset.name===state.sel); });
+  renderCard($("#cardSeason"),state.sel,y);
+}
+rowsBox.addEventListener("click",function(ev){
+  var b=ev.target.closest(".row"); if(!b) return;
+  state.sel=b.dataset.name;
+  rowsBox.querySelectorAll(".row").forEach(function(x){ x.classList.toggle("sel",x===b); });
+  renderCard($("#cardSeason"),state.sel,state.year);
+});
+function setYear(y,keepSel){
+  y=Math.max(Y0,Math.min(Y1,y)); if(y===state.year) return;
+  state.year=y; if(!keepSel) state.sel=null; renderSeason();
+}
+function gotoSeason(y,name){
+  state.year=y; state.sel=name; showTab("season"); renderSeason();
+  window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
+}
+slider.addEventListener("input",function(){ stop(); setYear(parseInt(slider.value,10)); });
+$("#prev").addEventListener("click",function(){ stop(); setYear(state.year-1); });
+$("#next").addEventListener("click",function(){ stop(); setYear(state.year+1); });
+var decBox=$("#decades");
+[["90s",1992,1999],["2000s",2000,2009],["2010s",2010,2019],["2020s",2020,2026]].forEach(function(d){
+  var b=el("button","dec",d[0]); b.type="button"; b.dataset.a=d[1]; b.dataset.z=d[2]; b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",function(){ stop(); setYear(d[1]); });
+  decBox.appendChild(b);
+});
+function stop(){ state.playing=false; clearInterval(state.timer); $("#play").textContent="Play"; $("#play").setAttribute("aria-pressed","false"); }
+$("#play").addEventListener("click",function(){
+  if(state.playing){ stop(); return; }
+  if(state.year>=Y1) setYear(Y0);
+  state.playing=true; $("#play").textContent="Pause"; $("#play").setAttribute("aria-pressed","true");
+  state.timer=setInterval(function(){ if(state.year>=Y1){ stop(); return; } setYear(state.year+1); },1700);
+});
+document.addEventListener("keydown",function(ev){
+  if(state.tab!=="season") return;
+  var t=ev.target; if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT")) return;
+  if(ev.key==="ArrowLeft"){ stop(); setYear(state.year-1); }
+  else if(ev.key==="ArrowRight"){ stop(); setYear(state.year+1); }
+});
+
+/* ---------- timeline ---------- */
+var tlBuilt=false;
+function buildTimeline(){
+  if(tlBuilt) return; tlBuilt=true;
+  var g=$("#tl"); g.innerHTML="";
+  var h=el("div","tl-row tl-head"); h.innerHTML="<div>Season</div><div>1st</div><div>2nd</div><div>3rd</div><div>4th</div><div>5th</div>"; g.appendChild(h);
+  for(var y=Y1;y>=Y0;y--){
+    var row=el("div","tl-row");
+    var yb=el("button","yr",fmtS(y)); yb.type="button"; yb.dataset.y=y; yb.title="Open "+fmtS(y); row.appendChild(yb);
+    BY[y].forEach(function(r){
+      var c=el("button","chip"+(r.rank===1?" r1":"")); c.type="button"; c.dataset.name=r.name; c.style.setProperty("--c",col(r.tm));
+      c.innerHTML="<span class='cn'></span><span class='cs'>"+Math.round(r.share*100)+"% &middot; "+r.tm+"</span>";
+      c.querySelector(".cn").textContent=lastName(r.name);
+      c.title=r.name+", "+fmtS(r.y)+", "+pct(r.share);
+      row.appendChild(c);
+    });
+    g.appendChild(row);
+  }
+  function hi(name){
+    g.classList.toggle("has-sel",!!name);
+    g.querySelectorAll(".chip").forEach(function(c){ c.classList.toggle("on",c.dataset.name===name); });
+    var info=$("#tlInfo");
+    if(name){ var p=P[name]; info.innerHTML="<b></b> &middot; "+p.n+" top-five finish"+(p.n===1?"":"es")+", "+p.mvps+" MVP"+(p.mvps===1?"":"s")+", best share "+pct(p.best); info.querySelector("b").textContent=name; }
+    else info.textContent="Hover a name to light up every year that player finished in the top five. Click to hold the highlight.";
+    $("#tlClear").hidden=!state.lock;
+  }
+  g.addEventListener("pointerover",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) hi(c.dataset.name); });
+  g.addEventListener("pointerout",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) hi(null); });
+  g.addEventListener("focusin",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) hi(c.dataset.name); });
+  g.addEventListener("focusout",function(ev){ if(!state.lock&&ev.target.closest(".chip")) hi(null); });
+  g.addEventListener("click",function(ev){
+    var yb=ev.target.closest(".yr"); if(yb){ gotoSeason(parseInt(yb.dataset.y,10),null); return; }
+    var c=ev.target.closest(".chip"); if(!c) return;
+    state.lock=(state.lock===c.dataset.name)?null:c.dataset.name; hi(state.lock);
+  });
+  $("#tlClear").addEventListener("click",function(){ state.lock=null; hi(null); });
+}
+
+/* ---------- ballot table ---------- */
+var tblBuilt=false;
+var TCOLS=[
+  {k:"y",t:"Season",f:function(r){return fmtS(r.y);}},
+  {k:"rank",t:"Rank",n:1,f:function(r){return r.rank;}},
+  {k:"name",t:"Player",f:function(r){return "<span class='dot' style='--c:"+col(r.tm)+"'></span>"+r.name;}},
+  {k:"age",t:"Age",n:1,f:function(r){return r.age;}},
+  {k:"tm",t:"Team",f:function(r){return r.tm;}},
+  {k:"first",t:"1st",n:1,f:function(r){return r.first;}},
+  {k:"pts",t:"Pts",n:1,f:function(r){return r.pts;}},
+  {k:"max",t:"Max",n:1,f:function(r){return r.max;}},
+  {k:"share",t:"Share",n:1,f:function(r){return pct(r.share)+"<span class='mini' style='--c:"+col(r.tm)+"'><i style='width:"+(r.share*100)+"%'></i></span>";}},
+  {k:"g",t:"GP",n:1,f:function(r){return r.g;}},
+  {k:"ppg",t:"PTS",n:1,f:function(r){return r.ppg.toFixed(1);}},
+  {k:"rpg",t:"REB",n:1,f:function(r){return r.rpg.toFixed(1);}},
+  {k:"apg",t:"AST",n:1,f:function(r){return r.apg.toFixed(1);}}
+];
+function cmp(k,dir){
+  return function(a,b){
+    var x=a[k], y2=b[k], c;
+    if(typeof x==="string") c=x.localeCompare(y2); else c=x-y2;
+    if(c!==0) return c*dir;
+    if(a.y!==b.y) return b.y-a.y;
+    return a.rank-b.rank;
+  };
+}
+function buildTable(){
+  if(!tblBuilt){
+    tblBuilt=true;
+    var tr=el("tr"); TCOLS.forEach(function(c){ var th=el("th",c.n?"n":""); th.dataset.k=c.k; th.tabIndex=0; th.setAttribute("role","columnheader"); tr.appendChild(th); });
+    $("#thead").appendChild(tr);
+    $("#thead").addEventListener("click",function(ev){ var th=ev.target.closest("th"); if(th) sortBy(th.dataset.k); });
+    $("#thead").addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ var th=ev.target.closest("th"); if(th){ ev.preventDefault(); sortBy(th.dataset.k); } } });
+    $("#tq").addEventListener("input",function(ev){ state.q=ev.target.value.trim().toLowerCase(); drawTable(); });
+    $("#tmvp").addEventListener("change",function(ev){ state.onlyMvp=ev.target.checked; drawTable(); });
+    $("#tbody").addEventListener("click",function(ev){ var tr2=ev.target.closest("tr"); if(tr2) gotoSeason(parseInt(tr2.dataset.y,10),tr2.dataset.name); });
+  }
+  drawTable();
+}
+function sortBy(k){
+  if(state.sort.k===k) state.sort.dir*=-1; else { state.sort.k=k; state.sort.dir=(k==="name"||k==="tm"||k==="rank"||k==="age")?1:-1; if(k==="y") state.sort.dir=-1; }
+  drawTable();
+}
+function drawTable(){
+  document.querySelectorAll("#thead th").forEach(function(th,i){
+    var c=TCOLS[i], on=state.sort.k===c.k;
+    th.innerHTML=c.t+(on?" <span class='arr'>"+(state.sort.dir>0?"&#9650;":"&#9660;")+"</span>":"");
+    if(on) th.setAttribute("aria-sort",state.sort.dir>0?"ascending":"descending"); else th.removeAttribute("aria-sort");
+  });
+  var q=state.q;
+  var rows=ALL.filter(function(r){
+    if(state.onlyMvp&&r.rank!==1) return false;
+    if(!q) return true;
+    return r.name.toLowerCase().indexOf(q)>=0||r.tm.toLowerCase()===q||r.tm.toLowerCase().indexOf(q)===0&&q.length>=2||fmtS(r.y).indexOf(q)>=0||String(r.y)===q;
+  }).sort(cmp(state.sort.k,state.sort.dir));
+  var tb=$("#tbody"); tb.innerHTML="";
+  var frag=document.createDocumentFragment();
+  rows.forEach(function(r){
+    var tr=el("tr",r.rank===1?"w":""); tr.dataset.y=r.y; tr.dataset.name=r.name;
+    TCOLS.forEach(function(c){ var td=el("td",c.n?"n":"",c.f(r)); tr.appendChild(td); });
+    frag.appendChild(tr);
+  });
+  tb.appendChild(frag);
+  $("#tcount").textContent=rows.length+" of "+ALL.length+" rows";
+}
+
+/* ---------- players ---------- */
+var plBuilt=false;
+var PCOLS=[
+  {k:"name",t:"Player",f:function(p){return p.name;}},
+  {k:"n",t:"Top 5",n:1,f:function(p){return p.n;}},
+  {k:"mvps",t:"MVPs",n:1,f:function(p){return p.mvps;}},
+  {k:"best",t:"Best share",n:1,f:function(p){return pct(p.best);}},
+  {k:"first",t:"Span",n:1,f:function(p){return fmtS(p.first).slice(0,4)+" to "+fmtS(p.last).slice(0,4);}}
+];
+function pcmp(k,dir){
+  return function(a,b){
+    var x=a[k], y2=b[k], c=(typeof x==="string")?x.localeCompare(y2):x-y2;
+    if(c!==0) return c*dir;
+    if(b.mvps!==a.mvps) return b.mvps-a.mvps;
+    if(b.n!==a.n) return b.n-a.n;
+    return a.name.localeCompare(b.name);
+  };
+}
+function buildPlayers(){
+  if(!plBuilt){
+    plBuilt=true;
+    var tr=el("tr"); PCOLS.forEach(function(c){ var th=el("th",c.n?"n":""); th.dataset.k=c.k; th.tabIndex=0; tr.appendChild(th); });
+    $("#phead").appendChild(tr);
+    function ps(th){ var k=th.dataset.k; if(state.psort.k===k) state.psort.dir*=-1; else { state.psort.k=k; state.psort.dir=(k==="name"||k==="first")?1:-1; } drawPlayers(); }
+    $("#phead").addEventListener("click",function(ev){ var th=ev.target.closest("th"); if(th) ps(th); });
+    $("#phead").addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ var th=ev.target.closest("th"); if(th){ ev.preventDefault(); ps(th); } } });
+    $("#pq").addEventListener("input",function(ev){ state.pq=ev.target.value.trim().toLowerCase(); drawPlayers(); });
+    $("#pbody").addEventListener("click",function(ev){
+      var tr2=ev.target.closest("tr"); if(!tr2) return;
+      state.psel=tr2.dataset.name;
+      document.querySelectorAll("#pbody tr").forEach(function(r){ r.classList.toggle("w",r.dataset.name===state.psel); });
+      renderCard($("#cardPlayers"),state.psel,null);
+    });
+    state.psel=PL.slice().sort(pcmp("n",-1))[0].name;
+  }
+  drawPlayers();
+  renderCard($("#cardPlayers"),state.psel,null);
+}
+function drawPlayers(){
+  document.querySelectorAll("#phead th").forEach(function(th,i){
+    var c=PCOLS[i], on=state.psort.k===c.k;
+    th.innerHTML=c.t+(on?" <span class='arr'>"+(state.psort.dir>0?"&#9650;":"&#9660;")+"</span>":"");
+    if(on) th.setAttribute("aria-sort",state.psort.dir>0?"ascending":"descending"); else th.removeAttribute("aria-sort");
+  });
+  var rows=PL.filter(function(p){ return !state.pq||p.name.toLowerCase().indexOf(state.pq)>=0; }).sort(pcmp(state.psort.k,state.psort.dir));
+  var tb=$("#pbody"); tb.innerHTML="";
+  rows.forEach(function(p){
+    var tr=el("tr",p.name===state.psel?"w":""); tr.dataset.name=p.name;
+    PCOLS.forEach(function(c){ var td=el("td",c.n?"n":""); td.textContent=c.f(p); tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+  $("#pcount").textContent=rows.length+" players";
+}
+
+/* ---------- tabs ---------- */
+function showTab(t){
+  state.tab=t;
+  if(t!=="season") stop();
+  document.querySelectorAll(".tab").forEach(function(b){ b.setAttribute("aria-selected",b.dataset.tab===t?"true":"false"); });
+  ["season","timeline","table","players"].forEach(function(n){ $("#p-"+n).hidden=(n!==t); });
+  if(t==="timeline") buildTimeline();
+  if(t==="table") buildTable();
+  if(t==="players") buildPlayers();
+}
+document.querySelectorAll(".tab").forEach(function(b){ b.addEventListener("click",function(){ showTab(b.dataset.tab); }); });
+
+renderSeason();
+})();
+</script>
+
+</body>
+</html>
