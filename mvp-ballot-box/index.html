@@ -69,7 +69,8 @@ h1 span{color:var(--accent)}
 .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
 .search{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:10px 12px;font:inherit}
 .sel{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:9px 10px;font:inherit;max-width:100%}
-.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;max-width:100%;min-width:0}
+.chk .sel{min-width:0;flex:1 1 auto;text-overflow:ellipsis}
 .count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
 .clear{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 12px;font-size:13px}
 .clear:hover{border-color:var(--accent)}
@@ -245,8 +246,9 @@ tr.w td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 /* rivals */
 .rv-pick{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:end;margin-bottom:12px}
 .rv-pick label{display:flex;flex-direction:column;gap:4px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.rv-pick .search{flex:none;width:100%}
-.rv-vs{font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1;padding-bottom:8px;color:var(--muted)}
+.rv-pick .sel{width:100%;text-transform:none;letter-spacing:0;font-family:var(--f-body,inherit);font-size:15px;color:var(--ink)}
+.rv-vs{font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1;padding:0 4px 8px;color:var(--muted);background:none;border:0;cursor:pointer}
+.rv-vs:hover{color:var(--accent)}
 .rv-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .rv-card{border-radius:10px;padding:14px 16px;background:var(--c);color:#fff;min-width:0}
 .rv-card h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(24px,5vw,38px);line-height:1;text-transform:uppercase;overflow-wrap:anywhere}
@@ -301,6 +303,14 @@ button.rec-line:hover{color:var(--accent)}
 .qc .rev b{font-size:16px}
 .qc.win{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .qc.bad{border-color:#C0392B;box-shadow:0 0 0 2px #C0392B}
+.qz-tag{display:inline-block;font-family:var(--f-display);font-weight:900;font-size:26px;line-height:1;color:var(--accent-ink);background:var(--accent);padding:5px 12px;border-radius:8px;margin-top:6px}
+.qh-q{font-family:var(--f-display);font-weight:800;font-size:clamp(20px,3.2vw,28px);line-height:1.2;margin:6px 0 16px;max-width:46ch}
+.qh-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.qh{text-align:left;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font-size:16px;font-weight:600;min-width:0}
+.qh:not([disabled]):hover{border-color:var(--accent)}
+.qh.win{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.qh.bad{border-color:#C0392B;box-shadow:0 0 0 2px #C0392B}
+.qh-why{margin-top:12px;font-size:15px;line-height:1.5;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .qz-foot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:14px;min-height:44px}
 .qz-msg{font-size:15px}
 .btn{border:0;background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:10px 18px;font-weight:600}
@@ -316,7 +326,7 @@ footer p{margin:0 0 8px}
 }
 @media (max-width:620px){
   .rv-pick{grid-template-columns:minmax(0,1fr)}
-  .rv-vs{display:none}
+  .rv-vs{justify-self:start;font-size:18px;padding:0}
   .bf-side.l{grid-template-columns:66px minmax(0,1fr)}
   .bf-side.r{grid-template-columns:minmax(0,1fr) 66px}
   .bf-side .v{font-size:11px}
@@ -439,12 +449,15 @@ footer p{margin:0 0 8px}
 
   <section class="panel" id="p-rivals" role="tabpanel" aria-labelledby="t-rivals" hidden>
     <div class="chips" id="rvPresets" role="group" aria-label="Famous rivalries"></div>
-    <div class="rv-pick">
-      <label>Player A<input class="search" id="rva" list="plist" autocomplete="off" spellcheck="false" placeholder="e.g. Bill Russell"></label>
-      <span class="rv-vs" aria-hidden="true">VS</span>
-      <label>Player B<input class="search" id="rvb" list="plist" autocomplete="off" spellcheck="false" placeholder="e.g. Wilt Chamberlain"></label>
+    <div class="tools">
+      <label class="chk">Time frame <select class="sel" id="rvEra" aria-label="Limit the player lists to an era"></select></label>
+      <span class="count" id="rvCount"></span>
     </div>
-    <datalist id="plist"></datalist>
+    <div class="rv-pick">
+      <label>Player A<select class="sel" id="rva" aria-label="Player A"></select></label>
+      <button type="button" class="rv-vs" id="rvSwap" title="Swap sides" aria-label="Swap players">VS</button>
+      <label>Player B<select class="sel" id="rvb" aria-label="Player B"></select></label>
+    </div>
     <div id="rvOut" aria-live="polite"></div>
   </section>
 
@@ -454,10 +467,12 @@ footer p{margin:0 0 8px}
 
   <section class="panel" id="p-quiz" role="tabpanel" aria-labelledby="t-quiz" hidden>
     <div class="tools">
+      <div class="seg" id="qzMode" role="group" aria-label="Quiz mode"><button type="button" data-m="classic" aria-pressed="true">Classic</button><button type="button" data-m="hard" aria-pressed="false">Hard</button></div>
       <select class="sel" id="qzEra" aria-label="Era to quiz on"></select>
       <button type="button" class="clear" id="qzNew">New round</button>
       <span class="count" id="qzBest"></span>
     </div>
+    <p class="pc-hint" id="qzHint" style="margin-bottom:10px">Classic: five stat lines, pick the MVP.</p>
     <div id="qz" aria-live="polite"></div>
   </section>
 
@@ -631,7 +646,7 @@ var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce
 var state={year:Y1,sel:null,tab:"season",playing:false,timer:null,lock:null,tlEra:"",
   sort:{k:"y",dir:-1},q:"",tview:"cards",tera:"",tteam:"",trank:"all",
   psort:{k:"n",dir:-1},pq:"",pmin:1,psel:null,
-  hm:{min:3,sort:"first",color:"team"},ra:"Bill Russell",rb:"Wilt Chamberlain",qz:{era:""}};
+  hm:{min:3,sort:"first",color:"team"},ra:"Bill Russell",rb:"Wilt Chamberlain",rera:"",qz:{era:"",mode:"classic"}};
 
 function syncHash(){
   try{
@@ -1140,14 +1155,6 @@ function drawPlayers(){
 /* ---------- rivals (head to head) ---------- */
 var rvReady=false;
 var RV_PRESETS=[["Bill Russell","Wilt Chamberlain"],["Larry Bird","Magic Johnson"],["Oscar Robertson","Jerry West"],["Kareem Abdul-Jabbar","Bob McAdoo"],["Michael Jordan","Karl Malone"],["Tim Duncan","Kevin Garnett"],["LeBron James","Kevin Durant"],["Nikola Jokić","Joel Embiid"],["Nikola Jokić","Shai Gilgeous-Alexander"]];
-function plain(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim(); }
-function findPlayer(s){
-  s=plain(s); if(!s) return null;
-  var names=Object.keys(P), i;
-  for(i=0;i<names.length;i++){ if(plain(names[i])===s) return names[i]; }
-  var hits=names.filter(function(n){ return plain(n).indexOf(s)>=0; });
-  return hits.length===1?hits[0]:null;
-}
 function sideCell(cls,o){
   if(!o) return "<span class='bf-side "+cls+" empty'><span class='v'>-</span><span class='t'></span></span>";
   var v=(o.rank===1?"MVP":rkOrd(o))+" &middot; "+pct(o.share);
@@ -1157,7 +1164,7 @@ function sideCell(cls,o){
 function renderRivals(){
   var out=$("#rvOut"); out.innerHTML="";
   var A=P[state.ra], B=P[state.rb];
-  if(!A||!B){ out.appendChild(el("p","pc-hint","Pick two players from the suggestions to compare their MVP ballots.")); return; }
+  if(!A||!B){ out.appendChild(el("p","pc-hint","Pick two players to compare their MVP ballots.")); return; }
   if(A===B){ out.appendChild(el("p","pc-hint","Pick two different players.")); return; }
   var head=el("div","rv-head");
   [A,B].forEach(function(p){
@@ -1194,34 +1201,86 @@ function renderRivals(){
   });
   out.appendChild(bf);
 }
+/* players who made a top five inside a time frame (era id, or "" for all time) */
+function rvPool(eraId){
+  var era=null; ERAS.forEach(function(e){ if(e.id===eraId) era=e; });
+  var out=[];
+  PL.forEach(function(p){
+    var inEra=era?p.list.filter(function(o){ return o.y>=era.a&&o.y<=era.z; }):p.list;
+    if(inEra.length) out.push({p:p,n:inEra.length,best:Math.max.apply(null,inEra.map(function(o){ return o.share; }))});
+  });
+  out.sort(function(a,b){ return b.n-a.n||b.best-a.best||a.p.name.localeCompare(b.p.name); });
+  return out;
+}
+function rvSpan(p){ return (p.first-1)+"-"+String(p.last).slice(2); }
+function rvFill(sel,pool,keep){
+  sel.innerHTML="";
+  pool.forEach(function(r){
+    var o=document.createElement("option"); o.value=r.p.name;
+    o.textContent=r.p.name+" ("+rvSpan(r.p)+(r.p.mvps?", "+r.p.mvps+" MVP"+(r.p.mvps===1?"":"s"):"")+")";
+    sel.appendChild(o);
+  });
+  if(keep&&pool.some(function(r){ return r.p.name===keep; })) sel.value=keep;
+}
+/* repopulate both dropdowns for the chosen time frame, keeping the current picks where they still fit */
+function rvSetFrame(eraId,a,b){
+  state.rera=eraId;
+  var pool=rvPool(eraId), names=pool.map(function(r){ return r.p.name; });
+  if(!a||names.indexOf(a)<0) a=(state.ra&&names.indexOf(state.ra)>=0)?state.ra:names[0];
+  if(!b||names.indexOf(b)<0||b===a){
+    b=(state.rb&&names.indexOf(state.rb)>=0&&state.rb!==a)?state.rb:names.filter(function(n){ return n!==a; })[0];
+  }
+  state.ra=a; state.rb=b;
+  rvFill($("#rva"),pool,a); rvFill($("#rvb"),pool,b);
+  $("#rvEra").value=eraId;
+  $("#rvCount").textContent=pool.length+" players in the list";
+  markPresets();
+}
+function rvPresetFrame(a,b){
+  /* the era where the pair made the most top fives together, or all time if no single era holds both */
+  var best="", bn=0;
+  ERAS.forEach(function(e){
+    var ra=0, rb=0;
+    P[a].list.forEach(function(o){ if(o.y>=e.a&&o.y<=e.z) ra++; });
+    P[b].list.forEach(function(o){ if(o.y>=e.a&&o.y<=e.z) rb++; });
+    if(ra&&rb&&ra+rb>bn){ bn=ra+rb; best=e.id; }
+  });
+  return best;
+}
 function buildRivals(){
   if(!rvReady){
     rvReady=true;
-    var dl=$("#plist");
-    PL.slice().sort(function(a,b){ return b.n-a.n||a.name.localeCompare(b.name); }).forEach(function(p){ var o=document.createElement("option"); o.value=p.name; dl.appendChild(o); });
+    var es=$("#rvEra"); es.innerHTML="";
+    var o0=el("option",null,"All time (1955-56 to 2025-26)"); o0.value=""; es.appendChild(o0);
+    ERAS.forEach(function(e){
+      var n=rvPool(e.id).length, o=el("option",null,esc(e.name)+" ("+fmtS(e.a)+" to "+fmtS(e.z)+", "+n+" players)"); o.value=e.id; es.appendChild(o);
+    });
     var pr=$("#rvPresets");
     RV_PRESETS.filter(function(p){ return P[p[0]]&&P[p[1]]; }).forEach(function(p){
       var b=el("button","chipb",esc(lastName(p[0]))+" vs "+esc(lastName(p[1]))); b.type="button"; b.dataset.a=p[0]; b.dataset.b=p[1];
       b.title=p[0]+" vs "+p[1];
-      b.addEventListener("click",function(){ state.ra=p[0]; state.rb=p[1]; syncRivalsInputs(); renderRivals(); });
+      b.addEventListener("click",function(){ rvSetFrame(rvPresetFrame(p[0],p[1]),p[0],p[1]); renderRivals(); });
       pr.appendChild(b);
     });
-    var upd=function(){
-      var a=findPlayer($("#rva").value), b=findPlayer($("#rvb").value);
-      state.ra=a||""; state.rb=b||""; renderRivals(); markPresets();
+    es.addEventListener("change",function(){ rvSetFrame(es.value); renderRivals(); });
+    var pick=function(){
+      state.ra=$("#rva").value; state.rb=$("#rvb").value;
+      if(state.ra===state.rb){ /* never compare a player with himself: nudge the side that did not just change */
+        var names=rvPool(state.rera).map(function(r){ return r.p.name; });
+        state.rb=names.filter(function(n){ return n!==state.ra; })[0]; $("#rvb").value=state.rb;
+      }
+      markPresets(); renderRivals();
     };
-    $("#rva").addEventListener("input",upd); $("#rvb").addEventListener("input",upd);
-    $("#rva").addEventListener("change",function(){ var a=findPlayer(this.value); if(a) this.value=a; });
-    $("#rvb").addEventListener("change",function(){ var b=findPlayer(this.value); if(b) this.value=b; });
+    $("#rva").addEventListener("change",pick); $("#rvb").addEventListener("change",pick);
+    $("#rvSwap").addEventListener("click",function(){ var t=state.ra; state.ra=state.rb; state.rb=t; $("#rva").value=state.ra; $("#rvb").value=state.rb; markPresets(); renderRivals(); });
     $("#rvOut").addEventListener("click",function(ev){ var r=ev.target.closest(".bf-row[data-y]"); if(r) gotoSeason(parseInt(r.dataset.y,10),r.dataset.name); });
-    syncRivalsInputs();
+    rvSetFrame(rvPresetFrame(state.ra,state.rb),state.ra,state.rb);
   }
   renderRivals();
 }
 function markPresets(){
   $$("#rvPresets .chipb").forEach(function(b){ b.setAttribute("aria-pressed",(b.dataset.a===state.ra&&b.dataset.b===state.rb)?"true":"false"); });
 }
-function syncRivalsInputs(){ $("#rva").value=state.ra; $("#rvb").value=state.rb; markPresets(); }
 
 /* ---------- records ---------- */
 var recsReady=false;
@@ -1333,26 +1392,227 @@ function buildRecords(){
 
 /* ---------- guess the MVP ---------- */
 var qzReady=false;
-var Q={pool:[],i:0,score:0,streak:0,rows:[],answered:false,total:0};
-function bestGet(){ try{ return parseInt(localStorage.getItem("mvpbox.best"),10)||0; }catch(e){ return 0; } }
-function bestSet(v){ try{ localStorage.setItem("mvpbox.best",String(v)); }catch(e){} }
-function qzBestText(){ var b=bestGet(); $("#qzBest").textContent=b?"Best 10-question round on all eras: "+b+"/10":""; }
+var Q={pool:[],hard:[],i:0,score:0,streak:0,rows:[],answered:false,total:0};
+function bestKey(){ return state.qz.mode==="hard"?"mvpbox.besthard":"mvpbox.best"; }
+function bestGet(){ try{ return parseInt(localStorage.getItem(bestKey()),10)||0; }catch(e){ return 0; } }
+function bestSet(v){ try{ localStorage.setItem(bestKey(),String(v)); }catch(e){} }
+function qzBestText(){ var b=bestGet(); $("#qzBest").textContent=b?(state.qz.mode==="hard"?"Best hard round: ":"Best 10-question round on all eras: ")+b+"/10":""; }
 function qzStart(){
-  var ys=[]; for(var y=Y0;y<=Y1;y++){ if(!state.qz.era||SEAS[y].era.id===state.qz.era) ys.push(y); }
-  shuffle(ys); Q.pool=ys.slice(0,Math.min(10,ys.length)); Q.total=Q.pool.length; Q.i=0; Q.score=0; Q.streak=0;
+  Q.i=0; Q.score=0; Q.streak=0;
+  if(state.qz.mode==="hard"){ Q.hard=hqRound(); Q.total=Q.hard.length; }
+  else {
+    var ys=[]; for(var y=Y0;y<=Y1;y++){ if(!state.qz.era||SEAS[y].era.id===state.qz.era) ys.push(y); }
+    shuffle(ys); Q.pool=ys.slice(0,Math.min(10,ys.length)); Q.total=Q.pool.length;
+  }
   qzShow();
+}
+/* ---------- hard mode: stat trivia computed from the ballots ---------- */
+var hqReady=false;
+function hqPrep(){
+  if(hqReady) return; hqReady=true;
+  PL.forEach(function(p){
+    p.s5=hqRun(p.list.map(function(o){ return o.y; }));
+    p.sm=hqRun(p.list.filter(function(o){ return o.rank===1; }).map(function(o){ return o.y; }));
+    var f={}; p.list.forEach(function(o){ if(o.tm!=="TOT") f[fr(o.tm)]=1; }); p.frs=Object.keys(f);
+    var m={}; p.list.filter(function(o){ return o.rank===1; }).forEach(function(o){ m[fr(o.tm)]=1; }); p.mfrs=Object.keys(m);
+  });
+}
+function hqRun(years){
+  var best={n:0,a:0,z:0}, cur=0, start=0, prev=-9;
+  years.slice().sort(function(a,b){ return a-b; }).forEach(function(y){
+    if(y===prev+1) cur++; else { cur=1; start=y; }
+    prev=y; if(cur>best.n) best={n:cur,a:start,z:y};
+  });
+  return best;
+}
+function hqMc(q,correct,wrong,why){
+  var seen={}; seen[correct]=1; var w=[];
+  shuffle(wrong.slice()).forEach(function(x){ if(!seen[x]&&w.length<3){ seen[x]=1; w.push(x); } });
+  if(w.length<3) return null;
+  return {q:q,opts:shuffle([correct].concat(w)),ans:correct,why:why};
+}
+function hqPick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function hqWinners(){ return ALL.filter(function(o){ return o.rank===1; }); }
+function hqNames(a){ return a.map(function(x){ return x.name; }); }
+
+function hqSecond(){
+  var c=PL.filter(function(p){ return !p.mvps; }).map(function(p){ return {p:p,s:p.list.filter(function(o){ return o.rank===2; })}; });
+  c.sort(function(a,b){ return b.s.length-a.s.length||b.p.n-a.p.n; });
+  var t=c[0]; if(!t||t.s.length<=c[1].s.length) return null;
+  return hqMc("Which player finished second in the MVP voting more often than anyone else who never won the award?",t.p.name,
+    c.slice(1).filter(function(x){ return x.p.n>=4; }).map(function(x){ return x.p.name; }),
+    esc(t.p.name)+" was the runner-up "+t.s.length+" times ("+t.s.map(function(o){ return fmtS(o.y); }).join(", ")+") and made the top five "+t.p.n+" times without ever winning.");
+}
+function hqFinish(){
+  var specs=[["ppg","points per game"],["rpg","rebounds per game"],["apg","assists per game"]], s=hqPick(specs), best=null;
+  ALL.forEach(function(o){ if(!best||o[s[0]]>best[s[0]]) best=o; });
+  var w=BY[best.y][0];
+  var wrong=shuffle([1,2,3,4,5].filter(function(r){ return r!==best.rank; })).slice(0,3).map(ord);
+  return hqMc(best.name+" averaged "+best[s[0]].toFixed(1)+" "+s[1]+" in "+fmtS(best.y)+", the highest mark of any top-five finisher since 1955-56. Where did he finish in the MVP voting?",
+    rkOrd(best),wrong,
+    esc(best.name)+" finished "+rkOrd(best)+(w===best?".":"; "+esc(w.name)+" won the award that year."));
+}
+function hqTriple(){
+  var tr=PL.filter(function(p){ return p.list.some(function(o){ return o.ppg>=10&&o.rpg>=10&&o.apg>=10; }); });
+  if(!tr.length) return null;
+  var tn={}; tr.forEach(function(p){ tn[p.name]=1; });
+  var c=hqPick(tr);
+  return hqMc("Which of these players averaged a triple-double in a season when he made the MVP top five?",c.name,
+    PL.filter(function(p){ return !tn[p.name]&&p.n>=5; }).map(function(p){ return p.name; }),
+    "Triple-double seasons in the top five: "+tr.map(function(p){ return esc(p.name)+" ("+p.list.filter(function(o){ return o.ppg>=10&&o.rpg>=10&&o.apg>=10; }).map(function(o){ return fmtS(o.y); }).join(", ")+")"; }).join("; ")+".");
+}
+function hqFewer(){
+  var f=[]; for(var y=Y0;y<=Y1;y++){ if(SEAS[y].incomplete) continue; var rs=BY[y]; if(rs.some(function(r){ return r.first>rs[0].first; })) f.push(rs[0]); }
+  if(!f.length) return null;
+  var c=hqPick(f), fy={}; f.forEach(function(o){ fy[o.y]=1; });
+  var others=[]; for(var z=Y0;z<=Y1;z++){ if(!fy[z]&&!SEAS[z].incomplete) others.push(BY[z][0]); }
+  others.sort(function(a,b){ return margins[a.y]-margins[b.y]; });
+  var rv=BY[c.y].slice().sort(function(a,b){ return b.first-a.first; })[0];
+  return hqMc("Which player won an MVP while receiving fewer first-place votes than a rival?",c.name,hqNames(others.slice(0,10)),
+    esc(c.name)+" won "+fmtS(c.y)+" with "+num(c.first)+" first-place votes; "+esc(rv.name)+" had "+num(rv.first)+", but the 10-7-5-3-1 points reward being on every ballot.");
+}
+function hqLowShare(){
+  var ws=hqWinners().filter(function(o){ return !SEAS[o.y].incomplete; }).sort(function(a,b){ return a.share-b.share; });
+  var c=ws[0];
+  return hqMc("Which MVP won with the smallest share of the points available (seasons with complete tallies)?",c.name,hqNames(ws.slice(1,9)),
+    esc(c.name)+" took "+fmtS(c.y)+" with "+pct(c.share)+" of the points. Next lowest: "+ws.slice(1,3).map(function(o){ return esc(lastName(o.name))+" "+fmtS(o.y)+" ("+pct(o.share)+")"; }).join(", ")+".");
+}
+function hqUnanimous(){
+  if(!unanimous.length) return null;
+  var c=BY[unanimous[0]][0];
+  var near=hqWinners().filter(function(o){ return SEAS[o.y].media&&o.first<SEAS[o.y].max/10; }).sort(function(a,b){ return b.share-a.share; });
+  return hqMc("Who was the first unanimous MVP, taking every first-place vote?",c.name,hqNames(near.slice(0,8)),
+    esc(c.name)+" got all "+num(c.first)+" first-place votes in "+fmtS(c.y)+". Closest misses: "+near.slice(0,2).map(function(o){ return esc(lastName(o.name))+" "+fmtS(o.y)+" ("+num(o.first)+" of "+(o.max/10)+")"; }).join(" and ")+".");
+}
+function hqOldest(){
+  var ws=hqWinners().sort(function(a,b){ return b.age-a.age; });
+  if(ws[0].age===ws[1].age) return null;
+  return hqMc("Who is the oldest player to win MVP?",ws[0].name,hqNames(ws.slice(1,10)),
+    esc(ws[0].name)+" was "+ws[0].age+" in "+fmtS(ws[0].y)+" (age as listed by Basketball Reference). Next: "+esc(ws[1].name)+", "+ws[1].age+", in "+fmtS(ws[1].y)+".");
+}
+function hqYoungest(){
+  var ws=hqWinners(), mn=Math.min.apply(null,ws.map(function(o){ return o.age; }));
+  var yg=ws.filter(function(o){ return o.age===mn; });
+  var c=hqPick(yg);
+  return hqMc("Which of these players won MVP at age "+mn+", the youngest on record?",c.name,
+    hqNames(ws.filter(function(o){ return o.age>=mn+4; })),
+    yg.map(function(o){ return esc(o.name)+" ("+fmtS(o.y)+")"; }).join(" and ")+" share the record at "+mn+" (ages as listed by Basketball Reference).");
+}
+function hqFranchise(){
+  var c={}; hqWinners().forEach(function(o){ var k=fr(o.tm); c[k]=(c[k]||0)+1; });
+  var ks=Object.keys(c).sort(function(a,b){ return c[b]-c[a]; });
+  if(c[ks[0]]===c[ks[1]]) return null;
+  var nm=function(k){ return FNAME[k]||k; };
+  return hqMc("Which franchise has had the most MVP seasons?",nm(ks[0]),ks.slice(1,8).map(nm),
+    nm(ks[0])+" lead with "+c[ks[0]]+" MVP seasons, ahead of "+nm(ks[1])+" ("+c[ks[1]]+") and "+nm(ks[2])+" ("+c[ks[2]]+"). Old and new team names are counted as one franchise.");
+}
+function hqThreepeat(){
+  var cands=PL.filter(function(p){ return p.sm.n>=3; });
+  if(!cands.length) return null;
+  var c=hqPick(cands);
+  return hqMc("Which of these players won three MVPs in a row?",c.name,
+    PL.filter(function(p){ return p.mvps>=2&&p.sm.n<3; }).map(function(p){ return p.name; }),
+    cands.map(function(p){ return esc(p.name)+" ("+fmtS(p.sm.a)+" to "+fmtS(p.sm.z)+")"; }).join("; ")+" are the only players to do it.");
+}
+function hqStreak5(){
+  var ps=PL.slice().sort(function(a,b){ return b.s5.n-a.s5.n||b.n-a.n; });
+  if(ps[0].s5.n===ps[1].s5.n) return null;
+  return hqMc("Who made the MVP top five in the most consecutive seasons?",ps[0].name,hqNames(ps.slice(1,8)),
+    esc(ps[0].name)+" did it "+ps[0].s5.n+" seasons running, from "+fmtS(ps[0].s5.a)+" to "+fmtS(ps[0].s5.z)+". Next: "+esc(ps[1].name)+" with "+ps[1].s5.n+".");
+}
+function hqTwoFr(){
+  var cands=PL.filter(function(p){ return p.mfrs.length>=2; });
+  if(!cands.length) return null;
+  var c=hqPick(cands);
+  return hqMc("Which of these players won MVP with two different franchises?",c.name,
+    PL.filter(function(p){ return p.mvps>=2&&p.mfrs.length===1; }).map(function(p){ return p.name; }),
+    cands.map(function(p){ return esc(p.name); }).join(", ")+" are the only ones. "+esc(c.name)+" won with the "+c.mfrs.map(function(k){ return esc(FNAME[k]||k); }).join(" and the ")+".");
+}
+function hqThreeFr(){
+  var cands=PL.filter(function(p){ return p.frs.length>=3; });
+  if(!cands.length) return null;
+  var c=hqPick(cands);
+  return hqMc("Which of these players finished in the MVP top five with at least three different franchises?",c.name,
+    PL.filter(function(p){ return p.n>=5&&p.frs.length===1; }).map(function(p){ return p.name; }),
+    cands.map(function(p){ return esc(p.name); }).join(", ")+" did. "+esc(c.name)+" did it with the "+c.frs.map(function(k){ return esc(FNAME[k]||k); }).join(", the ")+".");
+}
+function hqRookie(){
+  var cands=[["Wilt Chamberlain",1960],["Wes Unseld",1969]].filter(function(a){ return P[a[0]]&&P[a[0]].byYear[a[1]]&&P[a[0]].byYear[a[1]].rank===1&&P[a[0]].first===a[1]; });
+  if(!cands.length) return null;
+  var c=hqPick(cands);
+  return hqMc("Which of these players won MVP as a rookie?",c[0],
+    ["Magic Johnson","Larry Bird","Oscar Robertson","Bill Walton","Derrick Rose","Julius Erving","Hakeem Olajuwon"].filter(function(n){ return P[n]; }),
+    "Only two players have done it: Wilt Chamberlain ("+fmtS(1960)+") and Wes Unseld ("+fmtS(1969)+").");
+}
+function hqRace(){
+  var closest=Math.random()<.5, ys=[];
+  for(var y=Y0;y<=Y1;y++){ if(!SEAS[y].incomplete) ys.push(y); }
+  ys.sort(function(a,b){ return closest?margins[a]-margins[b]:margins[b]-margins[a]; });
+  var t=ys[0], r=BY[t];
+  return hqMc(closest?"Which MVP race was the closest, by the winner's lead over second place (complete tallies only)?":"Which MVP race was the most lopsided, by the winner's lead over second place (complete tallies only)?",
+    fmtS(t),ys.slice(1,9).map(fmtS),
+    esc(r[0].name)+" beat "+esc(r[1].name)+" by "+num(r[0].pts-r[1].pts)+" points in "+fmtS(t)+", "+pct(margins[t])+" of the points possible.");
+}
+function hqCount(){
+  var set={}; hqWinners().forEach(function(o){ set[o.name]=1; });
+  var n=Object.keys(set).length, multi=PL.filter(function(p){ return p.mvps>1; }).length;
+  return hqMc("How many different players have won MVP since 1955-56?",String(n),[n-5,n-3,n-2,n+2,n+3,n+5].filter(function(x){ return x>0; }).map(String),
+    n+" players have won it across "+NS+" seasons, and "+multi+" of them won more than once.");
+}
+function hqMostTop5(){
+  var ps=PL.slice().sort(function(a,b){ return b.n-a.n||b.mvps-a.mvps; });
+  if(ps[0].n===ps[1].n) return null;
+  return hqMc("Who has the most top-five MVP finishes of all time?",ps[0].name,hqNames(ps.slice(1,8)),
+    esc(ps[0].name)+" has "+ps[0].n+" top fives ("+ps[0].mvps+" MVPs). Next: "+esc(ps[1].name)+" with "+ps[1].n+".");
+}
+function hqLowPpg(){
+  var ws=hqWinners().sort(function(a,b){ return a.ppg-b.ppg; });
+  return hqMc("Which MVP had the lowest scoring average in his winning season?",ws[0].name,hqNames(ws.slice(1,10)),
+    esc(ws[0].name)+" won in "+fmtS(ws[0].y)+" averaging "+ws[0].ppg.toFixed(1)+" points (with "+ws[0].rpg.toFixed(1)+" rebounds). Next lowest: "+esc(lastName(ws[1].name))+", "+ws[1].ppg.toFixed(1)+" in "+fmtS(ws[1].y)+".");
+}
+var HQGEN=[hqSecond,hqFinish,hqTriple,hqFewer,hqLowShare,hqUnanimous,hqOldest,hqYoungest,hqFranchise,hqThreepeat,hqStreak5,hqTwoFr,hqThreeFr,hqRookie,hqRace,hqCount,hqMostTop5,hqLowPpg];
+function hqRound(){
+  hqPrep();
+  var out=[];
+  shuffle(HQGEN.slice()).forEach(function(g){ if(out.length<10){ var q=g(); if(q) out.push(q); } });
+  return out;
+}
+function qzShowHard(){
+  var box=$("#qz"); box.innerHTML="";
+  var h=Q.hard[Q.i]; Q.answered=false;
+  box.appendChild(el("div","qz-bar","<div><span class='m'>Mode</span><div class='qz-tag'>Hard</div></div><div><span class='m'>Question</span><br><b>"+(Q.i+1)+" / "+Q.total+"</b></div><div><span class='m'>Score</span><br><b>"+Q.score+"</b></div><div><span class='m'>Streak</span><br><b>"+Q.streak+"</b></div>"));
+  var qq=el("p","qh-q"); qq.textContent=h.q; box.appendChild(qq);
+  var opts=el("div","qh-opts");
+  h.opts.forEach(function(t,i){ var b=el("button","qh"); b.type="button"; b.dataset.i=i; b.textContent=t; opts.appendChild(b); });
+  box.appendChild(opts);
+  var why=el("div","qh-why"); why.hidden=true; box.appendChild(why);
+  var foot=el("div","qz-foot","<span class='qz-msg'>Pick an answer.</span>");
+  var nx=el("button","btn",Q.i+1>=Q.total?"See results":"Next question"); nx.type="button"; nx.hidden=true; nx.addEventListener("click",function(){ Q.i++; qzShow(); });
+  foot.appendChild(nx); box.appendChild(foot);
+  opts.addEventListener("click",function(ev){
+    var b=ev.target.closest(".qh"); if(!b||Q.answered) return;
+    Q.answered=true;
+    var right=h.opts[parseInt(b.dataset.i,10)]===h.ans;
+    if(right){ Q.score++; Q.streak++; } else Q.streak=0;
+    $$(".qh",opts).forEach(function(x,i){ x.disabled=true; if(h.opts[i]===h.ans) x.classList.add("win"); else if(x===b) x.classList.add("bad"); });
+    $(".qz-msg",foot).innerHTML=right?"<b>Correct.</b> Streak "+Q.streak+".":"<b>Not this time.</b> The answer is "+esc(h.ans)+".";
+    why.innerHTML=h.why; why.hidden=false; nx.hidden=false;
+  });
 }
 function qzShow(){
   var box=$("#qz"); box.innerHTML="";
   if(Q.i>=Q.total){
     var ratio=Q.score/Q.total;
-    var verdict=ratio>=.9?"Hall of Fame voter":ratio>=.7?"All-NBA ballot":ratio>=.5?"Sixth-man voter":"Still reading the box scores";
-    if(!state.qz.era&&Q.total===10&&Q.score>bestGet()) bestSet(Q.score);
+    var hard=state.qz.mode==="hard";
+    var verdict=hard?(ratio>=.9?"Basketball Reference in human form":ratio>=.7?"Press-row veteran":ratio>=.5?"League Pass regular":"Still reading the box scores")
+      :(ratio>=.9?"Hall of Fame voter":ratio>=.7?"All-NBA ballot":ratio>=.5?"Sixth-man voter":"Still reading the box scores");
+    if((hard||!state.qz.era)&&Q.total===10&&Q.score>bestGet()) bestSet(Q.score);
     qzBestText();
     var end=el("div","qz-end","<div class='big'>"+Q.score+"/"+Q.total+"</div><p style='font-size:20px;margin:6px 0 14px'>"+verdict+"</p>");
     var again=el("button","btn","Play again"); again.type="button"; again.addEventListener("click",qzStart); end.appendChild(again);
     box.appendChild(end); return;
   }
+  if(state.qz.mode==="hard") return qzShowHard();
   var y=Q.pool[Q.i]; Q.rows=shuffle(BY[y].slice()); Q.answered=false;
   var bar=el("div","qz-bar","<div><span class='m'>Season</span><div class='qz-s'>"+fmtS(y)+"</div></div><div><span class='m'>Question</span><br><b>"+(Q.i+1)+" / "+Q.total+"</b></div><div><span class='m'>Score</span><br><b>"+Q.score+"</b></div><div><span class='m'>Streak</span><br><b>"+Q.streak+"</b></div>");
   box.appendChild(bar);
@@ -1391,6 +1651,14 @@ function buildQuiz(){
     var qe=$("#qzEra"); qe.innerHTML="<option value=''>All eras</option>";
     ERAS.forEach(function(e){ var o=el("option",null,esc(e.name)+" ("+fmtS(e.a)+" to "+fmtS(e.z)+")"); o.value=e.id; qe.appendChild(o); });
     qe.addEventListener("change",function(ev){ state.qz.era=ev.target.value; qzStart(); });
+    $$("#qzMode button").forEach(function(b){
+      b.addEventListener("click",function(){
+        state.qz.mode=b.dataset.m;
+        $$("#qzMode button").forEach(function(x){ x.setAttribute("aria-pressed",x===b?"true":"false"); });
+        qe.disabled=state.qz.mode==="hard"; $("#qzHint").textContent=state.qz.mode==="hard"?"Hard mode: ten stat-trivia questions, built from every ballot.":"Classic: five stat lines, pick the MVP.";
+        qzBestText(); qzStart();
+      });
+    });
     $("#qzNew").addEventListener("click",qzStart);
     qzBestText(); qzStart();
   }
