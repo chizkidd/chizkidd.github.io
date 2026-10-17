@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="An interactive explorer of the top five NBA MVP vote-getters every season from 1991-92 to 2025-26.">
+<meta name="description" content="An interactive explorer of the top five NBA MVP vote-getters in every season from 1955-56 to 2025-26: scrub the seasons, trace careers, settle rivalries and test your MVP instincts.">
 <style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>MVP Ballot Box</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout concept: an arena scoreboard over a hardwood floor. A big season readout drives five animated vote bars colored by team; tabs open the same data as a grid, a sortable table and a player tracker. */
+/* Layout concept: an arena scoreboard over a hardwood floor. A big season readout drives animated vote bars colored by team; the other tabs open the same ballots as a timeline, a career heat map, small-multiple season cards, a head-to-head, a records book and a guessing game. */
 :root{
   --bg:#EEF0F6; --panel:#FFFFFF; --panel2:#F3F4FA; --ink:#10172E; --muted:#576080; --line:#D8DCEA;
   --accent:#D44A00; --accent-ink:#FFFFFF; --gold:#A86B00; --plank:rgba(16,23,46,.05); --court:rgba(16,23,46,.12);
@@ -54,7 +54,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 h1{font-family:var(--f-display);font-weight:900;font-size:clamp(44px,9vw,84px);line-height:.92;margin:6px 0 8px;letter-spacing:.005em;text-transform:uppercase;text-wrap:balance}
 h1 span{color:var(--accent)}
-.sub{margin:0;max-width:56ch;color:var(--muted)}
+.sub{margin:0;max-width:60ch;color:var(--muted)}
 .kpis{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:18px;position:relative;z-index:1}
 .kpi b{display:block;font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1}
 .kpi span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -65,14 +65,32 @@ h1 span{color:var(--accent)}
 .tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .panel[hidden]{display:none!important}
 
+/* shared controls */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.search{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:10px 12px;font:inherit}
+.sel{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:9px 10px;font:inherit;max-width:100%}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.clear{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 12px;font-size:13px}
+.clear:hover{border-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel);padding:8px 14px;font-weight:600;font-size:14px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chipb{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:13px}
+.chipb:hover,.chipb[aria-pressed="true"]{border-color:var(--accent)}
+.chipb[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
 /* scoreboard */
 .board{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 24px;align-items:end;background:var(--ink);color:var(--bg);border-radius:10px;padding:18px 22px 16px}
 .board .lab{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
 .season{font-family:var(--f-display);font-weight:900;font-size:clamp(64px,15vw,132px);line-height:.85;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .season.flip{animation:flip .45s cubic-bezier(.2,.8,.2,1)}
 @keyframes flip{from{transform:translateY(.25em);opacity:0}to{transform:none;opacity:1}}
-.who-won{font-size:15px;margin-top:6px;opacity:.9}
+.who-won{font-size:15px;margin-top:6px;opacity:.95;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .who-won b{font-weight:700}
+.eratag{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:999px;background:var(--ec,var(--accent));color:#fff}
 .ctrls{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 .cbtn{background:transparent;border:1.5px solid color-mix(in srgb,var(--bg) 55%,transparent);color:var(--bg);border-radius:8px;min-width:44px;height:44px;padding:0 14px;font-weight:600}
 .cbtn:hover{background:color-mix(in srgb,var(--bg) 14%,transparent)}
@@ -83,9 +101,11 @@ input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;ba
 input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:color-mix(in srgb,var(--bg) 28%,transparent)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:var(--accent);border:3px solid var(--bg)}
 input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--bg)}
-.decades{display:flex;gap:6px;flex-wrap:wrap}
-.dec{background:transparent;color:var(--bg);border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);border-radius:6px;padding:4px 12px;font-family:var(--f-mono);font-size:13px}
-.dec[aria-pressed="true"]{background:var(--bg);color:var(--ink)}
+.eras{display:flex;gap:3px}
+.erab{flex:var(--n) 1 0;min-width:0;border:0;border-top:3px solid var(--ec);border-radius:4px;padding:5px 6px;background:color-mix(in srgb,var(--ec) 30%,transparent);color:var(--bg);font-size:12px;line-height:1.15;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erab:hover{background:color-mix(in srgb,var(--ec) 55%,transparent)}
+.erab[aria-pressed="true"]{background:var(--ec);color:#fff;font-weight:600}
+.erab .short{display:none}
 
 /* race */
 .race{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,350px);gap:20px;margin-top:18px;align-items:start}
@@ -94,6 +114,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .row:hover{border-color:var(--muted)}
 .row.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .rk{font-family:var(--f-display);font-weight:900;font-size:38px;line-height:.9;color:var(--muted);text-align:center}
+.rk.tie{font-size:27px;padding-top:6px}
 .row.win .rk{color:var(--accent)}
 .rbody{display:flex;flex-direction:column;gap:6px;min-width:0}
 .rtop{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
@@ -121,7 +142,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .pc-head p{margin:6px 0 0;font-size:14px;opacity:.92}
 .pc-body{padding:14px 18px 16px;display:flex;flex-direction:column;gap:12px}
 .pc-cap{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.pc-chart{position:relative;display:grid;grid-template-columns:repeat(35,minmax(0,1fr));gap:2px;height:96px;align-items:end;border-bottom:1px solid var(--line)}
+.pc-chart{position:relative;display:grid;gap:2px;height:96px;align-items:end;border-bottom:1px solid var(--line)}
 .pc-chart .gap{height:3px;background:var(--line);border-radius:1px}
 .pc-chart button{display:block;width:100%;padding:0;border:0;border-radius:2px 2px 0 0;background:var(--c);min-height:4px;opacity:.78;position:relative}
 .pc-chart button.mvpbar{opacity:1;box-shadow:inset 0 4px 0 var(--accent)}
@@ -129,8 +150,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .pc-chart button:hover{opacity:1}
 .pc-axis{position:relative;height:14px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .pc-axis span{position:absolute;transform:translateX(-50%)}
-.pc-axis span:first-child{transform:none}
-.pc-axis span:last-child{transform:translateX(-100%)}
 .pc-stat{font-size:14px;background:var(--panel2);border-radius:6px;padding:8px 10px}
 .pc-stat b{font-family:var(--f-mono);font-weight:500}
 .pc-list{list-style:none;margin:0;padding:0;max-height:210px;overflow:auto;border-top:1px solid var(--line)}
@@ -142,14 +161,16 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 /* timeline */
 .tl-info{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between;margin-bottom:10px;color:var(--muted);font-size:14px}
 .tl-info b{color:var(--ink)}
-.clear{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:4px 10px;font-size:13px}
 .tl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px}
 .tl{min-width:560px;display:flex;flex-direction:column;gap:4px}
 .tl-row{display:grid;grid-template-columns:70px repeat(5,minmax(0,1fr));gap:4px;align-items:stretch}
 .tl-head{position:sticky;top:0;z-index:2;background:var(--panel);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-bottom:4px}
 .tl-head div:not(:first-child){text-align:center}
+.tl-era{margin-top:10px;padding:6px 8px;border-left:4px solid var(--ec);background:var(--panel2);font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline}
+.tl-era b{font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
 .yr{border:0;background:transparent;text-align:left;font-family:var(--f-mono);font-size:13px;color:var(--muted);padding:0 4px}
 .yr:hover{color:var(--accent);text-decoration:underline}
+.tl-cell{display:flex;flex-direction:column;gap:4px;min-width:0}
 .chip{display:flex;flex-direction:column;justify-content:center;gap:0;padding:5px 8px;min-height:44px;border:0;border-radius:5px;background:var(--c);color:#fff;text-align:left;transition:opacity .15s,transform .15s;min-width:0}
 .chip .cn{font-weight:600;font-size:14px;line-height:1.15;overflow-wrap:anywhere}
 .chip .cs{font-family:var(--f-mono);font-size:11px;opacity:.88}
@@ -157,11 +178,52 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .has-sel .chip{opacity:.14}
 .has-sel .chip.on{opacity:1;transform:scale(1.03)}
 
+/* career heat map */
+.hm-scroll{overflow:auto;max-height:74vh;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.hm{--cw:13px;--nw:200px;width:max-content;min-width:100%}
+.hm-row{display:flex;align-items:stretch;height:23px}
+.hm-name{position:sticky;left:0;z-index:2;flex:0 0 var(--nw);width:var(--nw);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px;background:var(--panel);border:0;border-right:1px solid var(--line);font-size:13px;text-align:left;white-space:nowrap;overflow:hidden}
+.hm-name b{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.hm-name i{flex:0 0 auto;font-style:normal;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.hm-track{position:relative;flex:0 0 auto;background-image:linear-gradient(to right,var(--line) 1px,transparent 1px);background-size:var(--cw) 100%}
+.hm-row:hover .hm-name{color:var(--accent)}
+.hm-row:hover .hm-track{background-color:var(--panel2)}
+.hm-head{position:sticky;top:0;z-index:4;height:46px;background:var(--panel);border-bottom:1px solid var(--line)}
+.hm-head .hm-name{z-index:5}
+.hm-head .hm-track{background-image:none}
+.hm-head:hover .hm-name{color:inherit}
+.hm-head:hover .hm-track{background-color:transparent}
+.hm-era{position:absolute;top:0;height:21px;padding:0 5px;font-size:11px;line-height:21px;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-radius:0 0 4px 4px;background:var(--ec)}
+.hm-tick{position:absolute;bottom:3px;font-family:var(--f-mono);font-size:10px;color:var(--muted);transform:translateX(-50%)}
+.hc{position:absolute;top:3px;bottom:3px;width:calc(var(--cw) - 2px);margin-left:1px;padding:0;border:0;border-radius:2px;background:var(--c)}
+.hc:hover{outline:2px solid var(--ink);outline-offset:1px;z-index:1}
+.hc.mvp::after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
+
+/* season cards (small multiples) */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.era-h{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;margin-top:10px;padding-top:8px;border-top:4px solid var(--ec)}
+.era-h:first-child{margin-top:0}
+.era-h h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1;text-transform:uppercase;letter-spacing:.01em}
+.era-h span{font-size:13px;color:var(--muted)}
+.sc{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sc-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;width:100%;padding:9px 12px 7px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left}
+.sc-head:hover{background:var(--panel2)}
+.sc-yr{font-family:var(--f-display);font-weight:900;font-size:28px;line-height:1}
+.sc-mvp{font-size:12px;color:var(--muted);text-align:right;min-width:0}
+.sc-mvp b{color:var(--ink)}
+.sc-row{display:grid;grid-template-columns:22px 92px minmax(0,1fr) 46px;gap:6px;align-items:center;width:100%;padding:3px 12px;border:0;background:transparent;text-align:left;font-size:13px}
+.sc-row:hover{background:var(--panel2)}
+.sc-row.dim{opacity:.25}
+.sc-row .r{font-family:var(--f-mono);color:var(--muted);text-align:center}
+.sc-row.w .r{color:var(--accent);font-weight:600}
+.sc-row .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-row.w .n{font-weight:600}
+.sc-row .bar{height:9px;background:var(--panel2);border-radius:2px;overflow:hidden}
+.sc-row .bar i{display:block;height:100%;background:var(--c)}
+.sc-row .p{font-family:var(--f-mono);font-size:12px;text-align:right}
+.sc-foot{padding:5px 12px 8px}
+
 /* table */
-.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
-.search{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:10px 12px;font:inherit}
-.chk{display:flex;gap:8px;align-items:center;font-size:14px}
-.count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
 .tscroll{overflow:auto;max-height:72vh;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
 th,td{padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
@@ -180,11 +242,86 @@ tr.w td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 /* players */
 .pl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,350px);gap:20px;align-items:start}
 
-footer{margin-top:28px;font-size:13px;color:var(--muted);max-width:80ch}
+/* rivals */
+.rv-pick{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:end;margin-bottom:12px}
+.rv-pick label{display:flex;flex-direction:column;gap:4px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.rv-pick .search{flex:none;width:100%}
+.rv-vs{font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1;padding-bottom:8px;color:var(--muted)}
+.rv-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.rv-card{border-radius:10px;padding:14px 16px;background:var(--c);color:#fff;min-width:0}
+.rv-card h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(24px,5vw,38px);line-height:1;text-transform:uppercase;overflow-wrap:anywhere}
+.rv-card p{margin:6px 0 0;font-size:14px;opacity:.95}
+.rv-sum{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-size:15px}
+.rv-sum b{font-family:var(--f-mono);font-weight:500}
+.bf{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:6px 10px;margin-top:12px}
+.bf-row{display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);gap:8px;align-items:center;width:100%;padding:3px 0;border:0;background:transparent;text-align:left}
+.bf-row:hover{background:var(--panel2)}
+.bf-row.both{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.bf-y{font-family:var(--f-mono);font-size:12px;color:var(--muted);text-align:center}
+.bf-side{display:grid;gap:6px;align-items:center;min-height:20px}
+.bf-side.l{grid-template-columns:92px minmax(0,1fr)}
+.bf-side.r{grid-template-columns:minmax(0,1fr) 92px}
+.bf-side .v{font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+.bf-side.l .v{text-align:left}
+.bf-side.r .v{text-align:right}
+.bf-side .t{display:flex;height:14px}
+.bf-side.l .t{justify-content:flex-end}
+.bf-side .t i{display:block;height:100%;background:var(--c);border-radius:2px}
+.bf-side .t i.w{box-shadow:0 0 0 2px var(--accent)}
+.bf-side.empty{opacity:.25}
+
+/* records */
+.recs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.rec{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.rec.wide{grid-column:1/-1}
+.rec h3{margin:0;font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.rec .big{font-family:var(--f-display);font-weight:900;font-size:46px;line-height:.95;color:var(--accent)}
+.rec-line{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:6px 0 2px;font-size:14px}
+button.rec-line:hover{color:var(--accent)}
+.rec-note{font-size:12px;color:var(--muted);margin:0}
+.fr{display:grid;grid-template-columns:130px minmax(0,1fr) 26px;gap:8px;align-items:center;font-size:14px;padding:2px 0}
+.fr .b{height:12px;background:var(--panel2);border-radius:2px;overflow:hidden}
+.fr .b i{display:block;height:100%;background:var(--c)}
+.fr .c{font-family:var(--f-mono);text-align:right}
+
+/* quiz */
+.qz-bar{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline;margin-bottom:12px}
+.qz-bar .qz-s{font-family:var(--f-display);font-weight:900;font-size:64px;line-height:.85}
+.qz-bar span.m{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.qz-bar b{font-family:var(--f-mono);font-size:18px;font-weight:500}
+.qz-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.qc{display:flex;flex-direction:column;gap:6px;text-align:left;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
+.qc:not([disabled]):hover{border-color:var(--accent)}
+.qc .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qc .stat{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1}
+.qc .stat small{font-family:var(--f-mono);font-size:11px;font-weight:400;color:var(--muted);letter-spacing:.06em;margin-left:3px}
+.qc .sub2{font-size:13px;color:var(--muted)}
+.qc .rev{display:none;flex-direction:column;gap:5px;border-top:1px solid var(--line);padding-top:8px}
+.qc.show .rev{display:flex}
+.qc .rev b{font-size:16px}
+.qc.win{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.qc.bad{border-color:#C0392B;box-shadow:0 0 0 2px #C0392B}
+.qz-foot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:14px;min-height:44px}
+.qz-msg{font-size:15px}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:10px 18px;font-weight:600}
+.qz-end{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 20px;text-align:center}
+.qz-end .big{font-family:var(--f-display);font-weight:900;font-size:84px;line-height:.9;color:var(--accent)}
+
+footer{margin-top:28px;font-size:13px;color:var(--muted);max-width:90ch}
 footer a{color:inherit}
+footer p{margin:0 0 8px}
 
 @media (max-width:860px){
   .race,.pl{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:620px){
+  .rv-pick{grid-template-columns:minmax(0,1fr)}
+  .rv-vs{display:none}
+  .bf-side.l{grid-template-columns:66px minmax(0,1fr)}
+  .bf-side.r{grid-template-columns:minmax(0,1fr) 66px}
+  .bf-side .v{font-size:11px}
+  .bf-row{grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);gap:4px}
+  .hm{--nw:150px}
 }
 @media (max-width:520px){
   .hero{padding:22px 16px 18px}
@@ -193,8 +330,14 @@ footer a{color:inherit}
   .ctrls{justify-content:flex-start}
   .row{grid-template-columns:28px minmax(0,1fr);gap:8px;padding:10px}
   .rk{font-size:30px}
+  .rk.tie{font-size:22px}
   .pc-list li button{grid-template-columns:70px 36px 1fr}
   .pc-list li button .tag:last-child{display:none}
+  .erab{flex:1 1 0;padding:5px 2px;text-align:center}
+  .erab .full{display:none}
+  .erab .short{display:inline;font-size:11px}
+  .sc-row{grid-template-columns:20px 78px minmax(0,1fr) 44px}
+  .fr{grid-template-columns:100px minmax(0,1fr) 24px}
 }
 @media (prefers-reduced-motion:reduce){
   .fill{transition:none}.season.flip{animation:none}.chip{transition:none}
@@ -206,15 +349,19 @@ footer a{color:inherit}
   <header class="hero">
     <div class="eyebrow">NBA Most Valuable Player voting</div>
     <h1>MVP <span>Ballot</span> Box</h1>
-    <p class="sub">The five biggest vote-getters every year from 1991-92 to 2025-26. Scrub through the seasons, trace a player across the decades, or sort the whole ballot.</p>
+    <p class="sub">The five biggest vote-getters in every MVP race from 1955-56 to 2025-26. Scrub the seasons, trace careers across the decades, settle a rivalry, or see if you can pick the winner from the stat lines.</p>
     <div class="kpis" id="kpis"></div>
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Views">
     <button class="tab" role="tab" id="t-season" aria-selected="true" data-tab="season">Season</button>
     <button class="tab" role="tab" id="t-timeline" aria-selected="false" data-tab="timeline">Timeline</button>
-    <button class="tab" role="tab" id="t-table" aria-selected="false" data-tab="table">Table</button>
+    <button class="tab" role="tab" id="t-careers" aria-selected="false" data-tab="careers">Careers</button>
+    <button class="tab" role="tab" id="t-table" aria-selected="false" data-tab="table">Ballots</button>
     <button class="tab" role="tab" id="t-players" aria-selected="false" data-tab="players">Players</button>
+    <button class="tab" role="tab" id="t-rivals" aria-selected="false" data-tab="rivals">Rivals</button>
+    <button class="tab" role="tab" id="t-records" aria-selected="false" data-tab="records">Records</button>
+    <button class="tab" role="tab" id="t-quiz" aria-selected="false" data-tab="quiz">Guess the MVP</button>
   </nav>
 
   <section class="panel" id="p-season" role="tabpanel" aria-labelledby="t-season">
@@ -222,7 +369,7 @@ footer a{color:inherit}
       <div>
         <div class="lab">Season</div>
         <div class="season" id="seasonLabel">2025-26</div>
-        <div class="who-won" id="whoWon"></div>
+        <div class="who-won"><span id="whoWon"></span><span class="eratag" id="eraTag"></span></div>
       </div>
       <div class="ctrls">
         <button class="cbtn" id="prev" aria-label="Previous season">&#8592;</button>
@@ -230,8 +377,8 @@ footer a{color:inherit}
         <button class="cbtn" id="next" aria-label="Next season">&#8594;</button>
       </div>
       <div class="sliderrow">
-        <input type="range" id="slider" min="1992" max="2026" step="1" value="2026" aria-label="Season">
-        <div class="decades" id="decades"></div>
+        <input type="range" id="slider" min="1956" max="2026" step="1" value="2026" aria-label="Season">
+        <div class="eras" id="eras" role="group" aria-label="Jump to an era"></div>
       </div>
     </div>
     <div class="race">
@@ -244,17 +391,36 @@ footer a{color:inherit}
   </section>
 
   <section class="panel" id="p-timeline" role="tabpanel" aria-labelledby="t-timeline" hidden>
+    <div class="chips" id="tlEras" role="group" aria-label="Filter by era"></div>
     <div class="tl-info"><span id="tlInfo">Hover a name to light up every year that player finished in the top five. Click to hold the highlight.</span><button class="clear" id="tlClear" hidden>Clear</button></div>
     <div class="tl-scroll"><div class="tl" id="tl"></div></div>
   </section>
 
+  <section class="panel" id="p-careers" role="tabpanel" aria-labelledby="t-careers" hidden>
+    <div class="tools">
+      <label class="chk">Players with <select class="sel" id="hmMin" aria-label="Minimum top-five finishes"><option value="2">2+</option><option value="3" selected>3+</option><option value="5">5+</option><option value="8">8+</option></select> top-five finishes</label>
+      <label class="chk">Sort by <select class="sel" id="hmSort" aria-label="Sort players"><option value="first">first season</option><option value="mvps">MVPs</option><option value="n">top-five finishes</option><option value="best">best vote share</option></select></label>
+      <div class="seg" id="hmColor" role="group" aria-label="Color squares by"><button type="button" data-m="team" aria-pressed="true">Team</button><button type="button" data-m="rank" aria-pressed="false">Finish</button><button type="button" data-m="share" aria-pressed="false">Share</button></div>
+      <span class="count" id="hmCount"></span>
+    </div>
+    <p class="pc-hint" id="hmHint" style="margin-bottom:10px"></p>
+    <div class="hm-scroll"><div class="hm" id="hm"></div></div>
+  </section>
+
   <section class="panel" id="p-table" role="tabpanel" aria-labelledby="t-table" hidden>
     <div class="tools">
-      <input class="search" id="tq" type="search" placeholder="Search a player, team or season (try LAL or 2016)" aria-label="Search the ballot">
-      <label class="chk"><input type="checkbox" id="tmvp"> MVP winners only</label>
+      <input class="search" id="tq" type="search" placeholder="Search a player, team or season (try Bird, LAL or 1987)" aria-label="Search the ballots">
+      <div class="seg" id="tview" role="group" aria-label="Layout"><button type="button" data-v="cards" aria-pressed="true">Cards</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
+    </div>
+    <div class="tools">
+      <select class="sel" id="tera" aria-label="Era"></select>
+      <select class="sel" id="tteam" aria-label="Franchise"></select>
+      <select class="sel" id="trank" aria-label="Finish"><option value="all">All five spots</option><option value="3">Top three</option><option value="1">MVP winners only</option></select>
+      <button type="button" class="clear" id="tcsv">Download CSV</button>
       <span class="count" id="tcount"></span>
     </div>
-    <div class="tscroll"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    <div id="cardsWrap"><div class="cards" id="cards"></div></div>
+    <div id="tableWrap" hidden><div class="tscroll"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div>
   </section>
 
   <section class="panel" id="p-players" role="tabpanel" aria-labelledby="t-players" hidden>
@@ -262,6 +428,7 @@ footer a{color:inherit}
       <div>
         <div class="tools">
           <input class="search" id="pq" type="search" placeholder="Find a player" aria-label="Find a player">
+          <select class="sel" id="pmin" aria-label="Minimum top-five finishes"><option value="1">Everyone</option><option value="2">2+ top fives</option><option value="3">3+ top fives</option><option value="5">5+ top fives</option></select>
           <span class="count" id="pcount"></span>
         </div>
         <div class="tscroll"><table style="min-width:520px"><thead id="phead"></thead><tbody id="pbody"></tbody></table></div>
@@ -270,8 +437,33 @@ footer a{color:inherit}
     </div>
   </section>
 
+  <section class="panel" id="p-rivals" role="tabpanel" aria-labelledby="t-rivals" hidden>
+    <div class="chips" id="rvPresets" role="group" aria-label="Famous rivalries"></div>
+    <div class="rv-pick">
+      <label>Player A<input class="search" id="rva" list="plist" autocomplete="off" spellcheck="false" placeholder="e.g. Bill Russell"></label>
+      <span class="rv-vs" aria-hidden="true">VS</span>
+      <label>Player B<input class="search" id="rvb" list="plist" autocomplete="off" spellcheck="false" placeholder="e.g. Wilt Chamberlain"></label>
+    </div>
+    <datalist id="plist"></datalist>
+    <div id="rvOut" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" id="p-records" role="tabpanel" aria-labelledby="t-records" hidden>
+    <div class="recs" id="recs"></div>
+  </section>
+
+  <section class="panel" id="p-quiz" role="tabpanel" aria-labelledby="t-quiz" hidden>
+    <div class="tools">
+      <select class="sel" id="qzEra" aria-label="Era to quiz on"></select>
+      <button type="button" class="clear" id="qzNew">New round</button>
+      <span class="count" id="qzBest"></span>
+    </div>
+    <div id="qz" aria-live="polite"></div>
+  </section>
+
   <footer>
-    Vote share is points won divided by points possible. Each voter gives 10 points for a first-place vote, so points possible is ten times the number of voters. Stats shown are that season's per-game numbers. Data: <a href="https://www.basketball-reference.com/awards/mvp.html" target="_blank" rel="noopener">Basketball Reference</a> MVP voting pages, 1991-92 through 2025-26.
+    <p>Vote share is points won divided by points possible. Players voted through 1979-80 and could not pick teammates; media have voted since 1980-81 on a 10-7-5-3-1 ballot. Earlier ballots varied: some seasons were one vote per ballot (points are then just votes), others used weighted points. Official tallies for 1965-66 to 1968-69, 1970-71 and 1978-79 are incomplete, so those seasons are left out of the closest-race and biggest-blowout records. Stats shown are that season's per-game numbers, and a tie for fifth place shows both players.</p>
+    <p>Data: <a href="https://www.basketball-reference.com/awards/mvp.html" target="_blank" rel="noopener">Basketball Reference</a> MVP voting pages, 1955-56 through 2025-26.</p>
   </footer>
 </div>
 
@@ -279,10 +471,55 @@ footer a{color:inherit}
 (function(){
 "use strict";
 
-var TEAM={CHI:"#C8102E",POR:"#C4412B",SAS:"#5F6B76",UTA:"#2F5D8A",NYK:"#E06C1B",PHO:"#6A3FA0",HOU:"#9E1B32",ATL:"#B0452E",ORL:"#0077C0",SEA:"#00653A",MIA:"#98002E",DET:"#1D428A",CHH:"#00788C",PHI:"#2E6BC6",LAL:"#552583",MIN:"#236192",SAC:"#7A4FB0",NJN:"#3A5A8C",DAL:"#00538C",IND:"#2B4B8F",CLE:"#860038",NOH:"#0E7F86",NOP:"#1B3A57",BOS:"#0F7B43",OKC:"#007AC1",LAC:"#D1383D",GSW:"#2A6FDB",MIL:"#2E7D4F",DEN:"#1E3A5F"};
+var TEAM={CHI:"#C8102E",POR:"#C4412B",SAS:"#5F6B76",UTA:"#2F5D8A",NYK:"#E06C1B",PHO:"#6A3FA0",HOU:"#9E1B32",ATL:"#B0452E",ORL:"#0077C0",SEA:"#00653A",MIA:"#98002E",DET:"#1D428A",CHH:"#00788C",PHI:"#2E6BC6",LAL:"#552583",MIN:"#236192",SAC:"#7A4FB0",NJN:"#3A5A8C",DAL:"#00538C",IND:"#2B4B8F",CLE:"#860038",NOH:"#0E7F86",NOP:"#1B3A57",BOS:"#0F7B43",OKC:"#007AC1",LAC:"#D1383D",GSW:"#2A6FDB",MIL:"#2E7D4F",DEN:"#1E3A5F",
+  /* defunct or relocated franchises, tinted like the franchise they became */
+  STL:"#B0452E",PHW:"#173F7A",SFW:"#2A6FDB",SYR:"#2E6BC6",MNL:"#552583",FTW:"#1D428A",CIN:"#7A4FB0",KCO:"#7A4FB0",BAL:"#A32638",WSB:"#A32638",CAP:"#A32638",BUF:"#C2410C",NOJ:"#2F5D8A",SDC:"#D1383D",TOT:"#6B7280"};
 
-/* name, age, team, first-place votes, points won, games, ppg, rpg, apg */
+var TNAME={STL:"St. Louis Hawks",PHW:"Philadelphia Warriors",SFW:"San Francisco Warriors",SYR:"Syracuse Nationals",MNL:"Minneapolis Lakers",FTW:"Fort Wayne Pistons",CIN:"Cincinnati Royals",KCO:"Kansas City-Omaha Kings",BAL:"Baltimore Bullets",WSB:"Washington Bullets",CAP:"Capital Bullets",BUF:"Buffalo Braves",NOJ:"New Orleans Jazz",SDC:"San Diego Clippers",TOT:"Two teams (traded mid-season)",SEA:"Seattle SuperSonics",NJN:"New Jersey Nets",NOH:"New Orleans Hornets",CHH:"Charlotte Hornets (1988-2002)"};
+
+/* franchise lineage: old and new codes roll up to one franchise */
+var FR={STL:"ATL",PHW:"GSW",SFW:"GSW",SYR:"PHI",MNL:"LAL",FTW:"DET",ROC:"SAC",CIN:"SAC",KCO:"SAC",BAL:"WAS",WSB:"WAS",CAP:"WAS",BUF:"LAC",SDC:"LAC",NOJ:"UTA",SEA:"OKC",NOH:"NOP"};
+var FNAME={ATL:"Hawks",BOS:"Celtics",CHI:"Bulls",CHH:"Hornets (Charlotte, 1988-2002)",CLE:"Cavaliers",DAL:"Mavericks",DEN:"Nuggets",DET:"Pistons",GSW:"Warriors",HOU:"Rockets",IND:"Pacers",LAC:"Clippers",LAL:"Lakers",MIA:"Heat",MIL:"Bucks",MIN:"Timberwolves",NJN:"Nets",NOP:"Pelicans / Hornets",NYK:"Knicks",OKC:"Thunder / SuperSonics",ORL:"Magic",PHI:"76ers / Nationals",PHO:"Suns",POR:"Trail Blazers",SAC:"Kings / Royals",SAS:"Spurs",TOT:"Two teams in a season",UTA:"Jazz",WAS:"Wizards / Bullets"};
+
+/* name, age, team, first-place votes, points won, games, ppg, rpg, apg, [1 = tied for fifth]
+   max = points possible. Before 1981 several seasons were one vote per ballot (points equal votes). */
 var DATA={
+1956:{max:80,rows:[["Bob Pettit",23,"STL",33,33,72,25.7,16.2,2.6],["Paul Arizin",27,"PHW",21,21,72,24.2,7.5,2.6],["Bob Cousy",27,"BOS",11,11,72,18.8,6.8,8.9],["Mel Hutchins",27,"FTW",9,9,66,12.0,7.5,2.7],["Dolph Schayes",27,"SYR",2,2,72,20.4,12.4,2.8,1],["Bill Sharman",29,"BOS",2,2,72,19.9,3.6,4.7,1]]},
+1957:{max:80,rows:[["Bob Cousy",28,"BOS",23,23,64,20.6,4.8,7.5],["Bob Pettit",24,"STL",21,21,71,24.7,14.6,1.9],["Paul Arizin",28,"PHW",9,9,71,25.6,7.9,2.1],["Dolph Schayes",28,"SYR",8,8,72,22.5,14.0,3.2],["George Yardley",28,"FTW",7,7,72,21.5,10.5,2.0]]},
+1958:{max:400,rows:[["Bill Russell",23,"BOS",33,228,69,16.6,22.7,2.9],["Dolph Schayes",29,"SYR",25,198,72,24.9,14.2,3.1],["George Yardley",29,"DET",12,120,72,27.8,10.7,1.3],["Bob Pettit",25,"STL",4,97,70,24.6,17.4,2.2],["Maurice Stokes",24,"CIN",2,28,63,16.9,18.1,6.4]]},
+1959:{max:410,rows:[["Bob Pettit",26,"STL",59,317,72,29.2,16.4,3.1],["Bill Russell",24,"BOS",10,144,70,16.7,23.0,3.2],["Elgin Baylor",24,"MNL",2,88,70,24.9,15.0,4.1],["Bob Cousy",30,"BOS",4,71,65,20.0,5.5,8.6],["Paul Arizin",30,"PHW",1,39,70,26.4,9.1,1.7]]},
+1960:{max:395,rows:[["Wilt Chamberlain",23,"PHW",49,270,72,37.6,27.0,2.3],["Bill Russell",25,"BOS",15,186,74,18.2,24.0,3.7],["Bob Pettit",27,"STL",3,106,72,26.1,17.0,3.6],["Bob Cousy",31,"BOS",8,66,75,19.4,4.7,9.5],["Elgin Baylor",25,"MNL",2,40,70,29.6,16.4,3.5]]},
+1961:{max:385,rows:[["Bill Russell",26,"BOS",35,213,78,16.9,23.9,3.4],["Bob Pettit",28,"STL",14,125,76,27.9,20.3,3.4],["Elgin Baylor",26,"LAL",10,116,73,34.8,19.8,5.1],["Wilt Chamberlain",24,"PHW",3,81,79,38.4,27.2,1.9],["Oscar Robertson",22,"CIN",7,70,71,30.5,10.1,9.7]]},
+1962:{max:425,rows:[["Bill Russell",27,"BOS",51,297,76,18.9,23.6,4.5],["Wilt Chamberlain",25,"PHW",9,152,80,50.4,25.7,2.4],["Oscar Robertson",23,"CIN",13,135,79,30.8,12.5,11.4],["Elgin Baylor",27,"LAL",3,82,48,38.3,18.6,4.6],["Jerry West",23,"LAL",6,60,75,30.8,7.9,5.4]]},
+1963:{max:505,rows:[["Bill Russell",28,"BOS",56,341,78,16.8,23.6,4.5],["Elgin Baylor",28,"LAL",19,221,80,34.0,14.3,4.8],["Oscar Robertson",24,"CIN",19,191,80,28.3,10.4,9.5],["Bob Pettit",30,"STL",3,84,79,28.4,15.1,3.1],["Jerry West",24,"LAL",2,19,55,27.1,7.0,5.6]]},
+1964:{max:480,rows:[["Oscar Robertson",25,"CIN",60,362,79,31.4,9.9,11.0],["Wilt Chamberlain",27,"SFW",19,215,80,36.9,22.3,5.0],["Bill Russell",29,"BOS",11,167,78,15.0,24.7,4.7],["Bob Pettit",31,"STL",4,69,80,27.4,15.3,3.2],["Jerry West",25,"LAL",2,39,72,28.7,6.0,5.6]]},
+1965:{max:99,rows:[["Bill Russell",30,"BOS",53,53,78,14.1,24.1,5.3],["Oscar Robertson",26,"CIN",21,21,75,30.4,9.0,11.5],["Jerry West",26,"LAL",20,20,74,31.0,6.0,4.9],["Sam Jones",31,"BOS",4,4,80,25.9,5.1,2.8],["Wilt Chamberlain",28,"TOT",1,1,73,34.7,22.9,3.4]]},
+1966:{max:267,rows:[["Wilt Chamberlain",29,"PHI",48,181,79,33.5,24.6,5.2],["Jerry West",27,"LAL",16,101,79,31.3,7.1,6.1],["Oscar Robertson",27,"CIN",14,93,76,31.3,7.7,11.1],["Bill Russell",31,"BOS",7,69,78,12.9,22.8,4.8],["Sam Jones",32,"BOS",2,11,67,23.5,5.2,3.2,1],["Jerry Lucas",25,"CIN",2,11,79,21.5,21.1,2.7,1]]},
+1967:{max:540,rows:[["Wilt Chamberlain",30,"PHI",80,444,81,24.1,24.2,7.8],["Nate Thurmond",25,"SFW",15,170,65,18.7,21.3,2.6],["Bill Russell",32,"BOS",5,96,81,13.3,21.0,5.8],["Oscar Robertson",28,"CIN",3,93,79,30.5,6.2,10.7],["Rick Barry",22,"SFW",2,52,78,35.6,9.2,3.6]]},
+1968:{max:695,rows:[["Wilt Chamberlain",31,"PHI",88,504,82,24.3,23.8,8.6],["Lenny Wilkens",30,"STL",26,216,82,20.0,5.3,8.3],["Elgin Baylor",33,"LAL",9,129,77,26.0,12.2,4.6],["Dave Bing",24,"DET",9,127,79,27.1,4.7,6.4],["Oscar Robertson",29,"CIN",7,112,65,29.2,6.0,9.7]]},
+1969:{max:515,rows:[["Wes Unseld",22,"BAL",53,310,82,13.8,18.2,2.6],["Willis Reed",26,"NYK",18,137,82,21.1,14.5,2.3],["Billy Cunningham",25,"PHI",15,130,82,24.8,12.8,3.5],["Bill Russell",34,"BOS",11,93,77,9.9,19.3,4.9],["Elgin Baylor",34,"LAL",6,89,76,24.8,10.6,5.4]]},
+1970:{max:775,rows:[["Willis Reed",27,"NYK",61,498,81,21.7,13.9,2.0],["Jerry West",31,"LAL",51,457,74,31.2,4.6,7.5],["Kareem Abdul-Jabbar",22,"MIL",30,335,82,28.8,14.5,4.1],["Walt Frazier",24,"NYK",4,50,77,20.9,6.0,8.2],["Billy Cunningham",26,"PHI",2,27,81,26.1,13.6,4.3,1],["Connie Hawkins",27,"PHO",2,27,81,24.6,10.4,4.8,1]]},
+1971:{max:780,rows:[["Kareem Abdul-Jabbar",23,"MIL",133,698,82,31.7,16.0,3.3],["Jerry West",32,"LAL",4,166,69,26.9,4.6,9.5],["Dave Bing",27,"DET",6,119,82,27.0,4.4,5.0],["Willis Reed",28,"NYK",5,109,73,20.9,13.7,2.0],["Oscar Robertson",32,"MIL",5,63,81,19.4,5.7,8.2]]},
+1972:{max:900,rows:[["Kareem Abdul-Jabbar",24,"MIL",81,581,81,34.8,16.6,4.6],["Jerry West",33,"LAL",44,393,77,25.8,4.2,9.7],["Wilt Chamberlain",35,"LAL",36,294,82,14.8,19.2,4.0],["John Havlicek",31,"BOS",1,65,82,27.5,8.2,7.5],["Spencer Haywood",22,"SEA",2,49,73,26.2,12.7,2.0]]},
+1973:{max:875,rows:[["Dave Cowens",24,"BOS",67,444,82,20.5,16.2,4.1],["Kareem Abdul-Jabbar",25,"MIL",33,339,76,30.2,16.1,5.0],["Tiny Archibald",24,"KCO",44,319,80,34.0,2.8,11.4],["Wilt Chamberlain",36,"LAL",12,123,82,13.2,18.6,4.5],["John Havlicek",32,"BOS",5,88,80,23.8,7.1,6.6]]},
+1974:{max:905,rows:[["Kareem Abdul-Jabbar",26,"MIL",74,528,81,27.0,14.5,4.8],["Bob McAdoo",22,"BUF",60,451,74,30.6,15.1,2.3],["Bob Lanier",25,"DET",37,395,81,22.5,13.3,4.2],["Dave Cowens",25,"BOS",3,91,80,19.0,15.7,4.4],["Elvin Hayes",28,"CAP",4,74,81,21.4,18.1,2.0]]},
+1975:{max:965,rows:[["Bob McAdoo",23,"BUF",81,547,82,34.5,14.1,2.2],["Dave Cowens",26,"BOS",32,310,65,20.4,14.7,4.6],["Elvin Hayes",29,"WSB",37,289,82,23.0,12.2,2.5],["Rick Barry",30,"GSW",16,254,80,30.6,5.7,6.2],["Kareem Abdul-Jabbar",27,"MIL",13,161,65,30.0,14.0,4.1]]},
+1976:{max:925,rows:[["Kareem Abdul-Jabbar",28,"LAL",52,409,82,27.7,16.9,5.0],["Bob McAdoo",24,"BUF",47,393,78,31.1,12.4,4.0],["Dave Cowens",27,"BOS",48,378,78,19.0,16.0,4.2],["Rick Barry",31,"GSW",20,201,81,21.0,6.1,6.1],["George McGinnis",25,"PHI",4,80,77,23.0,12.6,4.7]]},
+1977:{max:247,rows:[["Kareem Abdul-Jabbar",29,"LAL",159,159,82,26.2,13.3,3.9],["Bill Walton",24,"POR",29,29,65,18.6,14.4,3.8],["Pete Maravich",29,"NOJ",15,15,73,31.1,5.1,5.4],["Bob Lanier",28,"DET",11,11,64,25.3,11.6,3.3],["Julius Erving",26,"PHI",7,7,82,21.6,8.5,3.7]]},
+1978:{max:238,rows:[["Bill Walton",25,"POR",96,96,58,18.9,13.2,5.0],["George Gervin",25,"SAS",80.5,80.5,82,27.2,5.1,3.7],["David Thompson",23,"DEN",28.5,28.5,80,27.2,4.9,4.5],["Kareem Abdul-Jabbar",30,"LAL",14,14,62,25.8,12.9,4.3],["Walter Davis",23,"PHO",4,4,81,24.2,6.0,3.4]]},
+1979:{max:223,rows:[["Moses Malone",23,"HOU",112,112,82,24.8,17.6,1.8],["George Gervin",26,"SAS",35,35,80,29.6,5.0,2.7],["Elvin Hayes",33,"WSB",28,28,82,21.8,12.1,1.7],["Kareem Abdul-Jabbar",31,"LAL",15,15,80,23.8,12.8,5.4],["Bob Dandridge",31,"WSB",7,7,78,20.4,5.7,4.7]]},
+1980:{max:221,rows:[["Kareem Abdul-Jabbar",32,"LAL",147,147,82,24.8,10.8,4.5],["Julius Erving",29,"PHI",31.5,31.5,78,26.9,7.4,4.6],["George Gervin",27,"SAS",19,19,78,33.1,5.2,2.6],["Larry Bird",23,"BOS",15,15,82,21.3,10.4,4.5],["Tiny Archibald",31,"BOS",2,2,80,14.1,2.5,8.4,1],["Dennis Johnson",25,"SEA",2,2,81,19.0,5.1,4.1,1]]},
+1981:{max:690,rows:[["Julius Erving",30,"PHI",28,454,82,24.6,8.0,4.4],["Larry Bird",24,"BOS",20,423,82,21.2,10.9,5.5],["Kareem Abdul-Jabbar",33,"LAL",8,286,80,26.2,10.3,3.4],["Moses Malone",25,"HOU",8,180,80,27.8,14.8,1.8],["George Gervin",28,"SAS",1,83,82,27.1,5.1,3.2]]},
+1982:{max:690,rows:[["Moses Malone",26,"HOU",40,507,81,31.1,14.7,1.8],["Larry Bird",25,"BOS",20,406,77,22.9,10.9,5.8],["Julius Erving",31,"PHI",1,203,81,24.4,6.9,3.9],["Robert Parish",28,"BOS",4,131,80,19.9,10.8,1.8],["Gus Williams",28,"SEA",2,115,80,23.4,3.1,6.9]]},
+1983:{max:750,rows:[["Moses Malone",27,"PHI",69,720,78,24.5,15.3,1.3],["Larry Bird",26,"BOS",1,364,79,23.6,11.0,5.8],["Magic Johnson",23,"LAL",2,304.5,79,16.8,8.6,10.5],["Sidney Moncrief",25,"MIL",0,226,76,22.5,5.8,3.9],["Julius Erving",32,"PHI",3,112,72,21.4,6.8,3.7]]},
+1984:{max:760,rows:[["Larry Bird",27,"BOS",52,652,79,24.2,10.1,6.6],["Bernard King",27,"NYK",11,373,77,26.3,5.1,2.1],["Magic Johnson",24,"LAL",5,305,67,17.6,7.3,13.1],["Kareem Abdul-Jabbar",36,"LAL",3,153,80,21.5,7.3,2.6],["Isiah Thomas",22,"DET",1,115,82,21.3,4.0,11.1]]},
+1985:{max:780,rows:[["Larry Bird",28,"BOS",73,763,80,28.7,10.5,6.6],["Magic Johnson",25,"LAL",1,264,77,18.3,6.2,12.6],["Moses Malone",29,"PHI",0,218,79,24.6,13.1,1.6],["Kareem Abdul-Jabbar",37,"LAL",0,206,79,22.0,7.9,3.2],["Terry Cummings",23,"MIL",2,138,79,23.6,9.1,2.9]]},
+1986:{max:780,rows:[["Larry Bird",29,"BOS",73,765,82,25.8,9.8,6.8],["Dominique Wilkins",26,"ATL",5,407,78,30.3,7.9,2.6],["Magic Johnson",26,"LAL",0,205,72,18.8,5.9,12.6],["Hakeem Olajuwon",23,"HOU",0,193,68,23.5,11.5,2.0],["Kareem Abdul-Jabbar",38,"LAL",0,135,79,23.4,6.1,3.5]]},
+1987:{max:780,rows:[["Magic Johnson",27,"LAL",65,733,80,23.9,6.3,12.2],["Michael Jordan",23,"CHI",10,449,82,37.1,5.2,4.6],["Larry Bird",30,"BOS",1,271,74,28.1,9.2,7.6],["Kevin McHale",29,"BOS",0,254,77,26.1,9.9,2.6],["Dominique Wilkins",27,"ATL",0,128,79,29.0,6.3,3.3]]},
+1988:{max:800,rows:[["Michael Jordan",24,"CHI",47,665,82,35.0,5.5,5.9],["Larry Bird",31,"BOS",16,527,76,29.9,9.3,6.1],["Magic Johnson",28,"LAL",16,508,72,19.6,6.2,11.9],["Charles Barkley",24,"PHI",1,109,80,28.3,11.9,3.2],["Clyde Drexler",25,"POR",0,86,81,27.0,6.6,5.8]]},
+1989:{max:850,rows:[["Magic Johnson",29,"LAL",42.5,664.5,77,22.5,7.9,12.8],["Michael Jordan",25,"CHI",27.5,598.8,81,32.5,8.0,8.0],["Karl Malone",25,"UTA",5,362,80,29.1,10.7,2.7],["Patrick Ewing",26,"NYK",8,200,80,22.7,9.3,2.4],["Hakeem Olajuwon",26,"HOU",2,179.3,82,24.8,13.5,1.8]]},
+1990:{max:920,rows:[["Magic Johnson",30,"LAL",27,636,79,22.3,6.6,11.5],["Charles Barkley",26,"PHI",38,614,79,25.2,11.5,3.9],["Michael Jordan",26,"CHI",21,564,82,33.6,6.9,6.3],["Karl Malone",26,"UTA",2,214,82,31.0,11.1,2.8],["Patrick Ewing",27,"NYK",1,162,82,28.6,10.9,2.2]]},
+1991:{max:960,rows:[["Michael Jordan",27,"CHI",77,891,82,31.5,6.0,5.5],["Magic Johnson",31,"LAL",10,497,79,19.4,7.0,12.5],["David Robinson",25,"SAS",6,476,82,25.6,13.0,2.5],["Charles Barkley",27,"PHI",2,222,67,27.6,10.1,4.2],["Karl Malone",27,"UTA",0,142,82,29.0,11.8,3.3]]},
 1992:{max:960,rows:[["Michael Jordan",28,"CHI",80,900,80,30.1,6.4,6.1],["Clyde Drexler",29,"POR",12,561,76,25.0,6.6,6.7],["David Robinson",26,"SAS",2,337,68,23.2,12.2,2.7],["Karl Malone",28,"UTA",1,262,81,28.0,11.2,3.0],["Patrick Ewing",29,"NYK",0,100,82,24.0,11.2,1.9]]},
 1993:{max:980,rows:[["Charles Barkley",29,"PHO",59,835,76,25.6,12.2,5.1],["Hakeem Olajuwon",30,"HOU",22,647,82,26.1,13.0,3.5],["Michael Jordan",29,"CHI",13,565,78,32.6,6.7,5.5],["Patrick Ewing",30,"NYK",4,359,81,24.2,12.1,1.9],["Dominique Wilkins",33,"ATL",0,54,71,29.9,6.8,3.2]]},
 1994:{max:1010,rows:[["Hakeem Olajuwon",31,"HOU",66,889,80,27.3,11.9,3.6],["David Robinson",28,"SAS",24,730,80,29.8,10.7,4.8],["Scottie Pippen",28,"CHI",7,390,72,22.0,8.7,5.6],["Shaquille O'Neal",21,"ORL",3,289,81,29.3,13.2,2.4],["Patrick Ewing",31,"NYK",1,255,79,24.5,11.2,2.3]]},
@@ -320,116 +557,174 @@ var DATA={
 2026:{max:1000,rows:[["Shai Gilgeous-Alexander",27,"OKC",83,939,68,31.1,4.3,6.6],["Nikola Jokić",30,"DEN",10,634,65,27.7,12.9,10.7],["Victor Wembanyama",22,"SAS",5,569,64,25.0,11.5,3.1],["Luka Dončić",26,"LAL",0,250,64,33.5,7.7,8.3],["Cade Cunningham",24,"DET",2,117,64,23.9,5.5,9.9]]}
 };
 
-var SHORT={"Shai Gilgeous-Alexander":"SGA","Giannis Antetokounmpo":"Giannis","Shaquille O'Neal":"Shaq","Jermaine O'Neal":"J. O'Neal","Tim Hardaway":"T. Hardaway","Anthony Davis":"A. Davis","Isaiah Thomas":"I. Thomas","Chris Paul":"C. Paul"};
+var SHORT={"Shai Gilgeous-Alexander":"SGA","Giannis Antetokounmpo":"Giannis","Shaquille O'Neal":"Shaq","Jermaine O'Neal":"J. O'Neal","Tim Hardaway":"T. Hardaway","Anthony Davis":"A. Davis","Isiah Thomas":"I. Thomas","Chris Paul":"C. Paul","Kareem Abdul-Jabbar":"Kareem","Magic Johnson":"Magic","Moses Malone":"Moses","Wilt Chamberlain":"Wilt","Sam Jones":"S. Jones","Dennis Johnson":"D. Johnson","Walter Davis":"W. Davis","Gus Williams":"G. Williams"};
 
-var Y0=1992, Y1=2026;
-var ALL=[], BY={}, P={};
+/* ---------- setup ---------- */
+var Y0=1956, Y1=2026, NS=Y1-Y0+1;
+var INCOMPLETE={1966:1,1967:1,1968:1,1969:1,1971:1,1979:1}; /* official tallies flagged incomplete by Basketball Reference */
+var LOCKOUT={1999:1,2012:1};
+var ERAS=[
+  {id:"rw",a:1956,z:1969,name:"Russell & Wilt",s:"Russell",c:"#A16207"},
+  {id:"kj",a:1970,z:1980,name:"Kareem & the seventies",s:"70s",c:"#0F766E"},
+  {id:"bm",a:1981,z:1990,name:"Bird, Magic & Moses",s:"80s",c:"#B91C1C"},
+  {id:"mj",a:1991,z:1998,name:"Jordan's decade",s:"Jordan",c:"#C2410C"},
+  {id:"sd",a:1999,z:2008,name:"Shaq, Duncan & Nash",s:"2000s",c:"#6D28D9"},
+  {id:"lc",a:2009,z:2016,name:"LeBron & Curry",s:"LeBron",c:"#1D4ED8"},
+  {id:"pm",a:2017,z:2026,name:"The positionless era",s:"Now",c:"#BE185D"}
+];
+function eraOf(y){ for(var i=0;i<ERAS.length;i++){ if(y>=ERAS[i].a&&y<=ERAS[i].z) return ERAS[i]; } return ERAS[ERAS.length-1]; }
+
+var $=function(s,r){ return (r||document).querySelector(s); };
+var $$=function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function lastName(n){ if(SHORT[n]) return SHORT[n]; var p=n.split(" "); return p[p.length-1]; }
 function fmtS(y){ return (y-1)+"-"+String(y).slice(2); }
-function pct(v){ return (v*100).toFixed(1)+"%"; }
+function pct(v){ return (v*100+1e-9).toFixed(1)+"%"; }
+function num(v){ return String(Math.round(v*10)/10); }
 function ord(n){ return n+(["th","st","nd","rd"][n]||"th"); }
 function col(tm){ return TEAM[tm]||"#555"; }
+function tname(tm){ return TNAME[tm]||tm; }
+function fr(tm){ return FR[tm]||tm; }
+function rkText(o){ return (o.t?"T":"")+o.rank; }
+function rkOrd(o){ return (o.t?"T-":"")+ord(o.rank); }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function ctxLine(o){ return o.ppg.toFixed(1)+" pts, "+o.rpg.toFixed(1)+" reb, "+o.apg.toFixed(1)+" ast in "+o.g+" games"; }
 
+var ALL=[], BY={}, P={}, SEAS={};
 for(var y=Y0;y<=Y1;y++){
   var d=DATA[y]; BY[y]=[];
+  var single=d.rows.every(function(r){ return r[4]===r[3]; });
+  SEAS[y]={y:y,max:d.max,single:single,media:y>=1981,voters:single?d.max:(y>=1981?d.max/10:null),incomplete:!!INCOMPLETE[y],era:eraOf(y)};
   d.rows.forEach(function(r,i){
-    var o={y:y,rank:i+1,name:r[0],age:r[1],tm:r[2],first:r[3],pts:r[4],max:d.max,g:r[5],ppg:r[6],rpg:r[7],apg:r[8],share:r[4]/d.max};
+    var o={y:y,rank:r[9]?5:i+1,t:r[9]?1:0,name:r[0],age:r[1],tm:r[2],first:r[3],pts:r[4],max:d.max,g:r[5],ppg:r[6],rpg:r[7],apg:r[8],share:r[4]/d.max};
     ALL.push(o); BY[y].push(o);
     if(!P[o.name]) P[o.name]={name:o.name,list:[],byYear:{}};
     P[o.name].list.push(o); P[o.name].byYear[y]=o;
   });
 }
 var PL=Object.keys(P).map(function(k){
-  var p=P[k], mv=p.list.filter(function(e){return e.rank===1;}).length;
-  var best=Math.max.apply(null,p.list.map(function(e){return e.share;}));
-  p.n=p.list.length; p.mvps=mv; p.best=best; p.first=p.list[0].y; p.last=p.list[p.list.length-1].y;
+  var p=P[k], mv=p.list.filter(function(e){ return e.rank===1; }).length;
+  p.n=p.list.length; p.mvps=mv; p.best=Math.max.apply(null,p.list.map(function(e){ return e.share; }));
+  p.first=p.list[0].y; p.last=p.list[p.list.length-1].y;
   return p;
 });
 
-/* season facts */
-var margins={};
-for(var yy=Y0;yy<=Y1;yy++){ var rr=BY[yy]; margins[yy]=(rr[0].pts-rr[1].pts)/rr[0].max; }
-var closestY=Y0, widestY=Y0;
-for(yy=Y0;yy<=Y1;yy++){ if(margins[yy]<margins[closestY]) closestY=yy; if(margins[yy]>margins[widestY]) widestY=yy; }
-var unanimous=[]; for(yy=Y0;yy<=Y1;yy++){ if(BY[yy][0].first===BY[yy][0].max/10) unanimous.push(yy); }
-var LOCKOUT={1999:1,2012:1};
+/* season facts (seasons with incomplete official tallies are left out of the superlatives) */
+var margins={}, closestY=null, widestY=null, unanimous=[];
+for(var yy=Y0;yy<=Y1;yy++){
+  var rr=BY[yy]; margins[yy]=(rr[0].pts-rr[1].pts)/SEAS[yy].max;
+  if(!SEAS[yy].incomplete){
+    if(closestY===null||margins[yy]<margins[closestY]) closestY=yy;
+    if(widestY===null||margins[yy]>margins[widestY]) widestY=yy;
+  }
+  if(SEAS[yy].media&&rr[0].first===SEAS[yy].max/10) unanimous.push(yy);
+}
+function eraWinners(era){
+  var c={}, order=[];
+  for(var t=era.a;t<=era.z;t++){ var w=BY[t][0].name; if(!c[w]){ c[w]=0; order.push(w); } c[w]++; }
+  order.sort(function(a,b){ return c[b]-c[a]; });
+  return order.map(function(n){ return {name:n,n:c[n]}; });
+}
 
-var $=function(s,r){ return (r||document).querySelector(s); };
-function el(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
 var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var state={year:Y1,sel:null,tab:"season",playing:false,timer:null,lock:null,tlEra:"",
+  sort:{k:"y",dir:-1},q:"",tview:"cards",tera:"",tteam:"",trank:"all",
+  psort:{k:"n",dir:-1},pq:"",pmin:1,psel:null,
+  hm:{min:3,sort:"first",color:"team"},ra:"Bill Russell",rb:"Wilt Chamberlain",qz:{era:""}};
 
-var state={year:Y1,sel:null,tab:"season",playing:false,timer:null,lock:null,sort:{k:"y",dir:-1},q:"",onlyMvp:false,psort:{k:"n",dir:-1},pq:"",psel:null};
+function syncHash(){
+  try{
+    var h="#tab="+state.tab+(state.tab==="season"?"&y="+state.year:"");
+    if(location.hash!==h) history.replaceState(null,"",h);
+  }catch(e){}
+}
+function readHash(){
+  var o={};
+  try{ location.hash.slice(1).split("&").forEach(function(kv){ var p=kv.split("="); if(p[0]) o[p[0]]=decodeURIComponent(p[1]||""); }); }catch(e){}
+  return o;
+}
 
-/* KPIs */
+/* ---------- KPIs ---------- */
 (function(){
   var winners={}; for(var y=Y0;y<=Y1;y++) winners[BY[y][0].name]=1;
   var k=$("#kpis");
-  [[Y1-Y0+1,"seasons"],[ALL.length,"top-five finishes"],[PL.length,"players"],[Object.keys(winners).length,"different MVPs"],[unanimous.length,"unanimous ("+fmtS(unanimous[0])+")"]].forEach(function(a){
+  [[NS,"seasons"],[ALL.length,"top-five finishes"],[PL.length,"players"],[Object.keys(winners).length,"different MVPs"],[unanimous.length,"unanimous ("+fmtS(unanimous[0])+")"]].forEach(function(a){
     var d=el("div","kpi"); d.innerHTML="<b class='num'>"+a[0]+"</b><span>"+a[1]+"</span>"; k.appendChild(d);
   });
 })();
 
 /* ---------- player card ---------- */
+function winOf(p){
+  var a=Math.max(Y0,p.first-2), b=Math.min(Y1,p.last+2);
+  while(b-a+1<12 && !(a===Y0&&b===Y1)){ if(a>Y0) a--; if(b-a+1<12&&b<Y1) b++; }
+  return [a,b];
+}
 function renderCard(box,name,focusYear){
   var p=P[name]; box.innerHTML="";
   var head=el("div","pc-head"); head.style.setProperty("--c",col(p.list[p.list.length-1].tm));
-  var teams=[]; p.list.forEach(function(e){ if(teams.indexOf(e.tm)<0) teams.push(e.tm); });
   head.innerHTML="<h3></h3><p>"+p.n+" top-five finish"+(p.n===1?"":"es")+" &middot; "+p.mvps+" MVP"+(p.mvps===1?"":"s")+" &middot; best share "+pct(p.best)+"</p>";
   head.querySelector("h3").textContent=name;
   box.appendChild(head);
   var body=el("div","pc-body"); box.appendChild(body);
   body.appendChild(el("div","pc-cap","Vote share by season"));
+  var w=winOf(p), a=w[0], b=w[1], span=b-a+1;
   var chart=el("div","pc-chart"); chart.setAttribute("role","group"); chart.setAttribute("aria-label","Vote share by season for "+name);
-  for(var y=Y0;y<=Y1;y++){
+  chart.style.gridTemplateColumns="repeat("+span+",minmax(0,1fr))";
+  for(var y=a;y<=b;y++){
     var e=p.byYear[y];
     if(e){
-      var b=el("button",(e.rank===1?"mvpbar":"")+(y===focusYear?" cur":""));
-      b.type="button"; b.style.height=Math.max(4,e.share*100)+"%"; b.style.setProperty("--c",col(e.tm));
-      b.title=fmtS(y)+": "+ord(e.rank)+", "+pct(e.share)+" ("+e.tm+")";
-      b.setAttribute("aria-label",b.title);
-      b.dataset.y=y; chart.appendChild(b);
+      var bt=el("button",(e.rank===1?"mvpbar":"")+(y===focusYear?" cur":""));
+      bt.type="button"; bt.style.height=Math.max(4,e.share*100)+"%"; bt.style.setProperty("--c",col(e.tm));
+      bt.title=fmtS(y)+": "+rkOrd(e)+", "+pct(e.share)+" ("+e.tm+")";
+      bt.setAttribute("aria-label",bt.title);
+      bt.dataset.y=y; chart.appendChild(bt);
     } else chart.appendChild(el("span","gap"));
   }
   body.appendChild(chart);
   var ax=el("div","pc-axis");
-  [1992,2000,2010,2020,2026].forEach(function(t){ var s=el("span",null,"'"+String(t).slice(2)); s.style.left=((t-Y0)/(Y1-Y0)*100)+"%"; ax.appendChild(s); });
+  for(var t=a;t<=b;t++){ if(t%10===0){ var s=el("span",null,String(t)); s.style.left=((t-a+.5)/span*100)+"%"; ax.appendChild(s); } }
   body.appendChild(ax);
   if(focusYear && p.byYear[focusYear]){
     var f=p.byYear[focusYear];
-    body.appendChild(el("div","pc-stat","<b>"+fmtS(f.y)+"</b> &middot; "+ord(f.rank)+" &middot; "+f.ppg.toFixed(1)+" pts, "+f.rpg.toFixed(1)+" reb, "+f.apg.toFixed(1)+" ast in "+f.g+" games"));
+    body.appendChild(el("div","pc-stat","<b>"+fmtS(f.y)+"</b> &middot; "+rkOrd(f)+" &middot; "+ctxLine(f)));
   }
   var ul=el("ul","pc-list");
   p.list.forEach(function(e){
-    var li=el("li"); var bt=el("button");
-    bt.type="button"; bt.dataset.y=e.y;
-    bt.innerHTML="<span class='num'>"+fmtS(e.y)+"</span><span class='tag'>"+ord(e.rank)+"</span><span class='num'>"+pct(e.share)+"</span><span class='tag'>"+e.tm+"</span>";
-    li.appendChild(bt); ul.appendChild(li);
+    var li=el("li"); var bt2=el("button");
+    bt2.type="button"; bt2.dataset.y=e.y;
+    bt2.innerHTML="<span class='num'>"+fmtS(e.y)+"</span><span class='tag'>"+rkOrd(e)+"</span><span class='num'>"+pct(e.share)+"</span><span class='tag' title='"+esc(tname(e.tm))+"'>"+e.tm+"</span>";
+    li.appendChild(bt2); ul.appendChild(li);
   });
   body.appendChild(ul);
   body.appendChild(el("p","pc-hint","Click a bar or a row to open that season."));
   box.onclick=function(ev){
-    var t=ev.target.closest("[data-y]"); if(!t) return;
-    gotoSeason(parseInt(t.dataset.y,10),name);
+    var t2=ev.target.closest("[data-y]"); if(!t2) return;
+    gotoSeason(parseInt(t2.dataset.y,10),name);
   };
 }
 
 /* ---------- season view ---------- */
 var rowsBox=$("#rows"), slider=$("#slider"), label=$("#seasonLabel");
 function renderSeason(){
-  var y=state.year, rows=BY[y];
+  var y=state.year, rows=BY[y], S=SEAS[y], era=S.era;
   label.textContent=fmtS(y);
   label.classList.remove("flip"); void label.offsetWidth; if(!reduce) label.classList.add("flip");
   slider.value=y;
   var w=rows[0];
   $("#whoWon").innerHTML="MVP: <b></b> ("+w.tm+")";
   $("#whoWon").querySelector("b").textContent=w.name;
-  document.querySelectorAll(".dec").forEach(function(b){ var a=+b.dataset.a, z=+b.dataset.z; b.setAttribute("aria-pressed",(y>=a&&y<=z)?"true":"false"); });
+  var tag=$("#eraTag"); tag.textContent=era.name; tag.style.setProperty("--ec",era.c);
+  $$(".erab").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.id===era.id?"true":"false"); });
 
   rowsBox.innerHTML="";
   rows.forEach(function(r,i){
     var b=el("button","row"+(r.rank===1?" win":"")+(r.name===state.sel?" sel":""));
     b.type="button"; b.dataset.name=r.name; b.style.setProperty("--c",col(r.tm));
-    b.innerHTML="<span class='rk'>"+r.rank+"</span><span class='rbody'><span class='rtop'><span class='nm'></span><span class='tm'>"+r.tm+"</span>"+(r.rank===1?"<span class='mvp'>MVP</span>":"")+"<span class='age'>age "+r.age+"</span></span><span class='rbar'><span class='track'><span class='fill'></span></span><span class='pct'>"+pct(r.share)+"</span></span><span class='rnum'><b>"+r.first+"</b> first-place &middot; <b>"+r.pts+"</b> of "+r.max+" pts</span></span>";
+    var nums=S.single
+      ? "<b>"+num(r.pts)+"</b> vote"+(r.pts===1?"":"s")+" of <b>"+S.max+"</b>"
+      : "<b>"+num(r.first)+"</b> first-place &middot; <b>"+num(r.pts)+"</b> of "+S.max+" pts";
+    b.innerHTML="<span class='rk"+(r.t?" tie":"")+"'>"+rkText(r)+"</span><span class='rbody'><span class='rtop'><span class='nm'></span><span class='tm' title='"+esc(tname(r.tm))+"'>"+r.tm+"</span>"+(r.rank===1?"<span class='mvp'>MVP</span>":"")+"<span class='age'>age "+r.age+"</span></span><span class='rbar'><span class='track'><span class='fill'></span></span><span class='pct'>"+pct(r.share)+"</span></span><span class='rnum'>"+nums+"</span></span>";
     b.querySelector(".nm").textContent=r.name;
     rowsBox.appendChild(b);
     var f=b.querySelector(".fill");
@@ -437,19 +732,28 @@ function renderSeason(){
     else { f.style.transitionDelay=(i*70)+"ms"; requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=(r.share*100)+"%"; }); }); }
   });
 
-  var voters=rows[0].max/10, mar=rows[0].pts-rows[1].pts, notes=$("#notes"); notes.innerHTML="";
+  var notes=$("#notes"); notes.innerHTML="";
   function note(html,hot){ notes.appendChild(el("span","note"+(hot?" hot":""),html)); }
-  note("Voters <b class='num'>"+voters+"</b>");
+  note("<b>"+(S.media?"Media":"Players")+"</b> voted &middot; "+(S.single?"one vote per ballot":"weighted ballot"));
+  if(S.voters) note("Voters <b class='num'>"+S.voters+"</b>");
   note("Winner took <b class='num'>"+pct(rows[0].share)+"</b> of the points");
-  note("Margin over #2 <b class='num'>"+mar+"</b> pts");
-  if(rows[0].first===voters) note("<b>Unanimous.</b> Every voter picked "+lastName(rows[0].name),true);
-  if(y===closestY) note("<b>Tightest race</b> of these 35 seasons",true);
-  if(y===widestY) note("<b>Widest margin</b> of these 35 seasons",true);
+  note("Margin over #2 <b class='num'>"+num(rows[0].pts-rows[1].pts)+"</b> "+(S.single?"votes":"pts"));
+  if(S.media&&rows[0].first===S.max/10) note("<b>Unanimous.</b> Every voter picked "+esc(lastName(rows[0].name)),true);
+  if(!S.single){
+    var top=rows.slice(1).reduce(function(m,r){ return r.first>m.first?r:m; },rows[1]);
+    if(top.first>rows[0].first) note("<b>Won with fewer first-place votes</b> than "+esc(lastName(top.name))+" ("+num(rows[0].first)+" to "+num(top.first)+")",true);
+  }
+  if(y===closestY) note("<b>Closest race</b> of all "+NS+" seasons",true);
+  if(y===widestY) note("<b>Widest margin</b> of all "+NS+" seasons",true);
+  if(rows.some(function(r){ return r.t; })) note("Tie for fifth place");
+  if(!S.media) note("Players could not vote for teammates");
+  if(S.incomplete) note("Official tally incomplete");
   if(LOCKOUT[y]) note("Lockout-shortened season");
 
-  state.sel=state.sel&&P[state.sel].byYear[y]?state.sel:rows[0].name;
+  state.sel=state.sel&&P[state.sel]&&P[state.sel].byYear[y]?state.sel:rows[0].name;
   rowsBox.querySelectorAll(".row").forEach(function(b){ b.classList.toggle("sel",b.dataset.name===state.sel); });
   renderCard($("#cardSeason"),state.sel,y);
+  syncHash();
 }
 rowsBox.addEventListener("click",function(ev){
   var b=ev.target.closest(".row"); if(!b) return;
@@ -462,24 +766,31 @@ function setYear(y,keepSel){
   state.year=y; if(!keepSel) state.sel=null; renderSeason();
 }
 function gotoSeason(y,name){
-  state.year=y; state.sel=name; showTab("season"); renderSeason();
+  state.year=y; state.sel=name||null; showTab("season"); renderSeason();
+  window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
+}
+function gotoPlayer(name){
+  state.psel=name; state.pq=""; state.pmin=1; $("#pq").value=""; $("#pmin").value="1";
+  showTab("players");
   window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
 }
 slider.addEventListener("input",function(){ stop(); setYear(parseInt(slider.value,10)); });
 $("#prev").addEventListener("click",function(){ stop(); setYear(state.year-1); });
 $("#next").addEventListener("click",function(){ stop(); setYear(state.year+1); });
-var decBox=$("#decades");
-[["90s",1992,1999],["2000s",2000,2009],["2010s",2010,2019],["2020s",2020,2026]].forEach(function(d){
-  var b=el("button","dec",d[0]); b.type="button"; b.dataset.a=d[1]; b.dataset.z=d[2]; b.setAttribute("aria-pressed","false");
-  b.addEventListener("click",function(){ stop(); setYear(d[1]); });
-  decBox.appendChild(b);
+var erasBox=$("#eras");
+ERAS.forEach(function(e){
+  var b=el("button","erab","<span class='full'>"+esc(e.name)+"</span><span class='short'>"+esc(e.s)+"</span>");
+  b.type="button"; b.dataset.id=e.id; b.style.setProperty("--ec",e.c); b.style.setProperty("--n",e.z-e.a+1);
+  b.title=e.name+", "+fmtS(e.a)+" to "+fmtS(e.z); b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",function(){ stop(); setYear(e.a); });
+  erasBox.appendChild(b);
 });
 function stop(){ state.playing=false; clearInterval(state.timer); $("#play").textContent="Play"; $("#play").setAttribute("aria-pressed","false"); }
 $("#play").addEventListener("click",function(){
   if(state.playing){ stop(); return; }
   if(state.year>=Y1) setYear(Y0);
   state.playing=true; $("#play").textContent="Pause"; $("#play").setAttribute("aria-pressed","true");
-  state.timer=setInterval(function(){ if(state.year>=Y1){ stop(); return; } setYear(state.year+1); },1700);
+  state.timer=setInterval(function(){ if(state.year>=Y1){ stop(); return; } setYear(state.year+1); },1500);
 });
 document.addEventListener("keydown",function(ev){
   if(state.tab!=="season") return;
@@ -489,53 +800,202 @@ document.addEventListener("keydown",function(ev){
 });
 
 /* ---------- timeline ---------- */
-var tlBuilt=false;
-function buildTimeline(){
-  if(tlBuilt) return; tlBuilt=true;
+var tlReady=false;
+function mkChip(r){
+  var c=el("button","chip"+(r.rank===1?" r1":"")); c.type="button"; c.dataset.name=r.name; c.style.setProperty("--c",col(r.tm));
+  c.innerHTML="<span class='cn'></span><span class='cs'>"+Math.round(r.share*100)+"% &middot; "+r.tm+"</span>";
+  c.querySelector(".cn").textContent=lastName(r.name);
+  c.title=r.name+", "+fmtS(r.y)+", "+pct(r.share);
+  return c;
+}
+function tlHi(name){
+  var g=$("#tl");
+  g.classList.toggle("has-sel",!!name);
+  $$(".chip",g).forEach(function(c){ c.classList.toggle("on",c.dataset.name===name); });
+  var info=$("#tlInfo");
+  if(name){ var p=P[name]; info.innerHTML="<b></b> &middot; "+p.n+" top-five finish"+(p.n===1?"":"es")+", "+p.mvps+" MVP"+(p.mvps===1?"":"s")+", best share "+pct(p.best); info.querySelector("b").textContent=name; }
+  else info.textContent="Hover a name to light up every year that player finished in the top five. Click to hold the highlight.";
+  $("#tlClear").hidden=!state.lock;
+}
+function drawTimeline(){
   var g=$("#tl"); g.innerHTML="";
   var h=el("div","tl-row tl-head"); h.innerHTML="<div>Season</div><div>1st</div><div>2nd</div><div>3rd</div><div>4th</div><div>5th</div>"; g.appendChild(h);
+  var cur=null;
   for(var y=Y1;y>=Y0;y--){
+    var S=SEAS[y]; if(state.tlEra&&S.era.id!==state.tlEra) continue;
+    if(S.era!==cur){
+      cur=S.era;
+      var ws=eraWinners(cur).slice(0,4).map(function(w){ return esc(lastName(w.name))+(w.n>1?" &times;"+w.n:""); }).join(", ");
+      var eh=el("div","tl-era","<b>"+esc(cur.name)+"</b><span>"+fmtS(cur.a)+" to "+fmtS(cur.z)+" &middot; MVPs: "+ws+"</span>");
+      eh.style.setProperty("--ec",cur.c); g.appendChild(eh);
+    }
     var row=el("div","tl-row");
     var yb=el("button","yr",fmtS(y)); yb.type="button"; yb.dataset.y=y; yb.title="Open "+fmtS(y); row.appendChild(yb);
-    BY[y].forEach(function(r){
-      var c=el("button","chip"+(r.rank===1?" r1":"")); c.type="button"; c.dataset.name=r.name; c.style.setProperty("--c",col(r.tm));
-      c.innerHTML="<span class='cn'></span><span class='cs'>"+Math.round(r.share*100)+"% &middot; "+r.tm+"</span>";
-      c.querySelector(".cn").textContent=lastName(r.name);
-      c.title=r.name+", "+fmtS(r.y)+", "+pct(r.share);
-      row.appendChild(c);
-    });
+    var rows=BY[y];
+    rows.filter(function(r){ return r.rank<5; }).forEach(function(r){ row.appendChild(mkChip(r)); });
+    var fifth=rows.filter(function(r){ return r.rank===5; });
+    if(fifth.length>1){ var cell=el("div","tl-cell"); fifth.forEach(function(r){ cell.appendChild(mkChip(r)); }); row.appendChild(cell); }
+    else row.appendChild(mkChip(fifth[0]));
     g.appendChild(row);
   }
-  function hi(name){
-    g.classList.toggle("has-sel",!!name);
-    g.querySelectorAll(".chip").forEach(function(c){ c.classList.toggle("on",c.dataset.name===name); });
-    var info=$("#tlInfo");
-    if(name){ var p=P[name]; info.innerHTML="<b></b> &middot; "+p.n+" top-five finish"+(p.n===1?"":"es")+", "+p.mvps+" MVP"+(p.mvps===1?"":"s")+", best share "+pct(p.best); info.querySelector("b").textContent=name; }
-    else info.textContent="Hover a name to light up every year that player finished in the top five. Click to hold the highlight.";
-    $("#tlClear").hidden=!state.lock;
+  tlHi(state.lock);
+}
+function buildTimeline(){
+  if(!tlReady){
+    tlReady=true;
+    var cb=$("#tlEras");
+    var opts=[{id:"",name:"All eras"}].concat(ERAS);
+    opts.forEach(function(e){
+      var b=el("button","chipb",esc(e.name)); b.type="button"; b.dataset.id=e.id; b.setAttribute("aria-pressed",e.id===state.tlEra?"true":"false");
+      if(e.id) b.title=fmtS(e.a)+" to "+fmtS(e.z);
+      b.addEventListener("click",function(){
+        state.tlEra=e.id; state.lock=null;
+        $$(".chipb",cb).forEach(function(x){ x.setAttribute("aria-pressed",x.dataset.id===e.id?"true":"false"); });
+        drawTimeline();
+      });
+      cb.appendChild(b);
+    });
+    var g=$("#tl");
+    g.addEventListener("pointerover",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) tlHi(c.dataset.name); });
+    g.addEventListener("pointerout",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) tlHi(null); });
+    g.addEventListener("focusin",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) tlHi(c.dataset.name); });
+    g.addEventListener("focusout",function(ev){ if(!state.lock&&ev.target.closest(".chip")) tlHi(null); });
+    g.addEventListener("click",function(ev){
+      var yb=ev.target.closest(".yr"); if(yb){ gotoSeason(parseInt(yb.dataset.y,10),null); return; }
+      var c=ev.target.closest(".chip"); if(!c) return;
+      state.lock=(state.lock===c.dataset.name)?null:c.dataset.name; tlHi(state.lock);
+    });
+    $("#tlClear").addEventListener("click",function(){ state.lock=null; tlHi(null); });
   }
-  g.addEventListener("pointerover",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) hi(c.dataset.name); });
-  g.addEventListener("pointerout",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) hi(null); });
-  g.addEventListener("focusin",function(ev){ var c=ev.target.closest(".chip"); if(c&&!state.lock) hi(c.dataset.name); });
-  g.addEventListener("focusout",function(ev){ if(!state.lock&&ev.target.closest(".chip")) hi(null); });
-  g.addEventListener("click",function(ev){
-    var yb=ev.target.closest(".yr"); if(yb){ gotoSeason(parseInt(yb.dataset.y,10),null); return; }
-    var c=ev.target.closest(".chip"); if(!c) return;
-    state.lock=(state.lock===c.dataset.name)?null:c.dataset.name; hi(state.lock);
-  });
-  $("#tlClear").addEventListener("click",function(){ state.lock=null; hi(null); });
+  drawTimeline();
 }
 
-/* ---------- ballot table ---------- */
-var tblBuilt=false;
+/* ---------- careers heat map ---------- */
+var hmReady=false;
+var RANKCOL=["","#D79A12","#8D96AB","#B0713A","#5C6786","#5C6786"];
+function hmColor(o,mode){
+  if(mode==="rank") return RANKCOL[o.rank]||"#5C6786";
+  if(mode==="share"){ var p=Math.round(12+88*Math.min(1,o.share/0.95)); return "color-mix(in srgb,var(--accent) "+p+"%,var(--panel2))"; }
+  var q=Math.round(38+62*Math.min(1,o.share/0.9));
+  return "color-mix(in srgb,"+col(o.tm)+" "+q+"%,var(--panel2))";
+}
+function drawCareers(){
+  var CW=window.innerWidth<560?10:13, hm=$("#hm"), mode=state.hm.color, s=state.hm.sort;
+  hm.style.setProperty("--cw",CW+"px"); hm.innerHTML="";
+  var list=PL.filter(function(p){ return p.n>=state.hm.min; });
+  list.sort(function(a,b){
+    if(s==="first") return a.first-b.first||b.n-a.n||a.name.localeCompare(b.name);
+    if(s==="mvps") return b.mvps-a.mvps||b.n-a.n||a.first-b.first;
+    if(s==="n") return b.n-a.n||b.mvps-a.mvps||a.first-b.first;
+    return b.best-a.best||b.n-a.n||a.first-b.first;
+  });
+  var W=NS*CW;
+  var head=el("div","hm-row hm-head");
+  head.appendChild(el("div","hm-name","<b>Player</b><i>top 5s</i>"));
+  var ht=el("div","hm-track"); ht.style.width=W+"px";
+  ERAS.forEach(function(e){
+    var b=el("div","hm-era",esc(e.name)); b.style.left=((e.a-Y0)*CW)+"px"; b.style.width=((e.z-e.a+1)*CW-1)+"px";
+    b.style.setProperty("--ec",e.c); b.title=e.name+" ("+fmtS(e.a)+" to "+fmtS(e.z)+")"; ht.appendChild(b);
+  });
+  for(var t=Y0;t<=Y1;t++){ if(t%10===0){ var tk=el("span","hm-tick",String(t)); tk.style.left=((t-Y0+.5)*CW)+"px"; ht.appendChild(tk); } }
+  head.appendChild(ht); hm.appendChild(head);
+  var frag=document.createDocumentFragment();
+  list.forEach(function(p){
+    var row=el("div","hm-row");
+    var nb=el("button","hm-name"); nb.type="button"; nb.dataset.name=p.name;
+    nb.innerHTML="<b></b><i>"+p.n+(p.mvps?" &middot; "+p.mvps+" MVP":"")+"</i>"; nb.querySelector("b").textContent=p.name;
+    nb.title="Open "+p.name; row.appendChild(nb);
+    var tr=el("div","hm-track"); tr.style.width=W+"px";
+    p.list.forEach(function(o){
+      var c=el("button","hc"+(o.rank===1?" mvp":"")); c.type="button"; c.dataset.y=o.y; c.dataset.name=p.name;
+      c.style.left=((o.y-Y0)*CW)+"px"; c.style.setProperty("--c",hmColor(o,mode));
+      c.title=p.name+", "+fmtS(o.y)+": "+rkOrd(o)+", "+pct(o.share)+" ("+o.tm+")"; c.setAttribute("aria-label",c.title);
+      tr.appendChild(c);
+    });
+    row.appendChild(tr); frag.appendChild(row);
+  });
+  hm.appendChild(frag);
+  $("#hmCount").textContent=list.length+" players";
+  $("#hmHint").textContent=
+    (mode==="team"?"Each square is one top-five finish, colored by team; brighter means a bigger share of the vote."
+     :mode==="rank"?"Each square is one top-five finish: gold for 1st, silver for 2nd, bronze for 3rd, slate for 4th and 5th."
+     :"Each square is one top-five finish; the more orange, the bigger the share of the vote.")+
+    " A white dot marks an MVP season. Click a square for that season or a name for the career card.";
+}
+function buildCareers(){
+  if(!hmReady){
+    hmReady=true;
+    $("#hmMin").addEventListener("change",function(ev){ state.hm.min=parseInt(ev.target.value,10); drawCareers(); });
+    $("#hmSort").addEventListener("change",function(ev){ state.hm.sort=ev.target.value; drawCareers(); });
+    $("#hmColor").addEventListener("click",function(ev){
+      var b=ev.target.closest("button"); if(!b) return;
+      state.hm.color=b.dataset.m;
+      $$("#hmColor button").forEach(function(x){ x.setAttribute("aria-pressed",x===b?"true":"false"); });
+      drawCareers();
+    });
+    $("#hm").addEventListener("click",function(ev){
+      var c=ev.target.closest(".hc"); if(c){ gotoSeason(parseInt(c.dataset.y,10),c.dataset.name); return; }
+      var n=ev.target.closest("button.hm-name"); if(n) gotoPlayer(n.dataset.name);
+    });
+  }
+  drawCareers();
+}
+
+/* ---------- ballots: season cards and table ---------- */
+var tblReady=false;
+function qActive(){ return !!(state.q||state.tteam); }
+function qOk(r){
+  var q=state.q; if(!q) return true;
+  var tm=r.tm.toLowerCase();
+  return r.name.toLowerCase().indexOf(q)>=0||tm===q||(q.length>=2&&tm.indexOf(q)===0)||(q.length>=3&&tname(r.tm).toLowerCase().indexOf(q)>=0)||fmtS(r.y).indexOf(q)>=0||String(r.y)===q;
+}
+function teamOk(r){ return !state.tteam||fr(r.tm)===state.tteam; }
+function eraOk(r){ return !state.tera||SEAS[r.y].era.id===state.tera; }
+function rankOk(r){ return state.trank==="all"||(state.trank==="1"?r.rank===1:r.rank<=3); }
+function matchOk(r){ return qOk(r)&&teamOk(r); }
+
+function drawCards(){
+  var box=$("#cards"); box.innerHTML="";
+  var cur=null, shown=0;
+  for(var y=Y1;y>=Y0;y--){
+    var S=SEAS[y]; if(state.tera&&S.era.id!==state.tera) continue;
+    var rows=BY[y].filter(rankOk);
+    if(!rows.some(matchOk)) continue;
+    if(S.era!==cur){
+      cur=S.era;
+      var ws=eraWinners(cur).slice(0,3).map(function(w){ return esc(lastName(w.name))+(w.n>1?" &times;"+w.n:""); }).join(", ");
+      var eh=el("div","era-h","<h3>"+esc(cur.name)+"</h3><span>"+fmtS(cur.a)+" to "+fmtS(cur.z)+" &middot; MVPs: "+ws+"</span>");
+      eh.style.setProperty("--ec",cur.c); box.appendChild(eh);
+    }
+    shown++;
+    var card=el("article","sc");
+    var hd=el("button","sc-head"); hd.type="button"; hd.dataset.y=y;
+    hd.innerHTML="<span class='sc-yr'>"+fmtS(y)+"</span><span class='sc-mvp'>MVP <b></b></span>";
+    hd.querySelector("b").textContent=lastName(BY[y][0].name);
+    hd.title="Open "+fmtS(y); card.appendChild(hd);
+    rows.forEach(function(r){
+      var b=el("button","sc-row"+(r.rank===1?" w":"")+((qActive()&&!matchOk(r))?" dim":"")); b.type="button";
+      b.dataset.y=r.y; b.dataset.name=r.name; b.style.setProperty("--c",col(r.tm));
+      b.innerHTML="<span class='r'>"+rkText(r)+"</span><span class='n'></span><span class='bar'><i style='width:"+(r.share*100)+"%'></i></span><span class='p'>"+Math.round(r.share*100)+"%</span>";
+      b.querySelector(".n").textContent=lastName(r.name)+" "+r.tm;
+      b.title=r.name+" ("+tname(r.tm)+"), "+pct(r.share);
+      card.appendChild(b);
+    });
+    card.appendChild(el("div","sc-foot"));
+    box.appendChild(card);
+  }
+  if(!shown) box.appendChild(el("p","pc-hint","No seasons match those filters."));
+  $("#tcount").textContent=shown+" season"+(shown===1?"":"s");
+}
+
 var TCOLS=[
   {k:"y",t:"Season",f:function(r){return fmtS(r.y);}},
-  {k:"rank",t:"Rank",n:1,f:function(r){return r.rank;}},
-  {k:"name",t:"Player",f:function(r){return "<span class='dot' style='--c:"+col(r.tm)+"'></span>"+r.name;}},
+  {k:"rank",t:"Rank",n:1,f:function(r){return rkText(r);}},
+  {k:"name",t:"Player",f:function(r){return "<span class='dot' style='--c:"+col(r.tm)+"'></span>"+esc(r.name);}},
   {k:"age",t:"Age",n:1,f:function(r){return r.age;}},
-  {k:"tm",t:"Team",f:function(r){return r.tm;}},
-  {k:"first",t:"1st",n:1,f:function(r){return r.first;}},
-  {k:"pts",t:"Pts",n:1,f:function(r){return r.pts;}},
+  {k:"tm",t:"Team",f:function(r){return "<span title='"+esc(tname(r.tm))+"'>"+r.tm+"</span>";}},
+  {k:"first",t:"1st",n:1,f:function(r){return num(r.first);}},
+  {k:"pts",t:"Pts",n:1,f:function(r){return num(r.pts);}},
   {k:"max",t:"Max",n:1,f:function(r){return r.max;}},
   {k:"share",t:"Share",n:1,f:function(r){return pct(r.share)+"<span class='mini' style='--c:"+col(r.tm)+"'><i style='width:"+(r.share*100)+"%'></i></span>";}},
   {k:"g",t:"GP",n:1,f:function(r){return r.g;}},
@@ -552,54 +1012,83 @@ function cmp(k,dir){
     return a.rank-b.rank;
   };
 }
-function buildTable(){
-  if(!tblBuilt){
-    tblBuilt=true;
-    var tr=el("tr"); TCOLS.forEach(function(c){ var th=el("th",c.n?"n":""); th.dataset.k=c.k; th.tabIndex=0; th.setAttribute("role","columnheader"); tr.appendChild(th); });
-    $("#thead").appendChild(tr);
-    $("#thead").addEventListener("click",function(ev){ var th=ev.target.closest("th"); if(th) sortBy(th.dataset.k); });
-    $("#thead").addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ var th=ev.target.closest("th"); if(th){ ev.preventDefault(); sortBy(th.dataset.k); } } });
-    $("#tq").addEventListener("input",function(ev){ state.q=ev.target.value.trim().toLowerCase(); drawTable(); });
-    $("#tmvp").addEventListener("change",function(ev){ state.onlyMvp=ev.target.checked; drawTable(); });
-    $("#tbody").addEventListener("click",function(ev){ var tr2=ev.target.closest("tr"); if(tr2) gotoSeason(parseInt(tr2.dataset.y,10),tr2.dataset.name); });
-  }
-  drawTable();
+function filteredRows(){
+  return ALL.filter(function(r){ return rankOk(r)&&matchOk(r)&&eraOk(r); }).sort(cmp(state.sort.k,state.sort.dir));
 }
 function sortBy(k){
-  if(state.sort.k===k) state.sort.dir*=-1; else { state.sort.k=k; state.sort.dir=(k==="name"||k==="tm"||k==="rank"||k==="age")?1:-1; if(k==="y") state.sort.dir=-1; }
+  if(state.sort.k===k) state.sort.dir*=-1; else { state.sort.k=k; state.sort.dir=(k==="name"||k==="tm"||k==="rank"||k==="age")?1:-1; }
   drawTable();
 }
 function drawTable(){
-  document.querySelectorAll("#thead th").forEach(function(th,i){
+  $$("#thead th").forEach(function(th,i){
     var c=TCOLS[i], on=state.sort.k===c.k;
     th.innerHTML=c.t+(on?" <span class='arr'>"+(state.sort.dir>0?"&#9650;":"&#9660;")+"</span>":"");
     if(on) th.setAttribute("aria-sort",state.sort.dir>0?"ascending":"descending"); else th.removeAttribute("aria-sort");
   });
-  var q=state.q;
-  var rows=ALL.filter(function(r){
-    if(state.onlyMvp&&r.rank!==1) return false;
-    if(!q) return true;
-    return r.name.toLowerCase().indexOf(q)>=0||r.tm.toLowerCase()===q||r.tm.toLowerCase().indexOf(q)===0&&q.length>=2||fmtS(r.y).indexOf(q)>=0||String(r.y)===q;
-  }).sort(cmp(state.sort.k,state.sort.dir));
+  var rows=filteredRows();
   var tb=$("#tbody"); tb.innerHTML="";
   var frag=document.createDocumentFragment();
   rows.forEach(function(r){
     var tr=el("tr",r.rank===1?"w":""); tr.dataset.y=r.y; tr.dataset.name=r.name;
-    TCOLS.forEach(function(c){ var td=el("td",c.n?"n":"",c.f(r)); tr.appendChild(td); });
+    TCOLS.forEach(function(c){ tr.appendChild(el("td",c.n?"n":"",c.f(r))); });
     frag.appendChild(tr);
   });
   tb.appendChild(frag);
   $("#tcount").textContent=rows.length+" of "+ALL.length+" rows";
 }
+function drawBallots(){
+  var cards=state.tview==="cards";
+  $("#cardsWrap").hidden=!cards; $("#tableWrap").hidden=cards;
+  $$("#tview button").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.v===state.tview?"true":"false"); });
+  if(cards) drawCards(); else drawTable();
+}
+function csvCell(v){ v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function downloadCsv(){
+  var rows=filteredRows();
+  var lines=[["Season","Rank","Player","Age","Team","FirstPlaceVotes","PointsWon","PointsMax","Share","Games","PTS","REB","AST"].join(",")];
+  rows.forEach(function(r){
+    lines.push([fmtS(r.y),rkText(r),r.name,r.age,r.tm,r.first,r.pts,r.max,r.share.toFixed(4),r.g,r.ppg,r.rpg,r.apg].map(csvCell).join(","));
+  });
+  var blob=new Blob([lines.join("\n")],{type:"text/csv"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="nba-mvp-top5.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+}
+function buildTable(){
+  if(!tblReady){
+    tblReady=true;
+    var te=$("#tera"); te.innerHTML="<option value=''>All eras</option>";
+    ERAS.forEach(function(e){ var o=el("option",null,esc(e.name)+" ("+fmtS(e.a)+" to "+fmtS(e.z)+")"); o.value=e.id; te.appendChild(o); });
+    var tt=$("#tteam"); tt.innerHTML="<option value=''>All franchises</option>";
+    var keys={}; ALL.forEach(function(r){ keys[fr(r.tm)]=1; });
+    Object.keys(keys).sort(function(a,b){ return (FNAME[a]||a).localeCompare(FNAME[b]||b); }).forEach(function(k){ var o=el("option",null,esc(FNAME[k]||k)); o.value=k; tt.appendChild(o); });
+    var tr=el("tr"); TCOLS.forEach(function(c){ var th=el("th",c.n?"n":""); th.dataset.k=c.k; th.tabIndex=0; th.setAttribute("role","columnheader"); tr.appendChild(th); });
+    $("#thead").appendChild(tr);
+    $("#thead").addEventListener("click",function(ev){ var th=ev.target.closest("th"); if(th) sortBy(th.dataset.k); });
+    $("#thead").addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ var th=ev.target.closest("th"); if(th){ ev.preventDefault(); sortBy(th.dataset.k); } } });
+    $("#tq").addEventListener("input",function(ev){ state.q=ev.target.value.trim().toLowerCase(); drawBallots(); });
+    te.addEventListener("change",function(ev){ state.tera=ev.target.value; drawBallots(); });
+    tt.addEventListener("change",function(ev){ state.tteam=ev.target.value; drawBallots(); });
+    $("#trank").addEventListener("change",function(ev){ state.trank=ev.target.value; drawBallots(); });
+    $("#tview").addEventListener("click",function(ev){ var b=ev.target.closest("button"); if(!b) return; state.tview=b.dataset.v; drawBallots(); });
+    $("#tcsv").addEventListener("click",downloadCsv);
+    $("#tbody").addEventListener("click",function(ev){ var tr2=ev.target.closest("tr"); if(tr2) gotoSeason(parseInt(tr2.dataset.y,10),tr2.dataset.name); });
+    $("#cards").addEventListener("click",function(ev){
+      var r=ev.target.closest(".sc-row"); if(r){ gotoSeason(parseInt(r.dataset.y,10),r.dataset.name); return; }
+      var h=ev.target.closest(".sc-head"); if(h) gotoSeason(parseInt(h.dataset.y,10),null);
+    });
+  }
+  drawBallots();
+}
 
 /* ---------- players ---------- */
-var plBuilt=false;
+var plReady=false;
 var PCOLS=[
   {k:"name",t:"Player",f:function(p){return p.name;}},
   {k:"n",t:"Top 5",n:1,f:function(p){return p.n;}},
   {k:"mvps",t:"MVPs",n:1,f:function(p){return p.mvps;}},
   {k:"best",t:"Best share",n:1,f:function(p){return pct(p.best);}},
-  {k:"first",t:"Span",n:1,f:function(p){return fmtS(p.first).slice(0,4)+" to "+fmtS(p.last).slice(0,4);}}
+  {k:"first",t:"Span",n:1,f:function(p){return fmtS(p.first)+" to "+fmtS(p.last);}}
 ];
 function pcmp(k,dir){
   return function(a,b){
@@ -611,32 +1100,34 @@ function pcmp(k,dir){
   };
 }
 function buildPlayers(){
-  if(!plBuilt){
-    plBuilt=true;
+  if(!plReady){
+    plReady=true;
     var tr=el("tr"); PCOLS.forEach(function(c){ var th=el("th",c.n?"n":""); th.dataset.k=c.k; th.tabIndex=0; tr.appendChild(th); });
     $("#phead").appendChild(tr);
-    function ps(th){ var k=th.dataset.k; if(state.psort.k===k) state.psort.dir*=-1; else { state.psort.k=k; state.psort.dir=(k==="name"||k==="first")?1:-1; } drawPlayers(); }
+    var ps=function(th){ var k=th.dataset.k; if(state.psort.k===k) state.psort.dir*=-1; else { state.psort.k=k; state.psort.dir=(k==="name"||k==="first")?1:-1; } drawPlayers(); };
     $("#phead").addEventListener("click",function(ev){ var th=ev.target.closest("th"); if(th) ps(th); });
     $("#phead").addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ var th=ev.target.closest("th"); if(th){ ev.preventDefault(); ps(th); } } });
     $("#pq").addEventListener("input",function(ev){ state.pq=ev.target.value.trim().toLowerCase(); drawPlayers(); });
+    $("#pmin").addEventListener("change",function(ev){ state.pmin=parseInt(ev.target.value,10); drawPlayers(); });
     $("#pbody").addEventListener("click",function(ev){
       var tr2=ev.target.closest("tr"); if(!tr2) return;
       state.psel=tr2.dataset.name;
-      document.querySelectorAll("#pbody tr").forEach(function(r){ r.classList.toggle("w",r.dataset.name===state.psel); });
+      $$("#pbody tr").forEach(function(r){ r.classList.toggle("w",r.dataset.name===state.psel); });
       renderCard($("#cardPlayers"),state.psel,null);
     });
-    state.psel=PL.slice().sort(pcmp("n",-1))[0].name;
+    if(!state.psel) state.psel=PL.slice().sort(pcmp("n",-1))[0].name;
   }
   drawPlayers();
   renderCard($("#cardPlayers"),state.psel,null);
+  var sel=$("#pbody tr.w"); if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:"nearest"});
 }
 function drawPlayers(){
-  document.querySelectorAll("#phead th").forEach(function(th,i){
+  $$("#phead th").forEach(function(th,i){
     var c=PCOLS[i], on=state.psort.k===c.k;
     th.innerHTML=c.t+(on?" <span class='arr'>"+(state.psort.dir>0?"&#9650;":"&#9660;")+"</span>":"");
     if(on) th.setAttribute("aria-sort",state.psort.dir>0?"ascending":"descending"); else th.removeAttribute("aria-sort");
   });
-  var rows=PL.filter(function(p){ return !state.pq||p.name.toLowerCase().indexOf(state.pq)>=0; }).sort(pcmp(state.psort.k,state.psort.dir));
+  var rows=PL.filter(function(p){ return p.n>=state.pmin&&(!state.pq||p.name.toLowerCase().indexOf(state.pq)>=0); }).sort(pcmp(state.psort.k,state.psort.dir));
   var tb=$("#pbody"); tb.innerHTML="";
   rows.forEach(function(p){
     var tr=el("tr",p.name===state.psel?"w":""); tr.dataset.name=p.name;
@@ -646,19 +1137,291 @@ function drawPlayers(){
   $("#pcount").textContent=rows.length+" players";
 }
 
+/* ---------- rivals (head to head) ---------- */
+var rvReady=false;
+var RV_PRESETS=[["Bill Russell","Wilt Chamberlain"],["Larry Bird","Magic Johnson"],["Oscar Robertson","Jerry West"],["Kareem Abdul-Jabbar","Bob McAdoo"],["Michael Jordan","Karl Malone"],["Tim Duncan","Kevin Garnett"],["LeBron James","Kevin Durant"],["Nikola Jokić","Joel Embiid"],["Nikola Jokić","Shai Gilgeous-Alexander"]];
+function plain(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim(); }
+function findPlayer(s){
+  s=plain(s); if(!s) return null;
+  var names=Object.keys(P), i;
+  for(i=0;i<names.length;i++){ if(plain(names[i])===s) return names[i]; }
+  var hits=names.filter(function(n){ return plain(n).indexOf(s)>=0; });
+  return hits.length===1?hits[0]:null;
+}
+function sideCell(cls,o){
+  if(!o) return "<span class='bf-side "+cls+" empty'><span class='v'>-</span><span class='t'></span></span>";
+  var v=(o.rank===1?"MVP":rkOrd(o))+" &middot; "+pct(o.share);
+  var bar="<span class='t'><i"+(o.rank===1?" class='w'":"")+" style='width:"+(o.share*100)+"%;--c:"+col(o.tm)+"'></i></span>";
+  return "<span class='bf-side "+cls+"'>"+(cls==="l"?"<span class='v'>"+v+"</span>"+bar:bar+"<span class='v'>"+v+"</span>")+"</span>";
+}
+function renderRivals(){
+  var out=$("#rvOut"); out.innerHTML="";
+  var A=P[state.ra], B=P[state.rb];
+  if(!A||!B){ out.appendChild(el("p","pc-hint","Pick two players from the suggestions to compare their MVP ballots.")); return; }
+  if(A===B){ out.appendChild(el("p","pc-hint","Pick two different players.")); return; }
+  var head=el("div","rv-head");
+  [A,B].forEach(function(p){
+    var c=el("div","rv-card","<h3></h3><p>"+p.n+" top-five finish"+(p.n===1?"":"es")+" &middot; "+p.mvps+" MVP"+(p.mvps===1?"":"s")+" &middot; best share "+pct(p.best)+"</p>");
+    c.style.setProperty("--c",col(p.list[p.list.length-1].tm)); c.querySelector("h3").textContent=p.name; head.appendChild(c);
+  });
+  out.appendChild(head);
+  var years={}; A.list.forEach(function(o){ years[o.y]=1; }); B.list.forEach(function(o){ years[o.y]=1; });
+  var ys=Object.keys(years).map(Number).sort(function(a,b){ return a-b; });
+  var both=0, aAhead=0, bAhead=0, tied=0;
+  ys.forEach(function(yv){
+    var a=A.byYear[yv], b=B.byYear[yv]; if(!a||!b) return;
+    both++; if(a.rank<b.rank) aAhead++; else if(b.rank<a.rank) bAhead++; else tied++;
+  });
+  var la=esc(lastName(A.name)), lb=esc(lastName(B.name));
+  var sum=both
+    ? "Both made the top five in <b>"+both+"</b> season"+(both===1?"":"s")+". "+la+" finished ahead <b>"+aAhead+"</b> time"+(aAhead===1?"":"s")+", "+lb+" <b>"+bAhead+"</b>"+(tied?", with <b>"+tied+"</b> tied":"")+". MVPs: "+la+" <b>"+A.mvps+"</b>, "+lb+" <b>"+B.mvps+"</b>."
+    : "They never shared a top five. MVPs: "+la+" <b>"+A.mvps+"</b>, "+lb+" <b>"+B.mvps+"</b>.";
+  out.appendChild(el("p","rv-sum",sum));
+  var bf=el("div","bf");
+  var hd=el("div","bf-row"); hd.style.cursor="default";
+  hd.innerHTML="<span class='bf-side l'><b></b><span></span></span><span class='bf-y'></span><span class='bf-side r'><span></span><b></b></span>";
+  hd.querySelector(".l b").textContent=A.name; hd.querySelector(".r b").textContent=B.name;
+  hd.querySelector(".l").style.gridTemplateColumns="minmax(0,1fr)"; hd.querySelector(".r").style.gridTemplateColumns="minmax(0,1fr)";
+  hd.querySelector(".l span").remove(); hd.querySelector(".r span").remove();
+  hd.querySelector(".r b").style.textAlign="right"; hd.querySelector(".l b").style.textAlign="left";
+  bf.appendChild(hd);
+  ys.forEach(function(yv){
+    var a=A.byYear[yv], b=B.byYear[yv];
+    var r=el("button","bf-row"+(a&&b?" both":"")); r.type="button"; r.dataset.y=yv; r.dataset.name=(a||b).name;
+    r.innerHTML=sideCell("l",a)+"<span class='bf-y'>"+fmtS(yv)+"</span>"+sideCell("r",b);
+    r.title="Open "+fmtS(yv);
+    bf.appendChild(r);
+  });
+  out.appendChild(bf);
+}
+function buildRivals(){
+  if(!rvReady){
+    rvReady=true;
+    var dl=$("#plist");
+    PL.slice().sort(function(a,b){ return b.n-a.n||a.name.localeCompare(b.name); }).forEach(function(p){ var o=document.createElement("option"); o.value=p.name; dl.appendChild(o); });
+    var pr=$("#rvPresets");
+    RV_PRESETS.filter(function(p){ return P[p[0]]&&P[p[1]]; }).forEach(function(p){
+      var b=el("button","chipb",esc(lastName(p[0]))+" vs "+esc(lastName(p[1]))); b.type="button"; b.dataset.a=p[0]; b.dataset.b=p[1];
+      b.title=p[0]+" vs "+p[1];
+      b.addEventListener("click",function(){ state.ra=p[0]; state.rb=p[1]; syncRivalsInputs(); renderRivals(); });
+      pr.appendChild(b);
+    });
+    var upd=function(){
+      var a=findPlayer($("#rva").value), b=findPlayer($("#rvb").value);
+      state.ra=a||""; state.rb=b||""; renderRivals(); markPresets();
+    };
+    $("#rva").addEventListener("input",upd); $("#rvb").addEventListener("input",upd);
+    $("#rva").addEventListener("change",function(){ var a=findPlayer(this.value); if(a) this.value=a; });
+    $("#rvb").addEventListener("change",function(){ var b=findPlayer(this.value); if(b) this.value=b; });
+    $("#rvOut").addEventListener("click",function(ev){ var r=ev.target.closest(".bf-row[data-y]"); if(r) gotoSeason(parseInt(r.dataset.y,10),r.dataset.name); });
+    syncRivalsInputs();
+  }
+  renderRivals();
+}
+function markPresets(){
+  $$("#rvPresets .chipb").forEach(function(b){ b.setAttribute("aria-pressed",(b.dataset.a===state.ra&&b.dataset.b===state.rb)?"true":"false"); });
+}
+function syncRivalsInputs(){ $("#rva").value=state.ra; $("#rvb").value=state.rb; markPresets(); }
+
+/* ---------- records ---------- */
+var recsReady=false;
+function streaks(test){
+  var out=[];
+  PL.forEach(function(p){
+    var s=null;
+    p.list.filter(test).forEach(function(e){
+      if(s&&e.y===s.z+1){ s.z=e.y; s.len++; } else { if(s) out.push(s); s={name:p.name,a:e.y,z:e.y,len:1}; }
+    });
+    if(s) out.push(s);
+  });
+  return out;
+}
+function maxBy(arr,f){ var m=-Infinity; arr.forEach(function(x){ var v=f(x); if(v>m) m=v; }); return arr.filter(function(x){ return f(x)===m; }); }
+function minBy(arr,f){ return maxBy(arr,function(x){ return -f(x); }); }
+function voteText(o){
+  var S=SEAS[o.y];
+  if(S.single) return num(o.pts)+" of "+S.max+" votes";
+  if(S.media) return num(o.first)+" of "+(S.max/10)+" first-place votes";
+  return num(o.pts)+" of "+S.max+" points";
+}
+function buildRecords(){
+  if(recsReady) return; recsReady=true;
+  var box=$("#recs");
+  var winners=ALL.filter(function(o){ return o.rank===1; });
+  function add(title,big,lines,note,custom){
+    var c=el("section","rec"+(custom?" wide":"")); c.appendChild(el("h3",null,esc(title)));
+    if(big!=null) c.appendChild(el("div","big",esc(String(big))));
+    (lines||[]).forEach(function(l){
+      var b=el(l.y||l.n?"button":"div","rec-line",l.h);
+      if(l.y||l.n){ b.type="button"; if(l.y) b.dataset.y=l.y; if(l.n) b.dataset.name=l.n; }
+      c.appendChild(b);
+    });
+    if(custom) custom(c);
+    if(note) c.appendChild(el("p","rec-note",esc(note)));
+    box.appendChild(c);
+  }
+  var career=function(p){ return {n:p.name,h:"<b>"+esc(p.name)+"</b> &middot; "+fmtS(p.first)+" to "+fmtS(p.last)+", "+p.n+" top fives, "+p.mvps+" MVP"+(p.mvps===1?"":"s")}; };
+
+  var topM=maxBy(PL,function(p){ return p.mvps; });
+  add("Most MVPs",topM[0].mvps+(topM.length>1?" each":""),topM.map(function(p){ return {n:p.name,h:"<b>"+esc(p.name)+"</b> &middot; "+p.list.filter(function(e){ return e.rank===1; }).map(function(e){ return fmtS(e.y); }).join(", ")}; }));
+  var topN=maxBy(PL,function(p){ return p.n; });
+  add("Most top-five finishes",topN[0].n+(topN.length>1?" each":""),topN.map(career));
+  var run=maxBy(streaks(function(){ return true; }),function(s){ return s.len; });
+  add("Longest run of top-five finishes",run[0].len+" seasons",run.map(function(s){ return {n:s.name,h:"<b>"+esc(s.name)+"</b> &middot; "+fmtS(s.a)+" to "+fmtS(s.z)}; }));
+  var mrun=maxBy(streaks(function(e){ return e.rank===1; }),function(s){ return s.len; });
+  add("Most MVPs in a row",mrun[0].len,mrun.map(function(s){ return {n:s.name,h:"<b>"+esc(s.name)+"</b> &middot; "+fmtS(s.a)+" to "+fmtS(s.z)}; }));
+
+  var dom=maxBy(winners,function(o){ return o.share; });
+  add("Most dominant win",pct(dom[0].share),dom.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)+", "+voteText(o)}; }));
+  var thin=minBy(winners,function(o){ return o.share; });
+  add("Narrowest mandate",pct(thin[0].share),thin.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)+", "+voteText(o)}; }),"Lowest share of the vote for an MVP.");
+
+  var okYears=[]; for(var y=Y0;y<=Y1;y++){ if(!SEAS[y].incomplete) okYears.push(y); }
+  function raceLine(yv){
+    var r=BY[yv], S=SEAS[yv];
+    return {y:yv,n:r[0].name,h:"<b>"+fmtS(yv)+"</b> &middot; "+esc(lastName(r[0].name))+" over "+esc(lastName(r[1].name))+" by "+num(r[0].pts-r[1].pts)+(S.single?" votes":" pts")+" ("+pct(margins[yv])+" of the ballot)"};
+  }
+  var closest=okYears.slice().sort(function(a,b){ return margins[a]-margins[b]; }).slice(0,3);
+  add("Closest races",pct(margins[closest[0]]),closest.map(raceLine),"Margin between 1st and 2nd as a share of the ballot. Seasons with incomplete official tallies are left out.");
+  var widest=okYears.slice().sort(function(a,b){ return margins[b]-margins[a]; }).slice(0,3);
+  add("Biggest blowouts",pct(margins[widest[0]]),widest.map(raceLine),"Same measure, widest gaps. Incomplete tallies left out.");
+
+  add("Unanimous MVPs",unanimous.length,unanimous.map(function(yv){ var o=BY[yv][0]; return {y:yv,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(yv)+", "+voteText(o)}; }),"Players could not vote for teammates before 1980-81, so unanimity was impossible then.");
+
+  var fewer=[];
+  for(y=Y0;y<=Y1;y++){
+    if(SEAS[y].single) continue;
+    var w=BY[y][0], others=BY[y].slice(1), mxo=Math.max.apply(null,others.map(function(r){ return r.first; }));
+    if(mxo>w.first) fewer.push({y:y,w:w,o:others.filter(function(r){ return r.first===mxo; })[0]});
+  }
+  add("MVP with fewer first-place votes than a rival",fewer.length,fewer.map(function(f){ return {y:f.y,n:f.w.name,h:"<b>"+fmtS(f.y)+"</b> &middot; "+esc(lastName(f.w.name))+" ("+num(f.w.first)+") over "+esc(lastName(f.o.name))+" ("+num(f.o.first)+")"}; }),"The weighted ballot rewards depth: second- and third-place votes count too.");
+
+  var runnerUps=ALL.filter(function(o){ return o.rank>1; }).sort(function(a,b){ return b.share-a.share; }).slice(0,3);
+  add("Best finish without winning",pct(runnerUps[0].share),runnerUps.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)+", "+rkOrd(o)+", "+pct(o.share)}; }));
+  var noMvp=PL.filter(function(p){ return p.mvps===0; }).sort(function(a,b){ return b.n-a.n||a.first-b.first; }).slice(0,3);
+  add("Most top fives without an MVP",noMvp[0].n,noMvp.map(function(p){ return {n:p.name,h:"<b>"+esc(p.name)+"</b> &middot; "+p.n+", "+fmtS(p.first)+" to "+fmtS(p.last)}; }));
+
+  var young=minBy(winners,function(o){ return o.age; });
+  add("Youngest MVP",young[0].age,young.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)}; }),"Age as listed on the ballot page.");
+  var old=maxBy(winners,function(o){ return o.age; });
+  add("Oldest MVP",old[0].age,old.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)}; }));
+
+  function statRec(title,key,unit){
+    var top=maxBy(ALL,function(o){ return o[key]; });
+    add(title,top[0][key].toFixed(1)+" "+unit,top.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)+", finished "+rkOrd(o)}; }),"Per-game average among all top-five finishers.");
+  }
+  statRec("Highest-scoring finisher","ppg","ppg");
+  statRec("Top rebounder","rpg","rpg");
+  statRec("Top passer","apg","apg");
+  var td=ALL.filter(function(o){ return o.ppg>=10&&o.rpg>=10&&o.apg>=10; });
+  add("Averaged a triple-double",td.length,td.map(function(o){ return {y:o.y,n:o.name,h:"<b>"+esc(o.name)+"</b> &middot; "+fmtS(o.y)+", "+rkOrd(o)+" ("+o.ppg.toFixed(1)+"/"+o.rpg.toFixed(1)+"/"+o.apg.toFixed(1)+")"}; }));
+
+  var fc={}; winners.forEach(function(o){ var k=fr(o.tm); fc[k]=(fc[k]||0)+1; });
+  var fk=Object.keys(fc).sort(function(a,b){ return fc[b]-fc[a]||a.localeCompare(b); }).slice(0,10);
+  add("MVPs by franchise",null,[],"Old and new franchise names are combined (for example Minneapolis and Los Angeles Lakers).",function(c){
+    fk.forEach(function(k){
+      var r=el("div","fr","<span></span><span class='b'><i style='width:"+(fc[k]/fc[fk[0]]*100)+"%'></i></span><span class='c'>"+fc[k]+"</span>");
+      r.firstChild.textContent=FNAME[k]||k; r.style.setProperty("--c",col(k)); c.appendChild(r);
+    });
+  });
+
+  box.addEventListener("click",function(ev){
+    var b=ev.target.closest("button.rec-line"); if(!b) return;
+    if(b.dataset.y) gotoSeason(parseInt(b.dataset.y,10),b.dataset.name||null); else if(b.dataset.name) gotoPlayer(b.dataset.name);
+  });
+}
+
+/* ---------- guess the MVP ---------- */
+var qzReady=false;
+var Q={pool:[],i:0,score:0,streak:0,rows:[],answered:false,total:0};
+function bestGet(){ try{ return parseInt(localStorage.getItem("mvpbox.best"),10)||0; }catch(e){ return 0; } }
+function bestSet(v){ try{ localStorage.setItem("mvpbox.best",String(v)); }catch(e){} }
+function qzBestText(){ var b=bestGet(); $("#qzBest").textContent=b?"Best 10-question round on all eras: "+b+"/10":""; }
+function qzStart(){
+  var ys=[]; for(var y=Y0;y<=Y1;y++){ if(!state.qz.era||SEAS[y].era.id===state.qz.era) ys.push(y); }
+  shuffle(ys); Q.pool=ys.slice(0,Math.min(10,ys.length)); Q.total=Q.pool.length; Q.i=0; Q.score=0; Q.streak=0;
+  qzShow();
+}
+function qzShow(){
+  var box=$("#qz"); box.innerHTML="";
+  if(Q.i>=Q.total){
+    var ratio=Q.score/Q.total;
+    var verdict=ratio>=.9?"Hall of Fame voter":ratio>=.7?"All-NBA ballot":ratio>=.5?"Sixth-man voter":"Still reading the box scores";
+    if(!state.qz.era&&Q.total===10&&Q.score>bestGet()) bestSet(Q.score);
+    qzBestText();
+    var end=el("div","qz-end","<div class='big'>"+Q.score+"/"+Q.total+"</div><p style='font-size:20px;margin:6px 0 14px'>"+verdict+"</p>");
+    var again=el("button","btn","Play again"); again.type="button"; again.addEventListener("click",qzStart); end.appendChild(again);
+    box.appendChild(end); return;
+  }
+  var y=Q.pool[Q.i]; Q.rows=shuffle(BY[y].slice()); Q.answered=false;
+  var bar=el("div","qz-bar","<div><span class='m'>Season</span><div class='qz-s'>"+fmtS(y)+"</div></div><div><span class='m'>Question</span><br><b>"+(Q.i+1)+" / "+Q.total+"</b></div><div><span class='m'>Score</span><br><b>"+Q.score+"</b></div><div><span class='m'>Streak</span><br><b>"+Q.streak+"</b></div>");
+  box.appendChild(bar);
+  box.appendChild(el("p",null,(Q.rows.length>5?"Six players":"Five players")+" finished at the top of the voting"+(Q.rows.length>5?" (two tied for fifth)":"")+". Who won the MVP?"));
+  var cards=el("div","qz-cards");
+  Q.rows.forEach(function(r,i){
+    var c=el("button","qc"); c.type="button"; c.dataset.i=i; c.style.setProperty("--c",col(r.tm));
+    c.innerHTML="<span class='top'><span class='tm'>"+r.tm+"</span><span class='age'>age "+r.age+"</span></span><span class='stat'>"+r.ppg.toFixed(1)+"<small>PTS</small></span><span class='sub2'>"+r.rpg.toFixed(1)+" reb &middot; "+r.apg.toFixed(1)+" ast &middot; "+r.g+" GP</span><span class='rev'><b></b><span class='track'><span class='fill' style='width:0'></span></span><span class='sub2'></span></span>";
+    cards.appendChild(c);
+  });
+  box.appendChild(cards);
+  var foot=el("div","qz-foot","<span class='qz-msg'>Pick the player you think won.</span>");
+  var nx=el("button","btn",Q.i+1>=Q.total?"See results":"Next season"); nx.type="button"; nx.hidden=true; nx.addEventListener("click",function(){ Q.i++; qzShow(); });
+  foot.appendChild(nx); box.appendChild(foot);
+  cards.addEventListener("click",function(ev){
+    var c=ev.target.closest(".qc"); if(!c||Q.answered) return;
+    Q.answered=true;
+    var pick=Q.rows[parseInt(c.dataset.i,10)], right=pick.rank===1;
+    if(right){ Q.score++; Q.streak++; } else Q.streak=0;
+    $$(".qc",cards).forEach(function(card,i){
+      var r=Q.rows[i]; card.disabled=true; card.classList.add("show");
+      if(r.rank===1) card.classList.add("win"); else if(card===c) card.classList.add("bad");
+      card.querySelector(".rev b").textContent=r.name+(r.rank===1?" (MVP)":"");
+      card.querySelector(".rev .sub2").textContent=rkOrd(r)+" · "+pct(r.share);
+      var f=card.querySelector(".fill"); requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=(r.share*100)+"%"; }); });
+    });
+    var w=Q.rows.filter(function(r){ return r.rank===1; })[0];
+    var msg=$(".qz-msg",foot);
+    msg.innerHTML=right?"<b>Correct.</b> Streak "+Q.streak+".":"<b>Not this time.</b> "+esc(w.name)+" won with "+pct(w.share)+" of the vote.";
+    nx.hidden=false;
+  });
+}
+function buildQuiz(){
+  if(!qzReady){
+    qzReady=true;
+    var qe=$("#qzEra"); qe.innerHTML="<option value=''>All eras</option>";
+    ERAS.forEach(function(e){ var o=el("option",null,esc(e.name)+" ("+fmtS(e.a)+" to "+fmtS(e.z)+")"); o.value=e.id; qe.appendChild(o); });
+    qe.addEventListener("change",function(ev){ state.qz.era=ev.target.value; qzStart(); });
+    $("#qzNew").addEventListener("click",qzStart);
+    qzBestText(); qzStart();
+  }
+}
+
 /* ---------- tabs ---------- */
+var TABS=["season","timeline","careers","table","players","rivals","records","quiz"];
 function showTab(t){
   state.tab=t;
   if(t!=="season") stop();
-  document.querySelectorAll(".tab").forEach(function(b){ b.setAttribute("aria-selected",b.dataset.tab===t?"true":"false"); });
-  ["season","timeline","table","players"].forEach(function(n){ $("#p-"+n).hidden=(n!==t); });
+  $$(".tab").forEach(function(b){ b.setAttribute("aria-selected",b.dataset.tab===t?"true":"false"); });
+  TABS.forEach(function(n){ $("#p-"+n).hidden=(n!==t); });
   if(t==="timeline") buildTimeline();
+  if(t==="careers") buildCareers();
   if(t==="table") buildTable();
   if(t==="players") buildPlayers();
+  if(t==="rivals") buildRivals();
+  if(t==="records") buildRecords();
+  if(t==="quiz") buildQuiz();
+  syncHash();
 }
-document.querySelectorAll(".tab").forEach(function(b){ b.addEventListener("click",function(){ showTab(b.dataset.tab); }); });
+$$(".tab").forEach(function(b){ b.addEventListener("click",function(){ showTab(b.dataset.tab); }); });
 
-renderSeason();
+/* ---------- start ---------- */
+(function(){
+  var h=readHash(), yr=parseInt(h.y,10);
+  if(yr>=Y0&&yr<=Y1) state.year=yr;
+  renderSeason();
+  if(h.tab&&TABS.indexOf(h.tab)>0) showTab(h.tab);
+})();
+
 })();
 </script>
 
