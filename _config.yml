@@ -22,10 +22,9 @@ google_analytics: G-WFFQCFF6S8
 # Build settings
 exclude:
   - scripts/
+  - README.md
 markdown: kramdown
 permalink: pretty
-# theme: minima
-# theme: jekyll-theme-minimal
 
 highlighter: rouge
 kramdown:
@@ -33,51 +32,7 @@ kramdown:
   input: GFM
   auto_ids: true
   syntax_highlighter: rouge
-  # footnote_backlink: "&#8617;"
 
 # Excerpt settings
 excerpt_length: 50
 future: true
-
-# # Plugins
-# plugins:
-#   - jekyll-feed
-#   - jekyll-seo-tag
-
-# # RSS Feed settings
-# feed:
-#   path: feed.xml
-
-# # Minima theme specific settings
-# minima:
-#   social_links:
-#     - platform: rss
-#       user_url: /feed.xml
-#     - platform: github
-#       user_url: https://github.com/chizkidd
-#     - platform: kaggle
-#       user_url: https://www.kaggle.com/chizkidd
-#     - platform: twitter
-#       user_url: https://twitter.com/chizkidd
-
-# Navigation
-# header_pages:
-#     - games.md
-#     - about.md
-
-# # Defaults
-# defaults:
-#   - scope:
-#       path: ""
-#       type: "posts"
-#     values:
-#       comments: true
-#       layout: "post"
-#       author: "Chizoba Obasi"
-
-
-
-
-
-
-
