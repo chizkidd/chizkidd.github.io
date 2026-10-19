@@ -22,10 +22,28 @@ body {
   /* GRID STICKY FOOTER */
   display: grid;
   grid-template-rows: auto 1fr auto; /* Row 1: Header, Row 2: Content (Flexible), Row 3: Footer */
+  grid-template-columns: minmax(0, 1fr); /* let wide code blocks and images scroll/shrink instead of widening the page */
   min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 { font-size: 100%; font-weight: 400; }
+
+/* Accessibility: keyboard focus ring and skip link */
+a:focus-visible,
+button:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 10000;
+  padding: 8px 14px;
+  border-radius: 5px;
+  background: var(--bg-content);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.skip-link:focus { top: 8px; }
 
 /* --- FIX FOR BOLD AND UNDERLINE --- */
 
@@ -638,3 +656,23 @@ html[data-theme="dark"] .highlight .nv,
 html[data-theme="dark"] .highlight .vc,
 html[data-theme="dark"] .highlight .vg,
 html[data-theme="dark"] .highlight .vi { color: #79c0ff; }
+
+/* Narrow screens: keep long URLs, embeds and tables inside the page width */
+.post-content { overflow-wrap: break-word; }
+.post-content a { overflow-wrap: anywhere; }
+.post-content iframe { max-width: 100%; }
+
+@media screen and (max-width: 640px) {
+  .post-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* Wide display equations scroll inside their own box on narrow screens */
+.post-content mjx-container[display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

@@ -1,0 +1,17 @@
+---
+layout: none
+sitemap: false
+---
+{% assign site_root = site.url | append: "#" | remove: "/#" | remove: "#" %}<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{% for post in site.posts %}  <url>
+    <loc>{{ site_root }}{{ post.url }}</loc>
+    <lastmod>{{ post.date | date_to_xmlschema }}</lastmod>
+  </url>
+{% endfor %}{% for p in site.pages %}{% if p.title and p.layout and p.layout != "none" and p.sitemap != false %}  <url>
+    <loc>{{ site_root }}{{ p.url | replace: "index.html", "" }}</loc>
+  </url>
+{% endif %}{% endfor %}  <url>
+    <loc>{{ site_root }}/mvp-ballot-box/</loc>
+  </url>
+</urlset>
