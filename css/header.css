@@ -1,6 +1,10 @@
 /* Shared site header: used by the blog (_includes/header.html) and injected
    on the course sub-sites by header-loader.js. Needs theme.css. */
 
+/* Always reserve the scrollbar gutter so the centered header does not shift
+   sideways between short pages (no scrollbar) and long ones (scrollbar). */
+html { overflow-y: scroll; }
+
 :where(.site-header) * { margin: 0; padding: 0; }
 :where(.site-header) { font-family: Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; font-weight: 300; text-align: left; }
 :where(.site-header) img { display: block; }
