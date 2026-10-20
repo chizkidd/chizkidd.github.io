@@ -14,48 +14,10 @@ layout: default
   </header>
 
   <article class="post-content">
-  {{ content }}
+  {{ content | replace: '<img ', '<img loading="lazy" decoding="async" ' }}
   </article>
 
-  <!-- mathjax -->
-  {% if page.mathjax %}
-  <script>
-  window.MathJax = {
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      processEscapes: true
-    },
-    svg: {
-      fontCache: 'global'
-    }
-  };
-  </script>
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-  {% endif %}
-  <!-- {% if page.mathjax %}
-  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  {% endif %} -->
-  
-  <!-- giscus comments -->
- {% if page.comments %}
- <div class="giscus"></div>
-  <script src="https://giscus.app/client.js"
-          data-repo="chizkidd/chizkidd.github.io"
-          data-repo-id="R_kgDOMWtYhA"
-          data-category="Announcements"
-          data-category-id="DIC_kwDOMWtYhM4C1TMm"
-          data-mapping="pathname"
-          data-strict="0"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="bottom"
-          data-theme="light"
-          data-lang="en"
-          crossorigin="anonymous"
-          async>
-  </script>
-  {% endif %}
- 
-  
+  {% include mathjax.html %}
+  {% include comments.html %}
+
 </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   {% include head.html %}
 
   <body>
@@ -12,13 +12,15 @@
       })();
     </script>
 
+    <a class="skip-link" href="#main">Skip to content</a>
+
     {% include header.html %}
 
-    <div class="page-content">
+    <main class="page-content" id="main">
       <div class="wrap">
         {{ content }}
       </div>
-    </div>
+    </main>
 
     {% include footer.html %}
     {% include mermaid.html %}
@@ -26,6 +28,7 @@
 
     <script src="{{ '/scroll-to-top.js' | relative_url }}"></script>
     <script src="{{ '/dark-mode.js' | relative_url }}"></script>
+    <script src="{{ '/nav.js' | relative_url }}"></script>
 
   </body>
 </html>

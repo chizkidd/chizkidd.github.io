@@ -73,6 +73,14 @@
         });
     }
 
+    function loadMenuScript(done) {
+        if (window.initHeaderMenu) return done();
+        const sc = document.createElement('script');
+        sc.src = BASE + '/nav.js';
+        sc.onload = done;
+        document.head.appendChild(sc);
+    }
+
     function injectHeader() {
         const slot = document.createElement('div');
         slot.id = 'site-header-slot';
@@ -89,8 +97,12 @@
             .then(function (html) {
                 slot.innerHTML = html;
                 slot.style.minHeight = 'auto';
+                // Course pages live under Courses: mark it as the current section
+                const here = slot.querySelector('a.page-link[href="/courses/"]');
+                if (here) here.setAttribute('aria-current', 'page');
                 absolutize(slot);
                 wireThemeToggle(slot);
+                loadMenuScript(function () { window.initHeaderMenu(slot); });
             });
 
         if (REPO) {
