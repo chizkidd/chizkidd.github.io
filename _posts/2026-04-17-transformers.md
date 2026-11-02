@@ -230,7 +230,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026transformers,
-  title   = "Transformers",
+  title   = "Transformer Architecture Explained: Self-Attention, Encoders, and Decoders",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

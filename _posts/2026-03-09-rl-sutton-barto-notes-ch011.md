@@ -611,7 +611,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh11notes,
-  title   = "Sutton & Barto, Ch. 11: Off-Policy Methods with Approximation (Personal Notes)",
+  title   = "The Deadly Triad in RL: Off-Policy Learning with Function Approximation (S&B Ch. 11)",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

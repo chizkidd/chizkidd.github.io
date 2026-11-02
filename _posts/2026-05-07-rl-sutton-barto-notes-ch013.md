@@ -490,7 +490,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh13notes,
-  title   = "Sutton & Barto, Ch. 13: Policy Gradient Methods (Personal Notes)",
+  title   = "Policy Gradient Methods: REINFORCE, Actor-Critic, and the Policy Gradient Theorem (S&B Ch. 13)",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

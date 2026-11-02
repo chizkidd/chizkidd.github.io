@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Machine Learning Math: From Linear Algebra to Attention — A Rigorous Deep Dive"
+title: "A Rigorous Deep Dive of Machine Learning Math: From Linear Algebra to Attention"
 excerpt: A rigorous exploration of machine learning mathematics, from information theory and linear algebra to optimization dynamics and generative models, with correct implementations and theoretical connections.
 date: 2026-02-09
 mathjax: true
@@ -248,7 +248,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026MLmathfoundations,
-  title   = "Architectural and Mathematical Foundations of Machine Learning: A Rigorous Synthesis of Theory, Geometry, and Implementation",
+  title   = "A Rigorous Deep Dive of Machine Learning Math: From Linear Algebra to Attention",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

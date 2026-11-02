@@ -1291,6 +1291,21 @@ Implementation support changes faster than the mathematics. For deployed systems
 {% endcapture %}
 {% include callout.html type="note" title="A note on how to use this map" content=c %}
 
+### **Citation**
+
+If you found this blog post helpful, please consider citing it:
+
+```bibtex
+@article{obasi2026FlashAttentionPt1,
+  title   = "FlashAttention: Part 1",
+  author  = "Obasi, Chizoba",
+  journal = "chizkidd.github.io",
+  year    = "2026",
+  month   = "Sep",
+  url     = "https://chizkidd.github.io/2026/09/13/flashattention/"
+}
+```
+
 ### **References**
 
 [^1]: Ashish Vaswani et al. [Attention Is All You Need](https://arxiv.org/abs/1706.03762). NeurIPS 2017.
@@ -1323,17 +1338,4 @@ Implementation support changes faster than the mathematics. For deployed systems
 
 [^15]: [Understanding FlashAttention: How IO-Aware Attention Makes Transformers Faster Without Approximating Attention](https://drive.google.com/file/d/1CLyK-9Cflcvi3fRl3qAHyzYvwJFjCyVg/view). Google Drive PDF. Accessed September 2026.
 
-### **Citation**
 
-If you found this blog post helpful, please consider citing it:
-
-```bibtex
-@article{obasi2026FlashAttentionPt1,
-  title   = "FlashAttention: Part 1",
-  author  = "Obasi, Chizoba",
-  journal = "chizkidd.github.io",
-  year    = "2026",
-  month   = "Sep",
-  url     = "https://chizkidd.github.io/2026/09/13/flashattention/"
-}
-```

@@ -668,7 +668,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh09notes,
-  title   = "Sutton & Barto, Ch. 09: On-Policy Prediction with Approximation (Personal Notes)",
+  title   = "Value Function Approximation in RL: Tile Coding, Fourier Basis, and SGD (S&B Ch. 9)",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

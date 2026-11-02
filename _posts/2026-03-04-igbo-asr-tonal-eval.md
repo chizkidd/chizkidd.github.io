@@ -196,7 +196,7 @@ You might be surprised what you find.
 If you found this work helpful, please consider citing it:
 ```bibtex
 @article{obasi2026igboasr,
-  title   = "When Your Voice Assistant Can't Hear Tones: Evaluating ASR Bias in Igbo",
+  title   = "Why AI Voice Assistants Fail Tonal Languages: ASR Bias in Igbo",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

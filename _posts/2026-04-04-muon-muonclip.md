@@ -456,7 +456,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026muonmuonclip,
-  title   = "Muon & MuonClip Optimizers",
+  title   = "Muon Optimizer Explained: Newton-Schulz Orthogonalization Beyond Adam",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

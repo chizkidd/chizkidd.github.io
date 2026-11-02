@@ -363,7 +363,7 @@ The dataset is available on [Huggingface](https://huggingface.co/datasets/Chiz/o
 If you found this evaluation helpful, please consider citing it:
 ```bibtex
 @article{obasi2026tonalevaluation,
-  title   = "Tonal Fidelity in Multilingual ASR: A Diagnostic Evaluation",
+  title   = "Evaluating Tone Preservation in ASR: How Meta's omniASR Handles Igbo Diacritics",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

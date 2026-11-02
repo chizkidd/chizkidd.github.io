@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Mixture of Experts (MoE): How Transformers Scale Without Activating Everything."
+title: "Mixture of Experts (MoE): How Transformers Scale Without Activating Everything"
 excerpt: Notes on Mixture of Experts (MoE) from sparse expert routing, fine-grained and shared experts, dropless MoE, load balancing, and router stability, to the systems engineering that makes it all work.
 date: 2026-08-10
 mathjax: true

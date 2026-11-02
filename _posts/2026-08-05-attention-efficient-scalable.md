@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "How Attention Became Efficient & Scalable: KV Caching, MQA, GQA, MLA, and Sparse Attention."
+title: "How Attention Became Efficient & Scalable: KV Caching, MQA, GQA, MLA, and Sparse Attention"
 excerpt: Notes covering the evolution of attention mechanisms from vanilla self-attention through MHA, KV caching, MQA, GQA, MLA, sliding window attention, and Deepseek Sparse Attention.
 date: 2026-08-05
 mathjax: true
@@ -418,7 +418,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026attentionEfficientScalable,
-  title   = "How Attention Became Efficient & Scalable",
+  title   = "How Attention Became Efficient & Scalable: KV Caching, MQA, GQA, MLA, and Sparse Attention",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

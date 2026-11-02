@@ -214,7 +214,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh10notes,
-  title   = "Sutton & Barto, Ch. 10: On-Policy Control with Approximation (Personal Notes)",
+  title   = "Semi-Gradient Sarsa and the Average Reward Setting in RL (S&B Ch. 10)",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",

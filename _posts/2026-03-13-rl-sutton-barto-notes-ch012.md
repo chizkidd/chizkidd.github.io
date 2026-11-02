@@ -901,7 +901,7 @@ If you found this blog post helpful, please consider citing it:
 
 ```bibtex
 @article{obasi2026RLsuttonBartoCh12notes,
-  title   = "Sutton & Barto, Ch. 12: Eligibility Traces (Personal Notes)",
+  title   = "Eligibility Traces Explained: TD(λ), Sarsa(λ), and the λ-Return (S&B Ch. 12)",
   author  = "Obasi, Chizoba",
   journal = "chizkidd.github.io",
   year    = "2026",
