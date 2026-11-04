@@ -1,5 +1,3 @@
-final version:
-
 ---
 layout: post
 comments: true
