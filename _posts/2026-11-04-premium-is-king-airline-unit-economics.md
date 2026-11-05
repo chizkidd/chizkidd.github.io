@@ -45,9 +45,7 @@ $$
 
 > So the airline generates **15 cents** in revenue for every seat-mile it makes available.
 
-Because TRASM is measured per *available* seat mile, it bundles together fares, load factor, and ancillary revenue, so it can't tell us on its own which of those is doing the work.
-
-Now we have two useful metrics: 
+Because TRASM is measured per *available* seat mile, it bundles together fares, load factor, and ancillary revenue, so it can't tell us on its own which of those is doing the work. Now we have two useful metrics: 
 * **CASM** tells us how much it costs to produce capacity, while 
 * **TRASM** tells us how much revenue that capacity generates.
 
@@ -97,41 +95,30 @@ I pulled the full-year 2025 figures for eight U.S. airlines: Delta, United, Amer
 ---
 
 <br>
-One important clarification: **CASM-ex plus fuel CASM does not necessarily equal total CASM.** CASM-ex excludes different additional expenses depending on the airline. For example, Alaska also excludes freighter costs and special items, while JetBlue excludes other non-airline expenses and special items. Allegiant excludes special charges. The total CASM column, by contrast, represents total operating cost per seat-mile. However, it isn't perfectly comparable either, since some airlines make adjustments to their reported figures. Delta's, for example, is adjusted to remove third-party refinery activity.
 
-A few things jump out.
+One important clarification: **CASM-ex plus fuel CASM does not necessarily equal total CASM.** CASM-ex excludes different additional expenses depending on the airline. For example, Alaska also excludes freighter costs and special items, while JetBlue excludes other non-airline expenses and special items. Allegiant excludes special charges. The total CASM column, by contrast, represents total operating cost per seat-mile. However, it isn't perfectly comparable either, since some airlines make adjustments to their reported figures. Delta's, for example, is adjusted to remove third-party refinery activity. A few things jump out.
 
 ### 1. The cheapest airline doesn't necessarily win
 
-Look at Frontier and Allegiant, two ultra-low-cost carriers. Both have relatively low CASM-ex figures. Frontier's CASM-ex is just 7.41 cents, while Allegiant's is 8.04 cents. Compare that with Delta at 13.86 cents and United at 12.64 cents.
-
-At first glance, Frontier and Allegiant appear to have a significant cost advantage. But look at the revenue side. Frontier generates only 9.37 cents in revenue per available seat mile against total operating costs of 9.74 cents per available seat mile. That's a negative operating spread, or a unit operating margin of about -3.9%. Allegiant, on the other hand, generates 11.91 cents against costs of 11.24 cents. So despite having higher unit costs than Frontier, Allegiant has a positive operating spread, and a unit operating margin of about 5.6%.
-
-This is the interesting part: **having the lowest cost base doesn't automatically translate into the strongest economics.** An airline also needs to generate enough revenue to cover those costs.
+Look at Frontier and Allegiant, two ultra-low-cost carriers. Both have relatively low CASM-ex figures. Frontier's CASM-ex is just 7.41 cents, while Allegiant's is 8.04 cents. Compare that with Delta at 13.86 cents and United at 12.64 cents. At first glance, Frontier and Allegiant appear to have a significant cost advantage. But look at the revenue side. Frontier generates only 9.37 cents in revenue per available seat mile against total operating costs of 9.74 cents per available seat mile. That's a negative operating spread, or a unit operating margin of about -3.9%. Allegiant, on the other hand, generates 11.91 cents against costs of 11.24 cents. So despite having higher unit costs than Frontier, Allegiant has a positive operating spread, and a unit operating margin of about 5.6%. This is the interesting part: **having the lowest cost base doesn't automatically translate into the strongest economics.** An airline also needs to generate enough revenue to cover those costs.
 
 ### 2. Premium is king?
 
-Now look at the top of the table. Delta and United have the two strongest operating spreads, at 1.95 and 1.42 cents respectively. Both are legacy network carriers with significant premium offerings, loyalty programs, corporate travel exposure, and extensive route networks.
-
-This raises an interesting possibility. Perhaps the advantage isn't simply about making air travel cheaper to produce. It's about making the product valuable enough that customers are willing to pay more for it. Premium cabins, better schedules, loyalty benefits, airport lounges, and differentiated customer experiences can all contribute to stronger revenue generation. Of course, these airlines also have higher costs. Premium cabins take up space, lounges require investment, and a large network comes with operational complexity. But the numbers suggest that generating more revenue per seat-mile can compensate for a higher cost base. Delta is a particularly interesting example. Its CASM-ex is substantially higher than Frontier's, yet its revenue generation is also much stronger.
-
-It isn't a perfectly clean story, though. American is also a legacy carrier with a premium product, yet its operating spread is just 0.49 cents, below Allegiant's 0.67. Measured as a margin, the gap is clearer: about 2.7% for American versus about 5.6% for Allegiant.
+Now look at the top of the table. Delta and United have the two strongest operating spreads, at 1.95 and 1.42 cents respectively. Both are legacy network carriers with significant premium offerings, loyalty programs, corporate travel exposure, and extensive route networks. This raises an interesting possibility. Perhaps the advantage isn't simply about making air travel cheaper to produce. It's about making the product valuable enough that customers are willing to pay more for it. Premium cabins, better schedules, loyalty benefits, airport lounges, and differentiated customer experiences can all contribute to stronger revenue generation. Of course, these airlines also have higher costs. Premium cabins take up space, lounges require investment, and a large network comes with operational complexity. But the numbers suggest that generating more revenue per seat-mile can compensate for a higher cost base. Delta is a particularly interesting example. Its CASM-ex is substantially higher than Frontier's, yet its revenue generation is also much stronger. It isn't a perfectly clean story, though. American is also a legacy carrier with a premium product, yet its operating spread is just 0.49 cents, below Allegiant's 0.67. Measured as a margin, the gap is clearer: about 2.7% for American versus about 5.6% for Allegiant.
 
 ### 3. Revenue matters just as much as cost discipline
 
-Southwest and Alaska offer another interesting comparison. Their operating spreads are positive, but considerably narrower than Delta's and United's. Southwest's CASM-ex of 12.32 cents is close to United's 12.64, but it earns about 2.3 cents less revenue per available seat mile. JetBlue is also worth looking at. Its 2025 operating revenue per ASM of 13.94 cents fell short of its total operating cost of 14.51 cents. That produced a negative operating spread.
-
-This doesn't mean JetBlue has a fundamentally broken business model. These are results from one financial year, and airlines can have significant differences in network structure, fleet composition, route length, and other operating conditions. But it does illustrate how difficult the economics can become when revenue generation doesn't keep pace with operating costs.
+Southwest and Alaska offer another interesting comparison. Their operating spreads are positive, but considerably narrower than Delta's and United's. Southwest's CASM-ex of 12.32 cents is close to United's 12.64, but it earns about 2.3 cents less revenue per available seat mile. JetBlue is also worth looking at. Its 2025 operating revenue per ASM of 13.94 cents fell short of its total operating cost of 14.51 cents. That produced a negative operating spread. This doesn't mean JetBlue has a fundamentally broken business model. These are results from one financial year, and airlines can have significant differences in network structure, fleet composition, route length, and other operating conditions. But it does illustrate how difficult the economics can become when revenue generation doesn't keep pace with operating costs.
 
 ## A few caveats
 
 There are a few things worth keeping in mind before drawing too many conclusions from this comparison.
 
-**First, CASM-ex isn't standardized.** Different airlines exclude different expenses. Some exclude only fuel and special charges, while others also exclude profit sharing, freighter costs, or non-airline expenses. *That's why I wouldn't use CASM-ex alone to rank airlines by efficiency.*
+* **First, CASM-ex isn't standardized.** Different airlines exclude different expenses. Some exclude only fuel and special charges, while others also exclude profit sharing, freighter costs, or non-airline expenses. *That's why I wouldn't use CASM-ex alone to rank airlines by efficiency.*
 
-**Second, airline business models matter.** A network carrier operating long-haul international routes has a very different cost and revenue structure from an ultra-low-cost carrier flying leisure routes. Stage length, aircraft type, passenger mix, load factor, and network composition all affect unit economics.
+* **Second, airline business models matter.** A network carrier operating long-haul international routes has a very different cost and revenue structure from an ultra-low-cost carrier flying leisure routes. Stage length, aircraft type, passenger mix, load factor, and network composition all affect unit economics.
 
-**Third, this is a snapshot, not a verdict.** These figures represent full-year 2025 performance. They don't establish that one business model will always outperform another, nor do they prove that premium offerings alone explain the differences. And finally, operating spread isn't net profit. It's a useful starting point for understanding the economics of the core airline operation, not the whole financial picture.
+* **Third, this is a snapshot, not a verdict.** These figures represent full-year 2025 performance. They don't establish that one business model will always outperform another, nor do they prove that premium offerings alone explain the differences. And finally, operating spread isn't net profit. It's a useful starting point for understanding the economics of the core airline operation, not the whole financial picture.
 
 ## Final thoughts
 
