@@ -248,7 +248,7 @@ $$
 $$
 
 - This algorithm has 2 step sizes $\alpha^{\boldsymbol{\theta}}$ and $\alpha^{\mathbf{w}}$.
-- Choosing $\alpha^{\mathbf{w}}$ is relatively easy; in the linear case a good rule of thumb is (see [Section 9.6](https://chizkidd.github.io/RL-Sutton-Barto-notes/chapters/ch09-on-policy-prediction-approximation.html#sec-ch09-9-6)):
+- Choosing $\alpha^{\mathbf{w}}$ is relatively easy; in the linear case a good rule of thumb is (see [Section 9.6](https://chizkidd.github.io/rl-sutton-barto-notes/chapters/ch09-on-policy-prediction-approximation.html#sec-ch09-9-6)):
 
 $$\alpha^{\mathbf{w}} = \frac{0.1}{\mathbb{E}\!\left[\|\nabla \hat{v}(S_t, \mathbf{w})\|_\mu^2\right]}$$
 
@@ -338,7 +338,7 @@ $$
 
 ## 13.6 Policy Gradient for Continuing Problems
 
-- From [Section 10.3](https://chizkidd.github.io/RL-Sutton-Barto-notes/chapters/ch10-on-policy-control-approximation.html#sec-ch10-10-3) on continuing problems, lack of episode boundaries requires a new performance measure definition in terms of the **average rate of reward per time step**:
+- From [Section 10.3](https://chizkidd.github.io/rl-sutton-barto-notes/chapters/ch10-on-policy-control-approximation.html#sec-ch10-10-3) on continuing problems, lack of episode boundaries requires a new performance measure definition in terms of the **average rate of reward per time step**:
 
 $$
 \begin{align*}
