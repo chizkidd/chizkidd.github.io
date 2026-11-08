@@ -7,7 +7,7 @@ date: 2026-05-07
 mathjax: true
 ---
 
-- Almost all the algorithms/methods covered so far have been **action-value methods** (except gradient-bandit algorithms, [Section 2.8](https://chizkidd.github.io/RL-Sutton-Barto-notes/chapters/ch02-multi-armed-bandits.html#sec-ch02-2-8)).
+- Almost all the algorithms/methods covered so far have been **action-value methods** (except gradient-bandit algorithms, [Section 2.8](https://chizkidd.github.io/rl-sutton-barto-notes/chapters/ch02-multi-armed-bandits.html#sec-ch02-2-8)).
 - Action-value methods learn the values of actions and then derive the policy thereafter to select actions based on their estimated action values.
 - Here, we explicitly learn a **parametrized policy** that can select actions without consulting a value function.
 - A value function is not required for action selection, but still could be used to learn the policy parameters $\boldsymbol{\theta}$.
