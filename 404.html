@@ -4,6 +4,21 @@ title: Page not found
 permalink: /404.html
 sitemap: false
 ---
+<script>
+  (function () {
+    const url = new URL(window.location.href);
+
+    const canonicalPath = url.pathname.replace(
+      /^\/rl-sutton-barto-notes(?=\/|$)/i,
+      "/rl-sutton-barto-notes"
+    );
+
+    if (canonicalPath !== url.pathname) {
+      url.pathname = canonicalPath;
+      window.location.replace(url.toString());
+    }
+  })();
+</script>
 
 <div class="post">
   <header class="post-header">
